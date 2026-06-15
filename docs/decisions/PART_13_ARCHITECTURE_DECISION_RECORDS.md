@@ -484,6 +484,54 @@ Accepted
 
 ---
 
+# ADR-029 — Avoid Standard Library Namespace Collisions
+
+Decision
+
+Project modules must never shadow Python standard library modules.
+
+Forbidden names include:
+
+logging
+
+json
+
+typing
+
+asyncio
+
+queue
+
+sqlite3
+
+pathlib
+
+datetime
+
+enum
+
+email
+
+Reason
+
+Prevent catastrophic import ambiguity.
+
+Consequences
+
+Prefer descriptive names:
+
+core_logging
+
+json_utils
+
+task_queue
+
+Status
+
+Accepted
+
+---
+
 # Architecture Change Process
 
 Proposal
