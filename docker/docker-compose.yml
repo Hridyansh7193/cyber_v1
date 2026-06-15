@@ -1,0 +1,46 @@
+version: "3.9"
+
+x-common: &common
+  restart: "no"
+  networks:
+    - bughunter_net
+  deploy:
+    resources:
+      limits:
+        cpus: '2'
+        memory: 2G
+  volumes:
+    - ./data:/data
+    - ./logs:/logs
+    - ./reports:/reports
+    - ./tmp:/tmp
+
+services:
+  recon:
+    <<: *common
+    build:
+      context: ./containers/recon
+    image: bughunter-recon:latest
+
+  vuln:
+    <<: *common
+    build:
+      context: ./containers/vuln
+    image: bughunter-vuln:latest
+
+  js:
+    <<: *common
+    build:
+      context: ./containers/js
+    image: bughunter-js:latest
+
+  api:
+    <<: *common
+    build:
+      context: ./containers/api
+    image: bughunter-api:latest
+
+networks:
+  bughunter_net:
+    driver: bridge
+    internal: true
