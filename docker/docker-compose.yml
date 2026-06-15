@@ -16,26 +16,40 @@ x-common: &common
     - ./tmp:/tmp
 
 services:
+  base:
+    <<: *common
+    build:
+      context: ./containers/base
+    image: bughunter-base:latest
+
   recon:
     <<: *common
+    depends_on:
+      - base
     build:
       context: ./containers/recon
     image: bughunter-recon:latest
 
   vuln:
     <<: *common
+    depends_on:
+      - base
     build:
       context: ./containers/vuln
     image: bughunter-vuln:latest
 
   js:
     <<: *common
+    depends_on:
+      - base
     build:
       context: ./containers/js
     image: bughunter-js:latest
 
   api:
     <<: *common
+    depends_on:
+      - base
     build:
       context: ./containers/api
     image: bughunter-api:latest
