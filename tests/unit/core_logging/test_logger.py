@@ -44,7 +44,8 @@ def test_json_formatting_and_file_creation(tmpdir):
     assert data["metadata"] == {"foo": "bar"}
 
 def test_failure_handling_null_handler():
-    # Provide an explicitly invalid directory for Windows/Linux
-    logger = LoggerFactory.get_logger("invalid_test", log_dir="C:\\invalid|dir\\<>?*")
+    # Provide an explicitly invalid directory for Windows/Linux (using null byte on Linux)
+    logger = LoggerFactory.get_logger("invalid_test_fail", log_dir="/invalid\0dir")
     assert len(logger.handlers) == 1
     assert isinstance(logger.handlers[0], logging.NullHandler)
+
