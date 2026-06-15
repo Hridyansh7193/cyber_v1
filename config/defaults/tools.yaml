@@ -1,0 +1,11 @@
+tool_paths:
+  subfinder: "subfinder"
+  nuclei: "nuclei"
+docker_container_names:
+  recon: "bughunter-recon:latest"
+  vuln: "bughunter-vuln:latest"
+enable_flags:
+  recon: true
+  vuln: true
+wordlists:
+  default: "wordlists/default.txt"

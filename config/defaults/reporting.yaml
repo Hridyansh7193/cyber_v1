@@ -1,0 +1,6 @@
+report_formats:
+  - "json"
+  - "markdown"
+output_directories:
+  json: "reports/json"
+  markdown: "reports/markdown"
