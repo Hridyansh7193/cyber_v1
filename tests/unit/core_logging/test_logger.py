@@ -43,9 +43,11 @@ def test_json_formatting_and_file_creation(tmpdir):
     assert data["component"] == "planner"
     assert data["metadata"] == {"foo": "bar"}
 
-def test_failure_handling_null_handler():
-    # Provide an explicitly invalid directory for Windows/Linux (using null byte on Linux)
-    logger = LoggerFactory.get_logger("invalid_test_fail", log_dir="/invalid\0dir")
-    assert len(logger.handlers) == 1
-    assert isinstance(logger.handlers[0], logging.NullHandler)
+from unittest.mock import patch
 
+def test_failure_handling_null_handler():
+    # Use a mock to simulate an OS error during directory creation, ensuring cross-platform compatibility
+    with patch("os.makedirs", side_effect=OSError("Permission denied")):
+        logger = LoggerFactory.get_logger("invalid_test_fail", log_dir="/mock_fail_dir")
+        assert len(logger.handlers) == 1
+        assert isinstance(logger.handlers[0], logging.NullHandler)
