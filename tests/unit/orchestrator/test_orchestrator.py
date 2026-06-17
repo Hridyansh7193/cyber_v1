@@ -49,13 +49,15 @@ def test_transitions():
     # Should not transition if PENDING
     orch_state = OrchestrationState(task_status={"recon": "PENDING"}, errors={})
     state["orchestration_state"] = orch_state
-    assert recon_transition(state) == "END"
+    assert recon_transition(state) == "error_handler"
 
 def test_wrapper_applier():
     from schemas.state import ExecutionState, TargetState
+    from schemas.tool_result import ToolResult
     exec_state = ExecutionState(target=TargetState(domain="example.com", scope=[], session_id="sess_1", start_time=datetime.now(timezone.utc)))
     
-    new_state = apply_recon_wrapper_result(exec_state, new_subdomains=["sub1"])
+    wrapper_out = ToolResult(tool_name="test", metadata={"new_subdomains": ["sub1"]}, errors=[], success=True, exit_code=0, stdout="", stderr="", execution_time=0.0)
+    new_state = apply_recon_wrapper_result(exec_state, wrapper_out)
     assert "sub1" in new_state.recon_state.subdomains
 
 def test_delta_applier():
@@ -74,18 +76,18 @@ def test_checkpoint_recovery(mock_config, base_state):
     assert manager.get_saver() is not None
 
 def test_node_executor(mock_config):
+    from schemas.tool_result import ToolResult
     exec_state = ExecutionState(target=TargetState(domain="example.com", scope=[], session_id="sess_1", start_time=datetime.now(timezone.utc)))
     orch_state = OrchestrationState(task_status={}, errors={})
-    state = NodeResult(execution_state=exec_state, orchestration_state=orch_state)
     
-    def dummy_wrapper(s): return {"new_subdomains": ["sub1"]}
+    def dummy_wrapper(s): return ToolResult(tool_name="test", metadata={"new_subdomains": ["sub1"]}, errors=[], success=True, exit_code=0, stdout="", stderr="", execution_time=0.0)
     def dummy_agent(s, c): return ReconDelta(subdomains=("sub1",), alive_hosts=(), urls=())
     
-    res = execute_node(
-        state=state, config=mock_config, task_name="recon",
+    # execute_node now takes current_exec directly
+    new_exec = execute_node(
+        current_exec=exec_state, config=mock_config,
         wrapper=dummy_wrapper, wrapper_applier=apply_recon_wrapper_result,
         agent=dummy_agent, delta_applier=apply_recon_delta
     )
     
-    assert res.orchestration_state.task_status["recon"] == "COMPLETED"
-    assert "sub1" in res.execution_state.recon_state.subdomains
+    assert "sub1" in new_exec.recon_state.subdomains

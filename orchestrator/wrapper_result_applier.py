@@ -1,10 +1,16 @@
 from schemas.state import ExecutionState, ReconState, JSState, APIState, VulnerabilityState
+from schemas.tool_result import ToolResult
 from typing import List, Dict, Any
 
-def apply_recon_wrapper_result(state: ExecutionState, new_subdomains: List[str] = None, new_hosts: List[str] = None, new_urls: List[str] = None) -> ExecutionState:
-    merged_subs = list(dict.fromkeys(state.recon_state.subdomains + (new_subdomains or [])))
-    merged_hosts = list(dict.fromkeys(state.recon_state.alive_hosts + (new_hosts or [])))
-    merged_urls = list(dict.fromkeys(state.recon_state.urls + (new_urls or [])))
+def apply_recon_wrapper_result(state: ExecutionState, wrapper_out: ToolResult) -> ExecutionState:
+    output = wrapper_out.metadata or {}
+    new_subdomains = output.get("new_subdomains", [])
+    new_hosts = output.get("new_hosts", [])
+    new_urls = output.get("new_urls", [])
+
+    merged_subs = list(dict.fromkeys(state.recon_state.subdomains + new_subdomains))
+    merged_hosts = list(dict.fromkeys(state.recon_state.alive_hosts + new_hosts))
+    merged_urls = list(dict.fromkeys(state.recon_state.urls + new_urls))
     
     new_recon = ReconState(
         subdomains=merged_subs,
@@ -12,36 +18,48 @@ def apply_recon_wrapper_result(state: ExecutionState, new_subdomains: List[str] 
         urls=merged_urls,
         parameters=state.recon_state.parameters
     )
-    return state.model_copy(update={"recon_state": new_recon})
+    return state.model_copy(deep=True, update={"recon_state": new_recon})
 
-def apply_js_wrapper_result(state: ExecutionState, new_js_files: List[str] = None, new_endpoints: List[str] = None) -> ExecutionState:
-    merged_files = list(dict.fromkeys(state.js_state.js_files + (new_js_files or [])))
-    merged_endpoints = list(dict.fromkeys(state.js_state.endpoints + (new_endpoints or [])))
+def apply_js_wrapper_result(state: ExecutionState, wrapper_out: ToolResult) -> ExecutionState:
+    output = wrapper_out.metadata or {}
+    new_js_files = output.get("new_js_files", [])
+    new_endpoints = output.get("new_endpoints", [])
+
+    merged_files = list(dict.fromkeys(state.js_state.js_files + new_js_files))
+    merged_endpoints = list(dict.fromkeys(state.js_state.endpoints + new_endpoints))
     
     new_js = JSState(
         js_files=merged_files,
         endpoints=merged_endpoints,
         secrets=state.js_state.secrets
     )
-    return state.model_copy(update={"js_state": new_js})
+    return state.model_copy(deep=True, update={"js_state": new_js})
 
-def apply_api_wrapper_result(state: ExecutionState, new_swagger: List[str] = None, new_graphql: List[str] = None) -> ExecutionState:
-    merged_swagger = list(dict.fromkeys(state.api_state.swagger_urls + (new_swagger or [])))
-    merged_graphql = list(dict.fromkeys(state.api_state.graphql_urls + (new_graphql or [])))
+def apply_api_wrapper_result(state: ExecutionState, wrapper_out: ToolResult) -> ExecutionState:
+    output = wrapper_out.metadata or {}
+    new_swagger = output.get("new_swagger", [])
+    new_graphql = output.get("new_graphql", [])
+
+    merged_swagger = list(dict.fromkeys(state.api_state.swagger_urls + new_swagger))
+    merged_graphql = list(dict.fromkeys(state.api_state.graphql_urls + new_graphql))
     
     new_api = APIState(
         swagger_urls=merged_swagger,
         graphql_urls=merged_graphql
     )
-    return state.model_copy(update={"api_state": new_api})
+    return state.model_copy(deep=True, update={"api_state": new_api})
 
-def apply_vuln_wrapper_result(state: ExecutionState, new_nuclei: List[Dict] = None, new_dalfox: List[Dict] = None) -> ExecutionState:
-    merged_nuclei = state.vuln_state.nuclei_results + (new_nuclei or [])
-    merged_dalfox = state.vuln_state.dalfox_results + (new_dalfox or [])
+def apply_vuln_wrapper_result(state: ExecutionState, wrapper_out: ToolResult) -> ExecutionState:
+    output = wrapper_out.metadata or {}
+    new_nuclei = output.get("new_nuclei", [])
+    new_dalfox = output.get("new_dalfox", [])
+
+    merged_nuclei = state.vuln_state.nuclei_results + new_nuclei
+    merged_dalfox = state.vuln_state.dalfox_results + new_dalfox
     
     new_vuln = VulnerabilityState(
         nuclei_results=merged_nuclei,
         dalfox_results=merged_dalfox,
         takeovers=state.vuln_state.takeovers
     )
-    return state.model_copy(update={"vuln_state": new_vuln})
+    return state.model_copy(deep=True, update={"vuln_state": new_vuln})

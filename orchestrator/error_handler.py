@@ -2,8 +2,9 @@ from orchestrator.orchestration_state import OrchestrationState
 from orchestrator.queue_manager import update_task_status
 
 def handle_task_error(state: OrchestrationState, task_name: str, error_msg: str) -> OrchestrationState:
-    # Mark task FAILED
-    state_failed = update_task_status(state, task_name, "FAILED")
+    # If cancelled, mark as CANCELLED, else FAILED
+    status = "CANCELLED" if "cancel" in error_msg.lower() else "FAILED"
+    state_failed = update_task_status(state, task_name, status)
     
     # Attach error metadata
     new_errors = dict(state_failed.errors)

@@ -1,4 +1,3 @@
-from typing import Dict, List, Any
 from orchestrator.orchestration_state import OrchestrationState, TaskStatus
 
 def update_task_status(state: OrchestrationState, task_name: str, status: TaskStatus) -> OrchestrationState:
@@ -9,3 +8,9 @@ def update_task_status(state: OrchestrationState, task_name: str, status: TaskSt
         task_status=new_statuses,
         errors=state.errors
     )
+
+def start_task(state: OrchestrationState, task_name: str) -> OrchestrationState:
+    return update_task_status(state, task_name, "RUNNING")
+
+def complete_task(state: OrchestrationState, task_name: str) -> OrchestrationState:
+    return update_task_status(state, task_name, "COMPLETED")

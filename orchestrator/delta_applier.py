@@ -10,7 +10,7 @@ def apply_recon_delta(state: ExecutionState, delta: ReconDelta) -> ExecutionStat
         urls=list(delta.urls),
         parameters=state.recon_state.parameters
     )
-    return state.model_copy(update={"recon_state": new_recon})
+    return state.model_copy(deep=True, update={"recon_state": new_recon})
 
 def apply_js_delta(state: ExecutionState, delta: JSDelta) -> ExecutionState:
     new_js = JSState(
@@ -18,14 +18,14 @@ def apply_js_delta(state: ExecutionState, delta: JSDelta) -> ExecutionState:
         endpoints=list(delta.endpoints),
         secrets=state.js_state.secrets
     )
-    return state.model_copy(update={"js_state": new_js})
+    return state.model_copy(deep=True, update={"js_state": new_js})
 
 def apply_api_delta(state: ExecutionState, delta: APIDelta) -> ExecutionState:
     new_api = APIState(
         swagger_urls=list(delta.swagger_urls),
         graphql_urls=list(delta.graphql_urls)
     )
-    return state.model_copy(update={"api_state": new_api})
+    return state.model_copy(deep=True, update={"api_state": new_api})
 
 def apply_vulnerability_delta(state: ExecutionState, delta: VulnerabilityDelta) -> ExecutionState:
     # Overwrite vulnerabilities as per agent's deduplicated output
@@ -43,12 +43,13 @@ def apply_analysis_delta(state: ExecutionState, delta: AnalysisDelta) -> Executi
             description=f"Endpoint {group.get('endpoint')} associated with {group.get('subdomains')}",
             severity="info",
             confidence="certain",
-            metadata=group
+            metadata=group,
+            evidence="Inferred via analysis node"
         )
         new_findings.append(finding)
-    return state.model_copy(update={"findings": new_findings})
+    return state.model_copy(deep=True, update={"findings": new_findings})
 
 def apply_report_delta(state: ExecutionState, delta: ReportDelta) -> ExecutionState:
     # Overwrite or append reports
     new_reports = list(state.reports) + list(delta.reports)
-    return state.model_copy(update={"reports": new_reports})
+    return state.model_copy(deep=True, update={"reports": new_reports})
