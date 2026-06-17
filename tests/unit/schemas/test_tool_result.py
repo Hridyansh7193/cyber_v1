@@ -19,6 +19,19 @@ def test_tool_result_defaults():
     assert tr.raw_output_path is None
     assert tr.metadata == {}
 
+def test_tool_result_serialization():
+    result = ToolResult(
+        tool_name="test_tool",
+        success=True,
+        exit_code=0,
+        stdout="Output",
+        stderr="",
+        execution_time=0.5,
+        metadata={"key": "val"}
+    )
+    serialized = result.model_dump_json()
+    assert '"metadata":{"key":"val"}' in serialized.replace(" ", "")
+
 def test_tool_result_custom():
     tr = ToolResult(
         tool_name="subfinder",

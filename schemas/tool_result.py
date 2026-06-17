@@ -1,7 +1,9 @@
-from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any, List
+from pydantic import BaseModel, Field, ConfigDict, field_serializer
+from typing import Optional, Any, Tuple, Mapping
+from types import MappingProxyType
 
 class ToolResult(BaseModel):
+    model_config = ConfigDict(frozen=True)
     tool_name: str
     success: bool
     exit_code: int
@@ -9,4 +11,8 @@ class ToolResult(BaseModel):
     stderr: str
     execution_time: float = Field(ge=0.0)
     raw_output_path: Optional[str] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: Mapping[str, Any] = Field(default_factory=lambda: MappingProxyType({}))
+
+    @field_serializer('metadata')
+    def serialize_metadata(self, v: Mapping[str, Any], _info):
+        return dict(v)

@@ -1,6 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from enum import Enum
-from typing import List
+from typing import Tuple
 
 class Severity(str, Enum):
     INFO = "info"
@@ -16,8 +16,9 @@ class Confidence(str, Enum):
     CERTAIN = "certain"
 
 class Finding(BaseModel):
+    model_config = ConfigDict(frozen=True)
     title: str
     severity: Severity
     confidence: Confidence
     evidence: str
-    references: List[str] = Field(default_factory=list)
+    references: Tuple[str, ...] = Field(default=())

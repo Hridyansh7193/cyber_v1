@@ -8,7 +8,7 @@ def test_task_valid_defaults():
     assert task.priority == TaskPriority.MEDIUM
     assert task.status == TaskStatus.PENDING
     assert task.retry_count == 0
-    assert task.dependencies == []
+    assert task.dependencies == ()
 
 def test_task_custom_values():
     task = Task(
@@ -21,7 +21,7 @@ def test_task_custom_values():
     assert task.priority == TaskPriority.HIGH
     assert task.status == TaskStatus.IN_PROGRESS
     assert task.retry_count == 2
-    assert task.dependencies == ["recon_task"]
+    assert task.dependencies == ("recon_task",)
 
 def test_task_invalid_retry_count():
     with pytest.raises(ValidationError):

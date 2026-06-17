@@ -5,22 +5,22 @@ from schemas.target import TargetState
 from pydantic import ValidationError
 
 def test_recon_state():
-    state = ReconState(subdomains=["a.com"])
-    assert state.subdomains == ["a.com"]
-    assert state.alive_hosts == []
+    state = ReconState(subdomains=("a.com",))
+    assert state.subdomains == ("a.com",)
+    assert state.alive_hosts == ()
 
 def test_js_state():
-    state = JSState(endpoints=["/api"])
-    assert state.js_files == []
-    assert state.endpoints == ["/api"]
+    state = JSState(endpoints=("/api",))
+    assert state.js_files == ()
+    assert state.endpoints == ("/api",)
 
 def test_api_state():
-    state = APIState(swagger_urls=["/swagger.json"])
-    assert state.swagger_urls == ["/swagger.json"]
+    state = APIState(swagger_urls=("/swagger.json",))
+    assert state.swagger_urls == ("/swagger.json",)
 
 def test_vulnerability_state():
-    state = VulnerabilityState(nuclei_results=[{"vuln": "xss"}])
-    assert state.nuclei_results == [{"vuln": "xss"}]
+    state = VulnerabilityState(nuclei_results=({"vuln": "xss"},))
+    assert state.nuclei_results == ({"vuln": "xss"},)
 
 def test_execution_state_defaults():
     start = datetime.now()
@@ -28,14 +28,14 @@ def test_execution_state_defaults():
     exec_state = ExecutionState(target=target)
     
     assert exec_state.target.domain == "example.com"
-    assert exec_state.task_queue == []
+    assert exec_state.task_queue == ()
     assert isinstance(exec_state.recon_state, ReconState)
     assert isinstance(exec_state.js_state, JSState)
     assert isinstance(exec_state.api_state, APIState)
     assert isinstance(exec_state.vuln_state, VulnerabilityState)
-    assert exec_state.findings == []
-    assert exec_state.reports == []
-    assert exec_state.logs == []
+    assert exec_state.findings == ()
+    assert exec_state.reports == ()
+    assert exec_state.logs == ()
     assert exec_state.metadata == {}
 
 def test_execution_state_serialization():
