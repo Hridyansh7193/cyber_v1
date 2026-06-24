@@ -126,6 +126,61 @@ def test_reporter_pure_function(mock_state, mock_config):
     
     assert mock_state.model_dump() == original_state_dump
 
+def test_reporter_empty_formats(mock_state, mock_config):
+    config = mock_config.model_copy(update={"reporting": ReportingConfig(report_formats=[], output_directories={})})
+    delta = generate_reports(mock_state, config)
+    assert len(delta.reports) == 0
+
+def test_reporter_markdown_generation(mock_state, mock_config):
+    config = mock_config.model_copy(update={"reporting": ReportingConfig(report_formats=["markdown"], output_directories={"markdown": "out/md"})})
+    delta = generate_reports(mock_state, config)
+    assert len(delta.reports) == 1
+    assert delta.reports[0].report_format == ReportFormat.MARKDOWN
+    assert delta.reports[0].report_path == "out/md/report.markdown"
+
+def test_reporter_json_generation(mock_state, mock_config):
+    config = mock_config.model_copy(update={"reporting": ReportingConfig(report_formats=["json"], output_directories={"json": "out/json"})})
+    delta = generate_reports(mock_state, config)
+    assert len(delta.reports) == 1
+    assert delta.reports[0].report_format == ReportFormat.JSON
+    assert delta.reports[0].report_path == "out/json/report.json"
+
+def test_reporter_uuid5_determinism(mock_state, mock_config):
+    import uuid
+    delta1 = generate_reports(mock_state, mock_config)
+    delta2 = generate_reports(mock_state, mock_config)
+    assert delta1.reports[0].report_id == delta2.reports[0].report_id
+    assert delta1.reports[0].report_id.version == 5
+
+def test_reporter_timestamp_determinism(mock_state, mock_config):
+    delta1 = generate_reports(mock_state, mock_config)
+    assert delta1.reports[0].created_at == mock_state.target.start_time
+
+def test_reporter_malformed_configuration(mock_state, mock_config):
+    config = mock_config.model_copy(update={"reporting": ReportingConfig(report_formats=["json", "markdown"], output_directories={"json": "out/json"})})
+    delta = generate_reports(mock_state, config)
+    markdown_reports = [r for r in delta.reports if r.report_format == ReportFormat.MARKDOWN]
+    assert len(markdown_reports) == 1
+    assert markdown_reports[0].report_path == "reports/report.markdown"
+
+def test_reporter_empty_findings(mock_state, mock_config):
+    from datetime import datetime, timezone
+    empty_state = ExecutionState(
+        target=TargetState(domain="example.com", scope=[], session_id="sess_1", start_time=datetime.now(timezone.utc)),
+        findings=()
+    )
+    delta = generate_reports(empty_state, mock_config)
+    for report in delta.reports:
+        assert len(report.findings) == 0
+        assert report.total_findings == 0
+
+def test_reporter_invalid_format(mock_state, mock_config):
+    # Should skip the invalid format silently (lines 30-31)
+    config = mock_config.model_copy(update={"reporting": ReportingConfig(report_formats=["json", "invalid_format"], output_directories={"json": "out/json"})})
+    delta = generate_reports(mock_state, config)
+    assert len(delta.reports) == 1
+    assert delta.reports[0].report_format == ReportFormat.JSON
+
 def test_planner_empty_state(mock_config):
     from datetime import datetime, timezone
     # All states are default empty

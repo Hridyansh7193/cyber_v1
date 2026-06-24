@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=80", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cyber_v1"
+version = "0.1.0"
+description = "BugHunter Agent"
+requires-python = ">=3.12"
+
+[tool.setuptools.packages.find]
+include = [
+    "agents*",
+    "config*",
+    "core_logging*",
+    "execution*",
+    "memory*",
+    "orchestration*",
+    "orchestrator*",
+    "reporting*",
+    "schemas*",
+    "storage*"
+]

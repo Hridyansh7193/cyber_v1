@@ -27,13 +27,36 @@ def test_process_runner_timeout():
         assert stdout == "partial out"
         assert "timed out" in stderr
 
-def test_process_runner_exception():
-    with patch("subprocess.run", side_effect=FileNotFoundError("No such file")):
+def test_process_runner_oserror():
+    with patch("subprocess.run", side_effect=OSError("No such file")):
         exit_code, stdout, stderr, ex_time = ProcessRunner.run(["ls"], "test_tool")
-
         assert exit_code == -2
         assert stdout == ""
         assert "No such file" in stderr
+
+def test_process_runner_called_process_error():
+    with patch("subprocess.run", side_effect=subprocess.CalledProcessError(127, ["ls"], b"out", b"err")):
+        exit_code, stdout, stderr, ex_time = ProcessRunner.run(["ls"], "test_tool")
+        assert exit_code == 127
+        assert stdout == "out"
+        assert stderr == "err"
+
+def test_process_runner_programming_errors_propagate():
+    with patch("subprocess.run", side_effect=TypeError("Bad type")):
+        with pytest.raises(TypeError):
+            ProcessRunner.run(["ls"], "test_tool")
+            
+    with patch("subprocess.run", side_effect=KeyError("Bad key")):
+        with pytest.raises(KeyError):
+            ProcessRunner.run(["ls"], "test_tool")
+            
+    with patch("subprocess.run", side_effect=ValueError("Bad value")):
+        with pytest.raises(ValueError):
+            ProcessRunner.run(["ls"], "test_tool")
+            
+    with patch("subprocess.run", side_effect=AttributeError("Bad attr")):
+        with pytest.raises(AttributeError):
+            ProcessRunner.run(["ls"], "test_tool")
 
 def test_timeout_manager_heavy_tool():
     assert TimeoutManager.get_timeout("nuclei") == TimeoutManager.HEAVY_TIMEOUT
