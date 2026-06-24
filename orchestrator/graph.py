@@ -20,13 +20,47 @@ def build_graph(config: BugHunterConfig, checkpointer: CheckpointManager = None)
 
     retry = get_retry_policy()
 
-    workflow.add_node("init_node", wrap_node(init_node), retry=retry)
-    workflow.add_node("recon_node", wrap_node(recon_node), retry=retry)
-    workflow.add_node("js_node", wrap_node(js_node), retry=retry)
-    workflow.add_node("api_node", wrap_node(api_node), retry=retry)
-    workflow.add_node("vulnerability_node", wrap_node(vulnerability_node), retry=retry)
-    workflow.add_node("analysis_node", wrap_node(analysis_node), retry=retry)
-    workflow.add_node("report_node", wrap_node(report_node), retry=retry)
+    workflow.add_node(
+        "init_node",
+        wrap_node(init_node),
+        retry_policy=retry
+    )
+
+    workflow.add_node(
+        "recon_node",
+        wrap_node(recon_node),
+        retry_policy=retry
+    )
+
+    workflow.add_node(
+        "js_node",
+        wrap_node(js_node),
+        retry_policy=retry
+    )
+
+    workflow.add_node(
+        "api_node",
+        wrap_node(api_node),
+        retry_policy=retry
+    )
+
+    workflow.add_node(
+        "vulnerability_node",
+        wrap_node(vulnerability_node),
+        retry_policy=retry
+    )
+
+    workflow.add_node(
+        "analysis_node",
+        wrap_node(analysis_node),
+        retry_policy=retry
+    )
+
+    workflow.add_node(
+        "report_node",
+        wrap_node(report_node),
+        retry_policy=retry
+)
 
     workflow.set_entry_point("init_node")
     workflow.add_edge("init_node", "recon_node")

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from typing import Optional, List
-from datetime import datetime
+from datetime import datetime,UTC
 from storage.models import ScanSessionModel
 
 class SessionRepository:
@@ -9,7 +9,7 @@ class SessionRepository:
             session_id=session_id,
             target_domain=target_domain,
             status="running",
-            started_at=datetime.utcnow()
+            started_at=datetime.now(UTC)
         )
         db.add(model)
         db.commit()
@@ -24,7 +24,7 @@ class SessionRepository:
         if model:
             model.status = status
             if status in ["completed", "failed", "cancelled"]:
-                model.finished_at = datetime.utcnow()
+                model.finished_at = datetime.now(UTC)
             db.commit()
             db.refresh(model)
         return model
