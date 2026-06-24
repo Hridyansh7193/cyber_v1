@@ -1,0 +1,5 @@
+{
+  "domain": "example.com",
+  "scope": ["example.com", "api.example.com"],
+  "session_id": "test_sess"
+}
