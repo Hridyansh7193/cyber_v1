@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import patch
 
 from orchestrator.graph import build_graph
 from schemas.state import ExecutionState
@@ -18,31 +19,56 @@ def test_checkpoint_resume(e2e_db, mock_subprocess_run, base_config, determinist
         errors={}
     )
     
+    wrapper_calls = {"recon": 0, "js": 0, "api": 0}
+    
+    from schemas.tool_result import ToolResult
+    
+    def mock_recon(state):
+        wrapper_calls["recon"] += 1
+        return ToolResult(tool_name="dummy", metadata={"new_subdomains": [], "new_hosts": [], "new_urls": []}, errors=[], success=True, exit_code=0, stdout="", stderr="", execution_time=0.0)
+        
+    def mock_js(state):
+        wrapper_calls["js"] += 1
+        return ToolResult(tool_name="dummy", metadata={"new_js_files": [], "new_endpoints": []}, errors=[], success=True, exit_code=0, stdout="", stderr="", execution_time=0.0)
+        
+    def mock_api_fail(state):
+        wrapper_calls["api"] += 1
+        raise ValueError("Simulated API Crash")
+        
+    def mock_api_success(state):
+        wrapper_calls["api"] += 1
+        return ToolResult(tool_name="dummy", metadata={"new_swagger_urls": [], "new_graphql_urls": []}, errors=[], success=True, exit_code=0, stdout="", stderr="", execution_time=0.0)
+    
     config_run = {"configurable": {"thread_id": "e2e_checkpoint_thread"}}
-    
-    # We can't trivially interrupt a synchronous graph execution midway unless we use a conditional breakpoint or error.
-    # We will simulate an error in RECON to stop the graph, then fix it and resume.
-    
     graph_state_input = {
         "execution_state": initial_exec_state,
         "orchestration_state": initial_state
     }
     
-    # First Run: Mock fails in RECON
-    with pytest.raises(Exception): # Let's simulate a hard fail inside the node by patching it
-        from unittest.mock import patch
-        with patch('orchestrator.nodes.recon_node.analyze_recon', side_effect=ValueError("Simulated Crash")):
+    # First Run: API fails
+    with patch("orchestrator.nodes.recon_node.dummy_recon_wrapper", side_effect=mock_recon), \
+         patch("orchestrator.nodes.js_node.dummy_js_wrapper", side_effect=mock_js), \
+         patch("orchestrator.nodes.api_node.dummy_api_wrapper", side_effect=mock_api_fail):
+        with pytest.raises(Exception):
             app.invoke(graph_state_input, config=config_run)
             
-    # The checkpoint should have saved the state up to INIT
-    # Second Run: Graph resumes
-    # State should fetch from DB automatically if we pass None or empty state, but langgraph invoke with same thread will use checkpoint.
-    # We invoke with None
-    final_state = app.invoke(None, config=config_run)
+    assert wrapper_calls["recon"] == 1
+    assert wrapper_calls["js"] == 1
+    assert wrapper_calls["api"] == 1
+            
+    # Second Run: Graph resumes, API succeeds
+    with patch("orchestrator.nodes.recon_node.dummy_recon_wrapper", side_effect=mock_recon), \
+         patch("orchestrator.nodes.js_node.dummy_js_wrapper", side_effect=mock_js), \
+         patch("orchestrator.nodes.api_node.dummy_api_wrapper", side_effect=mock_api_success):
+        final_state = app.invoke(None, config=config_run)
     
     exec_state = final_state["execution_state"]
-    
     orch_state = final_state["orchestration_state"]
+    
+    # Assert idempotency: recon and JS were NOT run again
+    assert wrapper_calls["recon"] == 1
+    assert wrapper_calls["js"] == 1
+    assert wrapper_calls["api"] == 2
     
     # Should have completed everything successfully now
     assert "report" in orch_state.task_status

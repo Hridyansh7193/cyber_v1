@@ -15,9 +15,9 @@ def fixtures_dir():
 
 @pytest.fixture
 def mock_subprocess_run(fixtures_dir):
-    def side_effect(cmd, *args, **kwargs):
+    def side_effect(command, tool_name, cwd=None):
         # Determine the tool from the command
-        cmd_str = " ".join(cmd)
+        cmd_str = " ".join(command)
         stdout_data = ""
         
         if "subfinder" in cmd_str:
@@ -29,10 +29,10 @@ def mock_subprocess_run(fixtures_dir):
         elif "nuclei" in cmd_str:
             stdout_data = (fixtures_dir / "nuclei.json").read_text(encoding="utf-8")
         
-        # Return a mock CompletedProcess
-        return subprocess.CompletedProcess(args=cmd, returncode=0, stdout=stdout_data, stderr="")
+        # Return a mock Tuple[int, str, str, float]
+        return (0, stdout_data, "", 1.0)
 
-    with patch("subprocess.run", side_effect=side_effect) as m:
+    with patch("execution.utils.process_runner.ProcessRunner.run", side_effect=side_effect) as m:
         yield m
 
 @pytest.fixture

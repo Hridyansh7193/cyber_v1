@@ -46,12 +46,39 @@ def test_full_pipeline_success(e2e_db, mock_subprocess_run, base_config, determi
     assert isinstance(exec_state.recon_state.urls, tuple)
     assert isinstance(exec_state.findings, tuple)
     
-    # Verify database persistence
+    # Verify database persistence via public interfaces
+    from storage.repositories.target_repository import TargetRepository
+    
     with get_db_session() as session:
-        # Pipeline does not implement Storage layer population yet
-        pass
+        repo = TargetRepository()
+        
+        # Test persistence
+        saved_target = repo.create(session, exec_state.target)
+        assert saved_target.domain == "example.com"
+        
+        # Test retrieval
+        retrieved_target = repo.get_by_domain(session, "example.com")
+        assert retrieved_target is not None
+        assert retrieved_target.domain == "example.com"
 
     # Verify report generation is part of state
     assert len(exec_state.reports) == 2
     assert exec_state.reports[0].report_format.value == "markdown"
     assert exec_state.reports[1].report_format.value == "json"
+    
+    # Verify file storage through public interface
+    from storage.file_storage import save_generated_file
+    from reporting.markdown_renderer import generate_markdown
+    from reporting.json_renderer import generate_json
+    
+    for report in exec_state.reports:
+        fmt_str = report.report_format.value
+        if fmt_str == "markdown":
+            g_rep = generate_markdown(report)
+        else:
+            g_rep = generate_json(report)
+            
+        output_dir = Path(base_config.reporting.output_directories[fmt_str])
+        saved_path = save_generated_file(g_rep, output_dir)
+        assert Path(saved_path).exists()
+        assert Path(saved_path).is_file()
