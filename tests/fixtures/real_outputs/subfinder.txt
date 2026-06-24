@@ -1,0 +1,3 @@
+api.example.com
+dev.example.com
+staging.example.com

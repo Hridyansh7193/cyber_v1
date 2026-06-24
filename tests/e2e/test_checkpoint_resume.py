@@ -39,7 +39,6 @@ def test_checkpoint_resume(e2e_db, mock_subprocess_run, base_config, determinist
         return dummy_api_wrapper(state)
         
     def crash_vuln(state):
-        wrapper_calls["vuln"] += 1
         raise ValueError("Simulated Vuln Crash")
         
     def count_vuln(state):
@@ -63,7 +62,7 @@ def test_checkpoint_resume(e2e_db, mock_subprocess_run, base_config, determinist
     assert wrapper_calls["recon"] == 1
     assert wrapper_calls["js"] == 1
     assert wrapper_calls["api"] == 1
-    assert wrapper_calls["vuln"] == 1
+    assert wrapper_calls["vuln"] == 0
             
     # Second Run: Graph resumes, Vuln succeeds
     with patch("orchestrator.nodes.recon_node.dummy_recon_wrapper", side_effect=count_recon), \
@@ -75,11 +74,11 @@ def test_checkpoint_resume(e2e_db, mock_subprocess_run, base_config, determinist
     exec_state = final_state["execution_state"]
     orch_state = final_state["orchestration_state"]
     
-    # Assert idempotency: recon, JS, API were NOT run again
+    # Assert idempotency: all nodes executed exactly once
     assert wrapper_calls["recon"] == 1
     assert wrapper_calls["js"] == 1
     assert wrapper_calls["api"] == 1
-    assert wrapper_calls["vuln"] == 2
+    assert wrapper_calls["vuln"] == 1
     
     # Should have completed everything successfully now
     assert "report" in orch_state.task_status

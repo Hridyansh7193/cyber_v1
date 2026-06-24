@@ -1,0 +1,2 @@
+{"template-id":"cve-2021-44228","info":{"name":"Log4j RCE","severity":"critical"},"matched-at":"http://api.example.com"}
+{"template-id":"exposed-git","info":{"name":"Exposed .git directory","severity":"high"},"matched-at":"http://dev.example.com/.git/config"}

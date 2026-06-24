@@ -89,9 +89,10 @@ def test_db_session_close_guarantee():
     # In sqlalchemy, a closed session might still have is_active=True depending on version, 
     # but we can verify it's detached or try to use it and it will auto-begin or fail.
     # Better to just check session_ref.transaction is None or we can just pass since context manager handles it.
+    from sqlalchemy.exc import SQLAlchemyError
     try:
         session_ref.connection()
-    except Exception:
+    except SQLAlchemyError:
         pass # Expected or handled
 
 def test_nested_session_handling():

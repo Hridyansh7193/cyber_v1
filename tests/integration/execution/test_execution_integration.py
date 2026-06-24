@@ -4,7 +4,7 @@ from unittest.mock import patch
 from execution.recon.subfinder_wrapper import SubfinderWrapper
 from execution.vuln.nuclei_wrapper import NucleiWrapper
 
-@patch("subprocess.run")
+@patch("execution.utils.process_runner.subprocess.run")
 def test_integration_subfinder_process_runner(mock_subrun):
     # Setup mock
     mock_process = mock_subrun.return_value
@@ -20,7 +20,7 @@ def test_integration_subfinder_process_runner(mock_subrun):
     assert res.stdout == '{"host": "sub.example.com"}'
     mock_subrun.assert_called_once()
     
-@patch("subprocess.run")
+@patch("execution.utils.process_runner.subprocess.run")
 def test_integration_nuclei_timeout(mock_subrun):
     mock_subrun.side_effect = subprocess.TimeoutExpired(["nuclei"], 300)
     
