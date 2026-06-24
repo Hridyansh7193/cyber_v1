@@ -1,0 +1,16 @@
+# BugHunter-Agent Report
+
+**Report ID:** {{ report.report_id }}
+**Generated At:** {{ report.created_at }}
+**Total Findings:** {{ report.total_findings }}
+
+## Findings
+
+{% for finding in report.findings %}
+### {{ finding.title }}
+* **Severity:** {{ finding.severity.value }}
+* **Confidence:** {{ finding.confidence.value }}
+
+**Evidence:**
+{{ finding.evidence }}
+{% endfor %}

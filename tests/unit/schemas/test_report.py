@@ -3,9 +3,12 @@ from datetime import datetime
 from pydantic import ValidationError
 from schemas.report import Report, ReportFormat
 
+from uuid import uuid4
 def test_report_valid():
     now = datetime.now()
     report = Report(
+        report_id=uuid4(),
+        created_at=now,
         session_id="session123",
         report_path="/tmp/report.json",
         report_format=ReportFormat.JSON,

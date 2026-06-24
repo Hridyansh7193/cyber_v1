@@ -3,6 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from typing import Iterator
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 
 # Singleton configuration
 _engine = None
@@ -37,7 +38,7 @@ def get_db_session() -> Iterator[Session]:
     try:
         yield session
         session.commit()
-    except Exception:
+    except SQLAlchemyError:
         session.rollback()
         raise
     finally:
