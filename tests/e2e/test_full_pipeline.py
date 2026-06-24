@@ -48,18 +48,38 @@ def test_full_pipeline_success(e2e_db, mock_subprocess_run, base_config, determi
     
     # Verify database persistence via public interfaces
     from storage.repositories.target_repository import TargetRepository
+    from storage.repositories.finding_repository import FindingRepository
+    from storage.repositories.report_repository import ReportRepository
     
     with get_db_session() as session:
-        repo = TargetRepository()
+        target_repo = TargetRepository()
+        finding_repo = FindingRepository()
+        report_repo = ReportRepository()
         
         # Test persistence
-        saved_target = repo.create(session, exec_state.target)
-        assert saved_target.domain == "example.com"
+        saved_target = target_repo.create(session, exec_state.target)
+        assert saved_target.domain == exec_state.target.domain
         
         # Test retrieval
-        retrieved_target = repo.get_by_domain(session, "example.com")
+        retrieved_target = target_repo.get_by_domain(session, exec_state.target.domain)
         assert retrieved_target is not None
-        assert retrieved_target.domain == "example.com"
+        assert retrieved_target.domain == exec_state.target.domain
+        
+        # Persist findings
+        for finding in exec_state.findings:
+            finding_repo.create(session, exec_state.target.session_id, finding.title, finding.severity, finding.confidence, finding.description, finding.evidence)
+            retrieved_findings = finding_repo.get_by_session(session, exec_state.target.session_id)
+            assert len(retrieved_findings) > 0
+            # We compare fields that are persisted
+            assert any(f.title == finding.title for f in retrieved_findings)
+            
+        # Persist reports
+        for report in exec_state.reports:
+            report_repo.create(session, exec_state.target.session_id, report.report_path, report.report_format.value)
+            retrieved_reports = report_repo.get_by_session(session, exec_state.target.session_id)
+            assert len(retrieved_reports) > 0
+            # Ensure the specific report is saved
+            assert any(r.report_path == report.report_path for r in retrieved_reports)
 
     # Verify report generation is part of state
     assert len(exec_state.reports) == 2
