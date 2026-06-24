@@ -1,5 +1,6 @@
 import pytest
-from datetime import datetime, timezone
+from datetime import datetime, UTC
+from uuid import uuid4
 from schemas.state import ExecutionState, TargetState
 from orchestrator.delta_applier import (
     apply_recon_delta, apply_js_delta, apply_api_delta, 
@@ -8,7 +9,7 @@ from orchestrator.delta_applier import (
 from agents.deltas import ReconDelta, JSDelta, APIDelta, VulnerabilityDelta, AnalysisDelta, ReportDelta
 
 def get_base_state():
-    return ExecutionState(target=TargetState(domain="test.com", scope=[], session_id="1", start_time=datetime.now(timezone.utc)))
+    return ExecutionState(target=TargetState(domain="test.com", scope=[], session_id="1", start_time=datetime.now(UTC)))
 
 def test_apply_recon_delta():
     state = get_base_state()
@@ -48,7 +49,7 @@ def test_apply_analysis_delta():
 def test_apply_report_delta():
     from schemas.state import Report
     state = get_base_state()
-    r1 = Report(id="r1", session_id="1", report_path="test.md", report_format="markdown", timestamp=datetime.now(timezone.utc))
+    r1 = Report(report_id=uuid4(), session_id="1", report_path="test.md", report_format="markdown", created_at=datetime.now(UTC))
     delta = ReportDelta(reports=(r1,))
     new_state = apply_report_delta(state, delta)
     assert new_state is not state

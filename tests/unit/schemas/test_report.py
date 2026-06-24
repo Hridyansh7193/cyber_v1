@@ -1,11 +1,11 @@
 import pytest
-from datetime import datetime
+from datetime import datetime, UTC
 from pydantic import ValidationError
 from schemas.report import Report, ReportFormat
 
 from uuid import uuid4
 def test_report_valid():
-    now = datetime.now()
+    now = datetime.now(UTC)
     report = Report(
         report_id=uuid4(),
         created_at=now,
@@ -20,7 +20,7 @@ def test_report_valid():
     assert report.timestamp == now
 
 def test_report_invalid_format():
-    now = datetime.now()
+    now = datetime.now(UTC)
     with pytest.raises(ValidationError):
         Report(
             session_id="123",

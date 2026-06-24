@@ -1,10 +1,10 @@
 import pytest
-from datetime import datetime
+from datetime import datetime, UTC
 from pydantic import ValidationError
 from schemas.target import TargetState
 
 def test_target_state_valid():
-    start = datetime.now()
+    start = datetime.now(UTC)
     target = TargetState(domain="example.com", session_id="123", start_time=start)
     assert target.domain == "example.com"
     assert target.scope == ()
@@ -12,7 +12,7 @@ def test_target_state_valid():
     assert target.start_time == start
 
 def test_target_state_with_scope():
-    start = datetime.now()
+    start = datetime.now(UTC)
     target = TargetState(domain="example.com", scope=["*.example.com"], session_id="123", start_time=start)
     assert target.scope == ("*.example.com",)
 

@@ -1,5 +1,5 @@
 import pytest
-from datetime import datetime
+from datetime import datetime, UTC
 from schemas.state import ReconState, JSState, APIState, VulnerabilityState, ExecutionState
 from schemas.target import TargetState
 from pydantic import ValidationError
@@ -23,7 +23,7 @@ def test_vulnerability_state():
     assert state.nuclei_results == ({"vuln": "xss"},)
 
 def test_execution_state_defaults():
-    start = datetime.now()
+    start = datetime.now(UTC)
     target = TargetState(domain="example.com", session_id="123", start_time=start)
     exec_state = ExecutionState(target=target)
     
@@ -39,7 +39,7 @@ def test_execution_state_defaults():
     assert exec_state.metadata == {}
 
 def test_execution_state_serialization():
-    start = datetime.now()
+    start = datetime.now(UTC)
     target = TargetState(domain="example.com", session_id="123", start_time=start)
     exec_state = ExecutionState(target=target)
     
@@ -51,7 +51,7 @@ def test_execution_state_serialization():
     assert "example.com" in json_data
 
 def test_execution_state_deserialization():
-    start = datetime.now()
+    start = datetime.now(UTC)
     data = {
         "target": {
             "domain": "example.com",

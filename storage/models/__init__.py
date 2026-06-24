@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
 from sqlalchemy.orm import declarative_base
 
@@ -10,11 +10,11 @@ class ScanSessionModel(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     session_id = Column(String, nullable=False, unique=True, index=True)
     target_domain = Column(String, nullable=False, index=True)
-    started_at = Column(DateTime, nullable=True)
-    finished_at = Column(DateTime, nullable=True)
+    started_at = Column(DateTime(timezone=True), nullable=True)
+    finished_at = Column(DateTime(timezone=True), nullable=True)
     status = Column(String, nullable=False)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))
+    updated_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC))
 
 class TargetModel(Base):
     __tablename__ = 'targets'
@@ -23,8 +23,8 @@ class TargetModel(Base):
     domain = Column(String, nullable=False, unique=True, index=True)
     scope_type = Column(String, nullable=True)
     program_name = Column(String, nullable=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))
+    updated_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC))
 
 class SubdomainModel(Base):
     __tablename__ = 'subdomains'
@@ -33,7 +33,7 @@ class SubdomainModel(Base):
     session_id = Column(String, ForeignKey('scan_sessions.session_id'), nullable=False, index=True)
     subdomain = Column(String, nullable=False, index=True)
     source = Column(String, nullable=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))
 
 class AliveHostModel(Base):
     __tablename__ = 'alive_hosts'
@@ -45,7 +45,7 @@ class AliveHostModel(Base):
     title = Column(String, nullable=True)
     tech_stack = Column(String, nullable=True)
     response_time = Column(Float, nullable=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))
 
 class UrlModel(Base):
     __tablename__ = 'urls'
@@ -54,7 +54,7 @@ class UrlModel(Base):
     session_id = Column(String, ForeignKey('scan_sessions.session_id'), nullable=False, index=True)
     url = Column(String, nullable=False, index=True)
     source = Column(String, nullable=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))
 
 class ParameterModel(Base):
     __tablename__ = 'parameters'
@@ -63,7 +63,7 @@ class ParameterModel(Base):
     session_id = Column(String, ForeignKey('scan_sessions.session_id'), nullable=False, index=True)
     url = Column(String, nullable=False)
     parameter = Column(String, nullable=False, index=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))
 
 class JSFileModel(Base):
     __tablename__ = 'js_files'
@@ -71,7 +71,7 @@ class JSFileModel(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     session_id = Column(String, ForeignKey('scan_sessions.session_id'), nullable=False, index=True)
     url = Column(String, nullable=False, index=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))
 
 class SecretModel(Base):
     __tablename__ = 'secrets'
@@ -82,7 +82,7 @@ class SecretModel(Base):
     value = Column(String, nullable=False)
     source = Column(String, nullable=True)
     confidence = Column(String, nullable=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))
 
 class APIEndpointModel(Base):
     __tablename__ = 'api_endpoints'
@@ -91,7 +91,7 @@ class APIEndpointModel(Base):
     session_id = Column(String, ForeignKey('scan_sessions.session_id'), nullable=False, index=True)
     type = Column(String, nullable=False)
     url = Column(String, nullable=False, index=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))
 
 class FindingModel(Base):
     __tablename__ = 'findings'
@@ -104,7 +104,7 @@ class FindingModel(Base):
     description = Column(String, nullable=True)
     evidence = Column(String, nullable=True)
     status = Column(String, nullable=False, index=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))
 
 class ReportModel(Base):
     __tablename__ = 'reports'
@@ -113,7 +113,7 @@ class ReportModel(Base):
     session_id = Column(String, ForeignKey('scan_sessions.session_id'), nullable=False, index=True)
     report_path = Column(String, nullable=False)
     report_format = Column(String, nullable=False)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))
 
 class TaskHistoryModel(Base):
     __tablename__ = 'task_history'
@@ -124,7 +124,7 @@ class TaskHistoryModel(Base):
     status = Column(String, nullable=False)
     attempts = Column(Integer, default=0)
     duration = Column(Float, nullable=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))
 
 class LogModel(Base):
     __tablename__ = 'logs'
@@ -134,4 +134,4 @@ class LogModel(Base):
     component = Column(String, nullable=False, index=True)
     level = Column(String, nullable=False)
     message = Column(String, nullable=False)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))
