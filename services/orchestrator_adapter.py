@@ -55,6 +55,10 @@ class OrchestratorAdapter:
             self._job_registry.update_status(job_id, JobStatus.COMPLETED)
             
         except Exception as e:
+            # Top-level exception catch to prevent thread crash and safely record pipeline failure in Job Registry.
+            # We preserve the original error in logs and registry.
+            import logging
+            logging.getLogger(__name__).error(f"Scan pipeline failed for job {job_id}", exc_info=True)
             self._job_registry.update_status(job_id, JobStatus.FAILED, str(e))
 
     def submit_scan(self, job_id: str, target: TargetState) -> None:

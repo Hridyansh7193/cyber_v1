@@ -86,3 +86,66 @@ def test_get_report(monkeypatch):
     assert response.status_code == 404
     
     app.dependency_overrides.clear()
+
+def test_start_scan_with_config():
+    mock_scan_service = Mock(spec=ScanService)
+    mock_scan_service.submit_scan.return_value = "job-config"
+    app.dependency_overrides[get_scan_service] = lambda: mock_scan_service
+    
+    response = client.post("/scan", json={
+        "domain": "example.com",
+        "config": {
+            "settings": {"scan_depth": 1, "max_concurrency": 10, "log_level": "INFO"},
+            "llm": {"provider": "dummy", "default_model": "dummy", "timeout": 30},
+            "tools": {"tool_paths": {}, "docker_container_names": {}, "wordlists": {}, "enable_flags": {}},
+            "timeouts": {"subfinder_timeout": 60, "nuclei_timeout": 60, "dalfox_timeout": 60, "ffuf_timeout": 60, "global_timeout": 3600},
+            "reporting": {"report_formats": ["json"], "output_directories": {}}
+        }
+    })
+    assert response.status_code == 200
+    assert response.json()["job_id"] == "job-config"
+    app.dependency_overrides.clear()
+
+def test_start_scan_exception():
+    mock_scan_service = Mock(spec=ScanService)
+    mock_scan_service.submit_scan.side_effect = RuntimeError("Something bad")
+    app.dependency_overrides[get_scan_service] = lambda: mock_scan_service
+    
+    response = client.post("/scan", json={"domain": "example.com"})
+    assert response.status_code == 500
+    assert "Internal pipeline error" in response.json()["detail"]
+    app.dependency_overrides.clear()
+
+def test_get_report_markdown():
+    mock_report_service = Mock(spec=ReportService)
+    gen_report = GeneratedReport(
+        report_id=uuid.uuid4(),
+        session_id="job-123",
+        report_format=ReportFormat.MARKDOWN,
+        format=ReportFormat.MARKDOWN,
+        filename="report.md",
+        mime_type="text/markdown",
+        content="# Report Data"
+    )
+    mock_report_service.get_report.return_value = gen_report
+    app.dependency_overrides[get_report_service] = lambda: mock_report_service
+    
+    response = client.get("/report/job-123?format=markdown")
+    assert response.status_code == 200
+    assert response.text == "# Report Data"
+    app.dependency_overrides.clear()
+
+def test_cancel_scan():
+    mock_scan_service = Mock(spec=ScanService)
+    mock_scan_service.cancel_scan.return_value = True
+    app.dependency_overrides[get_scan_service] = lambda: mock_scan_service
+    
+    response = client.post("/cancel/job-123")
+    assert response.status_code == 200
+    assert response.json()["cancelled"] is True
+    
+    mock_scan_service.cancel_scan.return_value = False
+    response = client.post("/cancel/job-123")
+    assert response.status_code == 200
+    assert response.json()["cancelled"] is False
+    app.dependency_overrides.clear()

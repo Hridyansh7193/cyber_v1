@@ -34,7 +34,10 @@ def start_scan(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        # Prevent traceback leakage, map PipelineError internally if needed
+        # Top-level exception catch to prevent traceback leakage via FastAPI HTTP response.
+        # Original error is logged.
+        import logging
+        logging.getLogger(__name__).error("Internal API error during scan submission", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal pipeline error occurred")
 
 @router.get("/status/{job_id}", response_model=StatusResponse)

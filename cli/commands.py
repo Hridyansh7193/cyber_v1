@@ -54,6 +54,9 @@ def scan_cmd(domain: str, config: str = typer.Option(None, help="Path to config 
         console.print(f"[red]Validation Error:[/red] {e}")
         raise typer.Exit(code=2)
     except Exception as e:
+        # Top-level CLI catch to prevent ugly stack traces from leaking to the user's terminal
+        import logging
+        logging.getLogger(__name__).error("Unexpected CLI error", exc_info=True)
         console.print(f"[red]Error:[/red] {e}")
         raise typer.Exit(code=1)
 
@@ -113,9 +116,15 @@ def validate_config_cmd(config_path: str):
             else:
                 BugHunterConfig.model_validate(yaml.safe_load(f))
         console.print("[green]Configuration is valid.[/green]")
-    except Exception as e:
+    except ValueError as e:
         console.print(f"[red]Invalid configuration:[/red] {e}")
         raise typer.Exit(code=2)
+    except Exception as e:
+        # Top-level CLI catch to prevent ugly stack traces from leaking to the user's terminal
+        import logging
+        logging.getLogger(__name__).error("Unexpected CLI error", exc_info=True)
+        console.print(f"[red]Unexpected Error:[/red] {e}")
+        raise typer.Exit(code=1)
 
 @app.command("version")
 def version_cmd():
