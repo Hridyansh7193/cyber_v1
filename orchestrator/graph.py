@@ -1,8 +1,8 @@
 from langgraph.graph import StateGraph, END
 from orchestrator.graph_state import GraphState
 from orchestrator.state_adapter import from_graph_state, to_graph_state
-from orchestrator.nodes import init_node, recon_node, js_node, api_node, vulnerability_node, analysis_node, report_node
-from orchestrator.transitions import recon_transition, js_transition, api_transition, vuln_transition, analysis_transition
+from orchestrator.nodes import init_node, planner_node, recon_node, js_node, api_node, vulnerability_node, analysis_node, report_node
+from orchestrator.transitions import planner_transition, recon_transition, js_transition, api_transition, vuln_transition, analysis_transition
 from orchestrator.retry_policy import get_retry_policy
 from orchestrator.checkpoint_manager import CheckpointManager
 from config.schemas import BugHunterConfig
@@ -23,6 +23,12 @@ def build_graph(config: BugHunterConfig, checkpointer: CheckpointManager = None)
     workflow.add_node(
         "init_node",
         wrap_node(init_node),
+        retry_policy=retry
+    )
+
+    workflow.add_node(
+        "planner_node",
+        wrap_node(planner_node),
         retry_policy=retry
     )
 
@@ -63,8 +69,9 @@ def build_graph(config: BugHunterConfig, checkpointer: CheckpointManager = None)
 )
 
     workflow.set_entry_point("init_node")
-    workflow.add_edge("init_node", "recon_node")
+    workflow.add_edge("init_node", "planner_node")
     
+    workflow.add_conditional_edges("planner_node", planner_transition, {"recon_node": "recon_node", "END": END})
     workflow.add_conditional_edges("recon_node", recon_transition, {"js_node": "js_node", "END": END})
     workflow.add_conditional_edges("js_node", js_transition, {"api_node": "api_node", "END": END})
     workflow.add_conditional_edges("api_node", api_transition, {"vulnerability_node": "vulnerability_node", "END": END})

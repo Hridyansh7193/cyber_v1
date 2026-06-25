@@ -3,6 +3,12 @@ from .task import Task, TaskPriority, TaskStatus
 from .finding import Finding, Severity, Confidence
 from .report import Report, ReportFormat
 from .tool_result import ToolResult
+from .planner_decision import PlannerDecision
+from .prioritized_asset import PrioritizedAsset
+from .correlated_finding import CorrelatedFinding
+from .attack_graph import AttackGraph, AttackGraphNode, AttackGraphEdge
+from .risk_summary import RiskSummary
+from .intelligence import IntelligenceState
 
 import copyreg
 from types import MappingProxyType

@@ -1,8 +1,8 @@
 from config.schemas import BugHunterConfig
 from orchestrator.node_result import NodeResult
 from orchestrator.node_executor import execute_node
-from agents.analyzer import associate
-from orchestrator.delta_applier import apply_analysis_delta
+from agents.analysis_agent import analyze_intelligence
+from orchestrator.delta_applier import apply_intelligence_delta
 from orchestrator.queue_manager import start_task, complete_task
 
 def analysis_node(state: NodeResult, config: BugHunterConfig) -> NodeResult:
@@ -12,8 +12,8 @@ def analysis_node(state: NodeResult, config: BugHunterConfig) -> NodeResult:
         config=config,
         wrapper=None,
         wrapper_applier=None,
-        agent=associate,
-        delta_applier=apply_analysis_delta
+        agent=analyze_intelligence,
+        delta_applier=apply_intelligence_delta
     )
     orch = complete_task(orch, "analysis")
     return NodeResult(execution_state=new_exec, orchestration_state=orch)

@@ -1,11 +1,12 @@
 from pydantic import BaseModel, Field, ConfigDict, field_serializer
-from typing import Tuple, Mapping, Any
+from typing import Tuple, Mapping, Any, Optional
 from types import MappingProxyType
 
 from .target import TargetState
 from .task import Task
 from .finding import Finding
 from .report import Report
+from .intelligence import IntelligenceState
 
 class ReconState(BaseModel):
     model_config = ConfigDict(frozen=True)
@@ -43,6 +44,7 @@ class ExecutionState(BaseModel):
     reports: Tuple[Report, ...] = Field(default=())
     logs: Tuple[Mapping[str, Any], ...] = Field(default=())
     metadata: Mapping[str, Any] = Field(default_factory=lambda: MappingProxyType({}))
+    intelligence: Optional[IntelligenceState] = Field(default=None)
 
     @field_serializer('metadata')
     def serialize_metadata(self, v: Mapping[str, Any], _info):

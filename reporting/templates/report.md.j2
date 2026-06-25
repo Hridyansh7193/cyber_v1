@@ -4,12 +4,49 @@
 **Generated At:** {{ report.created_at }}
 **Total Findings:** {{ report.total_findings }}
 
-## Findings
+{% if report.intelligence %}
+## Executive Summary
+
+**Risk Score:** {{ report.intelligence.risk_summary.score }} ({{ report.intelligence.risk_summary.level }})
+**Risk Reasoning:** {{ report.intelligence.risk_summary.reasoning }}
+
+## Prioritized Assets
+{% for asset in report.intelligence.prioritized_assets %}
+* **{{ asset.asset_type }}**: {{ asset.asset }} (Score: {{ asset.score }})
+  * Reasoning: {{ asset.reasoning }}
+{% endfor %}
+
+## Correlated Vulnerabilities
+{% for cv in report.intelligence.correlated_findings %}
+### {{ cv.vulnerability_class }}
+* **Severity:** {{ cv.severity }}
+* **Root Cause:** {{ cv.root_cause }}
+* **Affected Assets:** {{ cv.affected_assets | join(', ') }}
+
+**Evidence:**
+{% for ev in cv.evidence %}
+- {{ ev }}
+{% endfor %}
+{% endfor %}
+
+## Attack Graph Overview
+{% if report.intelligence.attack_graph %}
+**Entry Points:** {{ report.intelligence.attack_graph.entry_points | join(', ') }}
+
+**Attack Paths:**
+{% for path in report.intelligence.attack_graph.attack_paths %}
+- `{{ path }}`
+{% endfor %}
+{% endif %}
+
+{% endif %}
+
+## Raw Findings
 
 {% for finding in report.findings %}
 ### {{ finding.title }}
-* **Severity:** {{ finding.severity.value }}
-* **Confidence:** {{ finding.confidence.value }}
+* **Severity:** {{ finding.severity.value if finding.severity.value is defined else finding.severity }}
+* **Confidence:** {{ finding.confidence.value if finding.confidence.value is defined else finding.confidence }}
 
 **Evidence:**
 {{ finding.evidence }}

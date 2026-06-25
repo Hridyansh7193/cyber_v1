@@ -1,3 +1,4 @@
+import os
 import importlib.resources
 from jinja2 import Environment
 from schemas.report import Report
@@ -9,7 +10,10 @@ _TEMPLATE = None
 def generate_markdown(report: Report) -> GeneratedReport:
     global _TEMPLATE
     if _TEMPLATE is None:
-        template_str = importlib.resources.files("reporting.templates").joinpath("report.md.j2").read_text(encoding="utf-8")
+        template_path = os.path.join(os.path.dirname(__file__), "templates", "report.md.j2")
+        with open(template_path, "r", encoding="utf-8") as f:
+            template_str = f.read()
+        _TEMPLATE = _ENV.from_string(template_str)
         _TEMPLATE = _ENV.from_string(template_str)
         
     # generate the single string natively

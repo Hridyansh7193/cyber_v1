@@ -11,6 +11,12 @@ def dummy_recon_wrapper(state) -> ToolResult:
     return ToolResult(tool_name="dummy", metadata={"new_subdomains": [], "new_hosts": [], "new_urls": []}, errors=[], success=True, exit_code=0, stdout="", stderr="", execution_time=0.0)
 
 def recon_node(state: NodeResult, config: BugHunterConfig) -> NodeResult:
+    if state.execution_state.intelligence and state.execution_state.intelligence.planner:
+        if "recon_node" in state.execution_state.intelligence.planner.skipped_nodes:
+            new_orch = start_task(state.orchestration_state, "recon")
+            new_orch = complete_task(new_orch, "recon")
+            return NodeResult(execution_state=state.execution_state, orchestration_state=new_orch)
+
     orch = start_task(state.orchestration_state, "recon")
     new_exec = execute_node(
         current_exec=state.execution_state,

@@ -35,3 +35,5 @@ class AnalysisDelta(BaseModel):
 class ReportDelta(BaseModel):
     model_config = ConfigDict(frozen=True)
     reports: Tuple[Report, ...]
+
+from .intelligence_delta import IntelligenceDelta

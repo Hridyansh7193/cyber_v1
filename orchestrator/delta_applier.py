@@ -1,5 +1,5 @@
 from schemas.state import ExecutionState, ReconState, JSState, APIState, VulnerabilityState
-from agents.deltas import ReconDelta, JSDelta, APIDelta, VulnerabilityDelta, AnalysisDelta, ReportDelta
+from agents.deltas import ReconDelta, JSDelta, APIDelta, VulnerabilityDelta, AnalysisDelta, ReportDelta, IntelligenceDelta
 from schemas.finding import Finding
 import uuid
 
@@ -53,3 +53,24 @@ def apply_report_delta(state: ExecutionState, delta: ReportDelta) -> ExecutionSt
     # Overwrite or append reports
     new_reports = tuple(state.reports) + tuple(delta.reports)
     return state.model_copy(deep=True, update={"reports": new_reports})
+
+def apply_intelligence_delta(state: ExecutionState, delta: IntelligenceDelta) -> ExecutionState:
+    if not state.intelligence:
+        return state.model_copy(deep=True, update={"intelligence": delta.intelligence})
+    
+    # Merge existing intelligence state with incoming delta, overriding fields that are not None
+    # or appending tuples. The delta's intelligence acts as a patch.
+    updates = {}
+    if delta.intelligence.planner is not None:
+        updates["planner"] = delta.intelligence.planner
+    if delta.intelligence.prioritized_assets:
+        updates["prioritized_assets"] = delta.intelligence.prioritized_assets
+    if delta.intelligence.correlated_findings:
+        updates["correlated_findings"] = delta.intelligence.correlated_findings
+    if delta.intelligence.attack_graph is not None:
+        updates["attack_graph"] = delta.intelligence.attack_graph
+    if delta.intelligence.risk_summary is not None:
+        updates["risk_summary"] = delta.intelligence.risk_summary
+        
+    new_intelligence = state.intelligence.model_copy(deep=True, update=updates)
+    return state.model_copy(deep=True, update={"intelligence": new_intelligence})

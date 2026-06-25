@@ -24,7 +24,8 @@ def generate_reports(state: ExecutionState, config: BugHunterConfig) -> ReportDe
                 report_path=f"{config.reporting.output_directories.get(fmt_str, 'reports')}/report.{fmt_str}",
                 report_format=fmt,
                 created_at=report_time,
-                timestamp=report_time
+                timestamp=report_time,
+                intelligence=state.intelligence
             )
             reports.append(rep)
         except ValueError:

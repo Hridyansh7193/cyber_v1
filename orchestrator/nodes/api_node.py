@@ -11,6 +11,12 @@ def dummy_api_wrapper(state) -> ToolResult:
     return ToolResult(tool_name="dummy", metadata={"new_swagger": [], "new_graphql": []}, errors=[], success=True, exit_code=0, stdout="", stderr="", execution_time=0.0)
 
 def api_node(state: NodeResult, config: BugHunterConfig) -> NodeResult:
+    if state.execution_state.intelligence and state.execution_state.intelligence.planner:
+        if "api_node" in state.execution_state.intelligence.planner.skipped_nodes:
+            new_orch = start_task(state.orchestration_state, "api")
+            new_orch = complete_task(new_orch, "api")
+            return NodeResult(execution_state=state.execution_state, orchestration_state=new_orch)
+
     orch = start_task(state.orchestration_state, "api")
     new_exec = execute_node(
         current_exec=state.execution_state,

@@ -1,6 +1,12 @@
 from typing import Literal
 from orchestrator.graph_state import GraphState
 
+def planner_transition(state: GraphState) -> str:
+    status = state["orchestration_state"].task_status.get("planner", "PENDING")
+    if status in {"COMPLETED", "FAILED", "CANCELLED"}:
+        return "recon_node"
+    return "error_handler"
+
 def recon_transition(state: GraphState) -> Literal["js_node", "error_handler"]:
     # The prompt explicitly specifies:
     # "if task_status['recon'] in {COMPLETED, FAILED}: goto_js()"
