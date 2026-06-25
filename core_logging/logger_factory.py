@@ -27,7 +27,7 @@ class LoggerFactory:
             )
             handler.setFormatter(JSONFormatter())
             logger.addHandler(handler)
-        except Exception:
+        except OSError:
             logger.addHandler(logging.NullHandler())
             
         return logger

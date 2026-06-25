@@ -3,14 +3,17 @@ from jinja2 import Environment
 from schemas.report import Report
 from schemas.generated_report import GeneratedReport
 
+_ENV = Environment(autoescape=False)
+_TEMPLATE = None
+
 def generate_markdown(report: Report) -> GeneratedReport:
-    # Python 3.9+
-    template_str = importlib.resources.files("reporting.templates").joinpath("report.md.j2").read_text(encoding="utf-8")
-    
-    env = Environment(autoescape=False)
-    template = env.from_string(template_str)
-    
-    content = template.render(report=report)
+    global _TEMPLATE
+    if _TEMPLATE is None:
+        template_str = importlib.resources.files("reporting.templates").joinpath("report.md.j2").read_text(encoding="utf-8")
+        _TEMPLATE = _ENV.from_string(template_str)
+        
+    # generate the single string natively
+    content = _TEMPLATE.render(report=report)
     
     return GeneratedReport(
         report_id=report.report_id,

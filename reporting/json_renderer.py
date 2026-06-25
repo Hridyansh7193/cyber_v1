@@ -3,9 +3,8 @@ from schemas.report import Report
 from schemas.generated_report import GeneratedReport
 
 def generate_json(report: Report) -> GeneratedReport:
-    # Serialize the report using Pydantic's JSON dumper
-    data = report.model_dump(mode="json")
-    content = json.dumps(data, indent=2, ensure_ascii=False)
+    # Serialize the report using Pydantic's JSON dumper incrementally
+    content = report.model_dump_json(indent=2)
     
     return GeneratedReport(
         report_id=report.report_id,

@@ -48,19 +48,20 @@ def test_storage_roundtrip_integrity(tmp_path):
         
         # Finding Roundtrip
         finding = Finding(title="XSS", severity="high", confidence="certain", evidence="payload")
-        finding_repo.create(session, session_id, finding.title, finding.severity.value, finding.confidence.value, "description", finding.evidence)
+        finding_repo.create_bulk(session, session_id, [finding])
         retrieved_findings = finding_repo.get_by_session(session, session_id)
         assert any(f.title == finding.title for f in retrieved_findings)
         
         # Report Roundtrip
-        report = GeneratedReport(report_id=uuid4(), format="markdown", filename="test.md", mime_type="text/markdown", content="content")
-        report_repo.create(session, session_id, "test.md", "markdown")
+        from schemas.report import Report, ReportFormat
+        report_schema = Report(report_id=uuid4(), session_id=session_id, report_path="test.md", report_format=ReportFormat.MARKDOWN)
+        report_repo.create_bulk(session, [report_schema])
         retrieved_reports = report_repo.get_by_session(session, session_id)
         assert any(r.report_path == "test.md" for r in retrieved_reports)
         
         # Task Roundtrip
         task = Task(name="recon", status="in_progress")
-        task_repo.create(session, session_id, task.name, task.status.value)
+        task_repo.create_bulk(session, [{"session_id": session_id, "task_name": task.name, "status": task.status.value}])
         retrieved_tasks = task_repo.get_by_session(session, session_id)
         assert any(t.task_name == task.name for t in retrieved_tasks)
         

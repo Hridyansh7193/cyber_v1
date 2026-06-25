@@ -214,8 +214,8 @@ def mixed_repository_benchmark():
     print(f"SQL -> Inserts: {stats.inserts}, Selects: {stats.selects}, Commits: {stats.commits}")
 
 if __name__ == "__main__":
-    # for count in [100, 1000, 10000, 25000, 50000]:
-    #     profile_db_writes(count)
+    for count in [10000, 25000, 50000, 100000]:
+        profile_db_writes(count)
         
     measure_refresh_cost()
     mixed_repository_benchmark()
