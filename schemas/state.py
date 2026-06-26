@@ -7,6 +7,7 @@ from .task import Task
 from .finding import Finding
 from .report import Report
 from .intelligence import IntelligenceState
+from .operational import OperationalState
 
 class ReconState(BaseModel):
     model_config = ConfigDict(frozen=True)
@@ -45,6 +46,7 @@ class ExecutionState(BaseModel):
     logs: Tuple[Mapping[str, Any], ...] = Field(default=())
     metadata: Mapping[str, Any] = Field(default_factory=lambda: MappingProxyType({}))
     intelligence: Optional[IntelligenceState] = Field(default=None)
+    operational: Optional[OperationalState] = Field(default=None)
 
     @field_serializer('metadata')
     def serialize_metadata(self, v: Mapping[str, Any], _info):

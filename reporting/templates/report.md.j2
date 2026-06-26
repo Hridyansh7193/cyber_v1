@@ -4,6 +4,19 @@
 **Generated At:** {{ report.created_at }}
 **Total Findings:** {{ report.total_findings }}
 
+{% if report.operational and report.operational.scan_quality %}
+## Scan Quality Summary
+
+**Overall Grade:** {{ report.operational.scan_quality.overall_grade }}
+**Completeness Score:** {{ report.operational.scan_quality.completeness_score }}
+**Reliability Score:** {{ report.operational.scan_quality.reliability_score }}
+
+**Feedback:**
+{% for fb in report.operational.scan_quality.feedback %}
+* {{ fb }}
+{% endfor %}
+{% endif %}
+
 {% if report.intelligence %}
 ## Executive Summary
 

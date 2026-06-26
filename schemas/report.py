@@ -5,6 +5,7 @@ from typing import Tuple, Optional
 from uuid import UUID, uuid4
 from .finding import Finding
 from .intelligence import IntelligenceState
+from .operational import OperationalState
 
 class ReportFormat(str, Enum):
     JSON = "json"
@@ -23,3 +24,4 @@ class Report(BaseModel):
     findings: Tuple[Finding, ...] = Field(default=())
     total_findings: int = 0
     intelligence: Optional[IntelligenceState] = Field(default=None)
+    operational: Optional[OperationalState] = Field(default=None)

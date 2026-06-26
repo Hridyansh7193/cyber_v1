@@ -25,7 +25,8 @@ def generate_reports(state: ExecutionState, config: BugHunterConfig) -> ReportDe
                 report_format=fmt,
                 created_at=report_time,
                 timestamp=report_time,
-                intelligence=state.intelligence
+                intelligence=state.intelligence,
+                operational=state.operational
             )
             reports.append(rep)
         except ValueError:

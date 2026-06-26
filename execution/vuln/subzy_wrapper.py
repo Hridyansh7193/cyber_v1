@@ -1,23 +1,42 @@
-"""
-Subzy wrapper.
-
-Purpose: Subdomain takeover detection via subzy.
-Input: subdomains (List[str])
-Output: ToolResult
-Dependencies: execution.utils.process_runner
-Exceptions: Never raises — returns failed ToolResult on error.
-"""
 import tempfile
 import os
-from typing import List
-
+import json
+from typing import List, Tuple, Any, Mapping
+from execution.plugins.base import ExecutionPlugin, PluginMetadata
 from schemas.tool_result import ToolResult
 from execution.utils.process_runner import ProcessRunner
 
+class SubzyPlugin(ExecutionPlugin):
+    def metadata(self) -> PluginMetadata:
+        return PluginMetadata(
+            name="subzy",
+            version="1.0.0",
+            description="Subdomain takeover detection via subzy",
+            capabilities=("takeover_detection",),
+            supported_tools=("subzy",)
+        )
+
+    def build_command(self, target: Any, config: Mapping[str, Any]) -> Tuple[str, ...]:
+        return ("subzy", "run", "--targets", str(target), "--output", "json")
+
+    def validate(self, target: Any, config: Mapping[str, Any]) -> bool:
+        return bool(target)
+
+    def parse(self, stdout: str, stderr: str) -> List[Mapping[str, Any]]:
+        results = []
+        try:
+            results = json.loads(stdout)
+            if not isinstance(results, list):
+                results = [results]
+        except json.JSONDecodeError:
+            pass
+        return results
+
+    def health_check(self) -> bool:
+        return True
 
 class SubzyWrapper:
-    """Deterministic wrapper around the subzy binary."""
-
+    """Deprecated: deterministic wrapper. Maintained for backward compatibility."""
     @staticmethod
     def execute(subdomains: List[str]) -> ToolResult:
         if not subdomains:
@@ -31,19 +50,20 @@ class SubzyWrapper:
                 metadata={"input_count": 0},
             )
 
+        plugin = SubzyPlugin()
         temp_path = None
+        parsed = []
         try:
-            with tempfile.NamedTemporaryFile(
-                mode="w", suffix=".txt", delete=False
-            ) as f:
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
                 for sub in subdomains:
                     f.write(f"{sub}\n")
                 temp_path = f.name
 
-            command = ["subzy", "run", "--targets", temp_path, "--output", "json"]
-            exit_code, stdout, stderr, execution_time = ProcessRunner.run(
-                command, "subzy"
-            )
+            command = plugin.build_command(temp_path, {})
+            exit_code, stdout, stderr, execution_time = ProcessRunner.run(list(command), "subzy")
+            
+            if exit_code == 0:
+                parsed = plugin.parse(stdout, stderr)
 
             return ToolResult(
                 tool_name="subzy",
@@ -52,7 +72,7 @@ class SubzyWrapper:
                 stdout=stdout,
                 stderr=stderr,
                 execution_time=execution_time,
-                metadata={"input_count": len(subdomains)},
+                metadata={"input_count": len(subdomains), "parsed_results": parsed},
             )
         finally:
             if temp_path and os.path.exists(temp_path):

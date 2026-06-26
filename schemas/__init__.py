@@ -19,3 +19,8 @@ def _pickle_mappingproxy(proxy):
 copyreg.pickle(MappingProxyType, _pickle_mappingproxy)
 from .state import ReconState, JSState, APIState, VulnerabilityState, ExecutionState
 from .generated_report import GeneratedReport
+
+from .telemetry import OperationalTelemetry
+from .tool_metrics import ToolMetrics
+from .scan_quality import ScanQuality, ScoreComponent
+from .operational import OperationalState

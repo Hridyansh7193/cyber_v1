@@ -1,21 +1,38 @@
-"""
-Swagger wrapper.
-
-Purpose: Swagger discovery.
-Input: urls (List[str])
-Output: ToolResult
-Dependencies: execution.utils.process_runner
-Exceptions: Never raises — returns failed ToolResult on error.
-"""
-from typing import List
-
+import json
+from typing import List, Tuple, Any, Mapping
+from execution.plugins.base import ExecutionPlugin, PluginMetadata
 from schemas.tool_result import ToolResult
 from execution.utils.process_runner import ProcessRunner
 
+class SwaggerPlugin(ExecutionPlugin):
+    def metadata(self) -> PluginMetadata:
+        return PluginMetadata(
+            name="swagger_discovery",
+            version="1.0.0",
+            description="Swagger endpoint discovery",
+            capabilities=("api_discovery", "swagger"),
+            supported_tools=("swagger_discover",)
+        )
+
+    def build_command(self, target: Any, config: Mapping[str, Any]) -> Tuple[str, ...]:
+        return ("python3", "swagger_discover.py", "-u", str(target))
+
+    def validate(self, target: Any, config: Mapping[str, Any]) -> bool:
+        return bool(target)
+
+    def parse(self, stdout: str, stderr: str) -> List[str]:
+        results = []
+        for line in stdout.splitlines():
+            line = line.strip()
+            if line:
+                results.append(line)
+        return list(dict.fromkeys(results))
+
+    def health_check(self) -> bool:
+        return True
 
 class SwaggerWrapper:
-    """Deterministic wrapper around a swagger discovery tool."""
-
+    """Deprecated: deterministic wrapper. Maintained for backward compatibility."""
     @staticmethod
     def execute(urls: List[str]) -> ToolResult:
         if not urls:
@@ -29,18 +46,17 @@ class SwaggerWrapper:
                 metadata={"input_count": 0},
             )
 
+        plugin = SwaggerPlugin()
         all_stdout = ""
         all_stderr = ""
         total_time = 0.0
         success = True
         final_exit = 0
+        parsed_results = []
 
         for url in urls:
-            # Assuming a generic python script or tool named 'swagger_discover'
-            command = ["python3", "swagger_discover.py", "-u", url]
-            exit_code, stdout, stderr, execution_time = ProcessRunner.run(
-                command, "swagger_discovery"
-            )
+            command = plugin.build_command(url, {})
+            exit_code, stdout, stderr, execution_time = ProcessRunner.run(list(command), "swagger_discovery")
             
             all_stdout += stdout + "\n"
             all_stderr += stderr + "\n"
@@ -48,6 +64,8 @@ class SwaggerWrapper:
             if exit_code != 0:
                 success = False
                 final_exit = exit_code
+            else:
+                parsed_results.extend(plugin.parse(stdout, stderr))
 
         return ToolResult(
             tool_name="swagger_discovery",
@@ -56,5 +74,5 @@ class SwaggerWrapper:
             stdout=all_stdout.strip(),
             stderr=all_stderr.strip(),
             execution_time=total_time,
-            metadata={"input_count": len(urls)},
+            metadata={"input_count": len(urls), "parsed_endpoints": list(dict.fromkeys(parsed_results))},
         )
