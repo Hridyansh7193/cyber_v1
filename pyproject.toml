@@ -3,10 +3,33 @@ requires = ["setuptools>=80", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cyber_v1"
-version = "0.1.0"
-description = "BugHunter Agent"
+name = "bughunter"
+dynamic = ["version"]
+description = "Production-grade autonomous security scanning platform powered by an intelligent LangGraph engine."
+readme = "README.md"
 requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [
+    { name = "BugHunter Team", email = "security@example.com" }
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.12",
+]
+keywords = ["security", "recon", "vulnerability", "scanner", "autonomous", "langgraph"]
+
+[project.urls]
+Homepage = "https://github.com/example/bughunter"
+Repository = "https://github.com/example/bughunter"
+Issues = "https://github.com/example/bughunter/issues"
+
+[project.scripts]
+bughunter = "cli.main:main"
+
+[tool.setuptools.dynamic]
+version = {attr = "version.__version__"}
 
 [tool.setuptools.packages.find]
 include = [
@@ -20,7 +43,18 @@ include = [
     "orchestration*",
     "orchestrator*",
     "reporting*",
+    "runtime*",
     "schemas*",
     "services*",
     "storage*"
 ]
+exclude = [
+    "tests*",
+    ".venv*",
+    "workspace*",
+    "docs*",
+    "benchmark_outputs*"
+]
+
+[tool.setuptools.package-data]
+"*" = ["*.yaml", "*.json", "*.html", "*.md"]

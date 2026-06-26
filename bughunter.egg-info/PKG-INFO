@@ -1,3 +1,22 @@
+Metadata-Version: 2.4
+Name: bughunter
+Version: 1.0.0
+Summary: Production-grade autonomous security scanning platform powered by an intelligent LangGraph engine.
+Author-email: BugHunter Team <security@example.com>
+License: MIT
+Project-URL: Homepage, https://github.com/example/bughunter
+Project-URL: Repository, https://github.com/example/bughunter
+Project-URL: Issues, https://github.com/example/bughunter/issues
+Keywords: security,recon,vulnerability,scanner,autonomous,langgraph
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Information Technology
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Dynamic: license-file
+
 # BugHunter
 
 BugHunter is a production-grade autonomous security scanning platform powered by an intelligent LangGraph engine.

@@ -147,7 +147,8 @@ def workspace_cmd(action: str = typer.Argument(..., help="list|clean|archive")):
 @app.command("version")
 def version_cmd():
     """Show detailed version info."""
-    console.print("BugHunter v1.0.0")
+    from version import __version__
+    console.print(f"BugHunter v{__version__}")
     console.print("Config Schema: v2")
     console.print("Git Commit: latest")
 
