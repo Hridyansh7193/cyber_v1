@@ -3,6 +3,7 @@ import os
 import json
 from typing import List, Tuple, Any, Mapping
 from execution.plugins.base import ExecutionPlugin, PluginMetadata
+from schemas.runtime import Capability
 from schemas.tool_result import ToolResult
 from execution.utils.process_runner import ProcessRunner
 
@@ -12,7 +13,8 @@ class SubzyPlugin(ExecutionPlugin):
             name="subzy",
             version="1.0.0",
             description="Subdomain takeover detection via subzy",
-            capabilities=("takeover_detection",),
+            capabilities=(Capability.VULN, Capability.DNS),
+            minimum_version="0.0.1",
             supported_tools=("subzy",)
         )
 

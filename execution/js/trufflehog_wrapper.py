@@ -1,6 +1,7 @@
 import json
 from typing import List, Tuple, Any, Mapping
 from execution.plugins.base import ExecutionPlugin, PluginMetadata
+from schemas.runtime import Capability
 from schemas.tool_result import ToolResult
 from execution.utils.process_runner import ProcessRunner
 
@@ -10,7 +11,8 @@ class TrufflehogWrapper(ExecutionPlugin):
             name="trufflehog",
             version="3.0.0",
             description="Secret leakage detection",
-            capabilities=("secret_discovery", "git_analysis"),
+            capabilities=(Capability.SECRETS,),
+            minimum_version="0.0.1",
             supported_tools=("trufflehog",)
         )
 

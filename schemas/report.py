@@ -13,6 +13,20 @@ class ReportFormat(str, Enum):
     HTML = "html"
     PDF = "pdf"
 
+class RuntimeMetadata(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    bughunter_version: str = "1.0.0"
+    schema_version: str = "v2"
+    plugin_versions: dict[str, str] = Field(default_factory=dict)
+    config_version: str = "v2"
+    profile: str = "default"
+    db_version: str = "v1"
+    git_commit: str = "latest"
+    build_date: str = ""
+    os: str = ""
+    python_version: str = ""
+    go_version: str = ""
+
 class Report(BaseModel):
     model_config = ConfigDict(frozen=True)
     report_id: UUID = Field(default_factory=uuid4)
@@ -25,3 +39,4 @@ class Report(BaseModel):
     total_findings: int = 0
     intelligence: Optional[IntelligenceState] = Field(default=None)
     operational: Optional[OperationalState] = Field(default=None)
+    runtime_metadata: Optional[RuntimeMetadata] = Field(default=None)

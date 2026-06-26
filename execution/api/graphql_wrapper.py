@@ -1,6 +1,7 @@
 import json
 from typing import List, Tuple, Any, Mapping
 from execution.plugins.base import ExecutionPlugin, PluginMetadata
+from schemas.runtime import Capability
 from schemas.tool_result import ToolResult
 from execution.utils.process_runner import ProcessRunner
 
@@ -10,7 +11,8 @@ class GraphQLPlugin(ExecutionPlugin):
             name="graphql_discovery",
             version="1.0.0",
             description="GraphQL endpoint discovery",
-            capabilities=("api_discovery", "graphql"),
+            capabilities=(Capability.API,),
+            minimum_version="0.0.1",
             supported_tools=("graphql_discover",)
         )
 

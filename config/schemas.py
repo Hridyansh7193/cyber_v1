@@ -36,10 +36,21 @@ class ReportingConfig(BaseModel):
     report_formats: List[str]
     output_directories: Dict[str, str]
 
+class ResourceLimitsConfig(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    max_memory_mb: int = 4096
+    max_runtime_seconds: int = 3600
+    max_threads: int = 100
+    max_subdomains: int = 10000
+    max_urls: int = 50000
+    max_findings: int = 1000
+
 class BugHunterConfig(BaseModel):
     model_config = ConfigDict(frozen=True)
+    version: str = "2"
     settings: SettingsConfig
     llm: LLMConfig
     tools: ToolsConfig
     timeouts: TimeoutsConfig
     reporting: ReportingConfig
+    resource_limits: ResourceLimitsConfig = ResourceLimitsConfig()

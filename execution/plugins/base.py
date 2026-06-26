@@ -2,13 +2,17 @@ from abc import ABC, abstractmethod
 from typing import Tuple, Any, Mapping
 from pydantic import BaseModel, ConfigDict
 
+from schemas.runtime import Capability
+
 class PluginMetadata(BaseModel):
     model_config = ConfigDict(frozen=True)
     name: str
     version: str
     description: str
-    capabilities: Tuple[str, ...]
+    capabilities: Tuple[Capability, ...]
     supported_tools: Tuple[str, ...]
+    minimum_version: str | None = None
+    recommended_version: str | None = None
 
 class PluginValidator(ABC):
     @abstractmethod

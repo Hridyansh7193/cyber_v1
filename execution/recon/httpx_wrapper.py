@@ -3,6 +3,7 @@ import os
 import json
 from typing import List, Tuple, Any, Mapping
 from execution.plugins.base import ExecutionPlugin, PluginMetadata
+from schemas.runtime import Capability
 from schemas.tool_result import ToolResult
 from execution.utils.process_runner import ProcessRunner
 
@@ -12,7 +13,8 @@ class HttpxPlugin(ExecutionPlugin):
             name="httpx",
             version="1.6.0",
             description="Alive host detection",
-            capabilities=("host_discovery", "tech_discovery"),
+            capabilities=(Capability.RECON, Capability.HTTP),
+            minimum_version="0.0.1",
             supported_tools=("httpx",)
         )
 

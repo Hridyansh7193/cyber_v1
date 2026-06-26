@@ -1,5 +1,6 @@
 from typing import Tuple, Any, Mapping, List
 from execution.plugins.base import ExecutionPlugin, PluginMetadata
+from schemas.runtime import Capability
 from schemas.tool_result import ToolResult
 from execution.utils.process_runner import ProcessRunner
 
@@ -9,7 +10,8 @@ class AssetfinderWrapper(ExecutionPlugin):
             name="assetfinder",
             version="0.1.1",
             description="Subdomain discovery via assetfinder",
-            capabilities=("subdomain_discovery",),
+            capabilities=(Capability.RECON, Capability.DNS),
+            minimum_version="0.0.1",
             supported_tools=("assetfinder",)
         )
 

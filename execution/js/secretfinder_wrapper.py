@@ -3,6 +3,7 @@ import os
 import json
 from typing import List, Tuple, Any, Mapping
 from execution.plugins.base import ExecutionPlugin, PluginMetadata
+from schemas.runtime import Capability
 from schemas.tool_result import ToolResult
 from execution.utils.process_runner import ProcessRunner
 
@@ -12,7 +13,8 @@ class SecretFinderWrapper(ExecutionPlugin):
             name="secretfinder",
             version="1.0.0",
             description="Find secrets in JS files",
-            capabilities=("secret_discovery", "js_analysis"),
+            capabilities=(Capability.JS, Capability.SECRETS),
+            minimum_version="0.0.1",
             supported_tools=("secretfinder",)
         )
 

@@ -3,6 +3,7 @@ import os
 import json
 from typing import List, Tuple, Any, Mapping
 from execution.plugins.base import ExecutionPlugin, PluginMetadata
+from schemas.runtime import Capability
 from schemas.tool_result import ToolResult
 from execution.utils.process_runner import ProcessRunner
 
@@ -12,7 +13,8 @@ class DalfoxPlugin(ExecutionPlugin):
             name="dalfox",
             version="2.8.0",
             description="XSS Scanning",
-            capabilities=("xss_scanning",),
+            capabilities=(Capability.VULN, Capability.FUZZING),
+            minimum_version="0.0.1",
             supported_tools=("dalfox",)
         )
 

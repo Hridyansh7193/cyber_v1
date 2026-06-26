@@ -1,5 +1,6 @@
 from typing import Tuple, Any, Mapping, List
 from execution.plugins.base import ExecutionPlugin, PluginMetadata
+from schemas.runtime import Capability
 from schemas.tool_result import ToolResult
 from execution.utils.process_runner import ProcessRunner
 
@@ -9,7 +10,8 @@ class GauWrapper(ExecutionPlugin):
             name="gau",
             version="2.1.2",
             description="Historical URL discovery",
-            capabilities=("url_discovery",),
+            capabilities=(Capability.RECON, Capability.HTTP),
+            minimum_version="0.0.1",
             supported_tools=("gau",)
         )
 

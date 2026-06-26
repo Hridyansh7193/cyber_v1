@@ -1,6 +1,7 @@
 import json
 from typing import Tuple, Any, Mapping, List
 from execution.plugins.base import ExecutionPlugin, PluginMetadata
+from schemas.runtime import Capability
 from schemas.tool_result import ToolResult
 from execution.utils.process_runner import ProcessRunner
 
@@ -10,7 +11,8 @@ class FfufPlugin(ExecutionPlugin):
             name="ffuf",
             version="2.0.0",
             description="Content discovery via ffuf",
-            capabilities=("content_discovery", "fuzzing"),
+            capabilities=(Capability.FUZZING, Capability.HTTP),
+            minimum_version="0.0.1",
             supported_tools=("ffuf",)
         )
 

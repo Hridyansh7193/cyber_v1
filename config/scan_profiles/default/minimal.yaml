@@ -1,0 +1,17 @@
+name: minimal
+description: A fast, lightweight scan focused on quick recon and passive discovery.
+plugins:
+  subfinder: true
+  assetfinder: true
+  httpx: true
+  gau: true
+  nuclei: false
+  dalfox: false
+  ffuf: false
+  katana: false
+  linkfinder: false
+  secretfinder: false
+  trufflehog: false
+  subzy: false
+  swagger: false
+  graphql: false
