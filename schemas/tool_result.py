@@ -5,10 +5,14 @@ from types import MappingProxyType
 class ToolResult(BaseModel):
     model_config = ConfigDict(frozen=True)
     tool_name: str
+    plugin_version: str = "unknown"
     success: bool
     exit_code: int
     stdout: str
     stderr: str
+    stdout_size: int = 0
+    parsed_findings: int = 0
+    errors: Tuple[str, ...] = Field(default_factory=tuple)
     execution_time: float = Field(ge=0.0)
     raw_output_path: Optional[str] = None
     metadata: Mapping[str, Any] = Field(default_factory=lambda: MappingProxyType({}))

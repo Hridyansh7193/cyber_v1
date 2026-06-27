@@ -10,8 +10,6 @@ def report_node(state: NodeResult, config: BugHunterConfig) -> NodeResult:
     new_exec = execute_node(
         current_exec=state.execution_state,
         config=config,
-        wrapper=None,
-        wrapper_applier=None,
         agent=generate_reports,
         delta_applier=apply_report_delta
     )

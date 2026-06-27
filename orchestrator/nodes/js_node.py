@@ -5,10 +5,8 @@ from orchestrator.wrapper_result_applier import apply_js_wrapper_result
 from agents.js import analyze_js
 from orchestrator.delta_applier import apply_js_delta
 from orchestrator.queue_manager import start_task, complete_task
-from schemas.tool_result import ToolResult
-
-def dummy_js_wrapper(state) -> ToolResult:
-    return ToolResult(tool_name="dummy", metadata={"new_js_files": [], "new_endpoints": []}, errors=[], success=True, exit_code=0, stdout="", stderr="", execution_time=0.0)
+from execution.wrappers import JSWrapper
+from schemas.runtime import Capability
 
 def js_node(state: NodeResult, config: BugHunterConfig) -> NodeResult:
     if state.execution_state.intelligence and state.execution_state.intelligence.planner:
@@ -21,7 +19,8 @@ def js_node(state: NodeResult, config: BugHunterConfig) -> NodeResult:
     new_exec = execute_node(
         current_exec=state.execution_state,
         config=config,
-        wrapper=dummy_js_wrapper,
+        capability=Capability.JS,
+        wrapper_func=JSWrapper.execute,
         wrapper_applier=apply_js_wrapper_result,
         agent=analyze_js,
         delta_applier=apply_js_delta

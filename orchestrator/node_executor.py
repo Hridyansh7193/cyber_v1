@@ -1,18 +1,22 @@
-from typing import Callable, Any
+from typing import Callable, Any, Tuple
 from config.schemas import BugHunterConfig
 from schemas.state import ExecutionState
+from schemas.tool_result import ToolResult
+from schemas.runtime import Capability
+from orchestrator.execution_coordinator import ExecutionCoordinator
 
 def execute_node(
     current_exec: ExecutionState,
     config: BugHunterConfig,
-    wrapper: Callable[[Any], Any],
-    wrapper_applier: Callable[[Any, Any], Any],
-    agent: Callable[[Any, Any], Any],
-    delta_applier: Callable[[Any, Any], Any]
+    capability: Capability = None,
+    wrapper_func: Callable[[Tuple[str, ...], BugHunterConfig, str], Tuple[ToolResult, ...]] = None,
+    wrapper_applier: Callable[[Any, Any], Any] = None,
+    agent: Callable[[Any, Any], Any] = None,
+    delta_applier: Callable[[Any, Any], Any] = None
 ) -> ExecutionState:
     # 1. Wrapper
-    if wrapper and wrapper_applier:
-        wrapper_out = wrapper(current_exec)
+    if capability and wrapper_func and wrapper_applier:
+        wrapper_out = ExecutionCoordinator.execute_capability(current_exec, config, capability, wrapper_func)
         current_exec = wrapper_applier(current_exec, wrapper_out)
         
     # 2. Agent

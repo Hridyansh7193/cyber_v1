@@ -10,8 +10,6 @@ def analysis_node(state: NodeResult, config: BugHunterConfig) -> NodeResult:
     new_exec = execute_node(
         current_exec=state.execution_state,
         config=config,
-        wrapper=None,
-        wrapper_applier=None,
         agent=analyze_intelligence,
         delta_applier=apply_intelligence_delta
     )

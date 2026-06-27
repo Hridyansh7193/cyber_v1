@@ -5,10 +5,8 @@ from orchestrator.wrapper_result_applier import apply_api_wrapper_result
 from agents.api import analyze_api
 from orchestrator.delta_applier import apply_api_delta
 from orchestrator.queue_manager import start_task, complete_task
-from schemas.tool_result import ToolResult
-
-def dummy_api_wrapper(state) -> ToolResult:
-    return ToolResult(tool_name="dummy", metadata={"new_swagger": [], "new_graphql": []}, errors=[], success=True, exit_code=0, stdout="", stderr="", execution_time=0.0)
+from execution.wrappers import APIWrapper
+from schemas.runtime import Capability
 
 def api_node(state: NodeResult, config: BugHunterConfig) -> NodeResult:
     if state.execution_state.intelligence and state.execution_state.intelligence.planner:
@@ -21,7 +19,8 @@ def api_node(state: NodeResult, config: BugHunterConfig) -> NodeResult:
     new_exec = execute_node(
         current_exec=state.execution_state,
         config=config,
-        wrapper=dummy_api_wrapper,
+        capability=Capability.API,
+        wrapper_func=APIWrapper.execute,
         wrapper_applier=apply_api_wrapper_result,
         agent=analyze_api,
         delta_applier=apply_api_delta
