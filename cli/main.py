@@ -1,7 +1,7 @@
 import typer
 import sys
 from cli.commands import app as commands_app
-from version import __version__
+from cli.version import __version__
 
 def version_callback(value: bool):
     if value:

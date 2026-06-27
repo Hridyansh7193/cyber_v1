@@ -123,3 +123,6 @@ class AnalyticsRepository:
     def clear(self) -> None:
         if os.path.exists(self.db_path):
             os.remove(self.db_path)
+    def initialize_schema(self):
+        """Initialize database schema."""
+        self._init_db()

@@ -38,7 +38,7 @@ class SelfTest:
             
         # 4. Parsers
         try:
-            from execution.plugins.registry import REGISTRY
+            #from execution.plugins.registry import REGISTRY
             plugin = REGISTRY.get_plugin("subfinder")
             parsed = plugin.parse("sub1.example.com\n", "")
             if len(parsed) == 1:

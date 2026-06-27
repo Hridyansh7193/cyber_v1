@@ -1,0 +1,15 @@
+{
+  "bughunter_version": "1.0.0",
+  "install_date": "2026-06-26",
+  "python_version": "3.12.3",
+  "go_version": "1.24",
+  "plugin_versions": {},
+  "installed_profiles": [
+    "minimal",
+    "bug_bounty",
+    "stealth",
+    "full"
+  ],
+  "templates_version": "v9.9.0",
+  "git_commit": "latest"
+}

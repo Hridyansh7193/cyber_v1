@@ -34,6 +34,7 @@ cli/__init__.py
 cli/commands.py
 cli/main.py
 cli/progress.py
+cli/version.py
 config/__init__.py
 config/loader.py
 config/migration.py
