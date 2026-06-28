@@ -1,5 +1,4 @@
 import typer
-import sys
 from rich.console import Console
 from rich.table import Table
 import yaml
@@ -9,16 +8,12 @@ from services.job_registry import JobRegistry
 from services.orchestrator_adapter import OrchestratorAdapter
 from services.scan_service import ScanService
 from services.report_service import ReportService
-from services.runtime_service import RuntimeService
 from cli.progress import track_scan_progress
-from runtime.workspace import WorkspaceManager
 
 app = typer.Typer()
 console = Console()
 
 registry = JobRegistry()
-runtime_service = RuntimeService()
-ws_manager = WorkspaceManager()
 
 def _create_default_config() -> BugHunterConfig:
     return BugHunterConfig(
@@ -32,26 +27,18 @@ def _create_default_config() -> BugHunterConfig:
 default_config = _create_default_config()
 adapter = OrchestratorAdapter(registry, default_config)
 scan_service = ScanService(adapter, registry)
-report_service = ReportService()
+report_service = ReportService(adapter)
 
 @app.command("scan")
-def scan_cmd(domain: str, config: str = typer.Option(None, help="Path to config file"), profile: str = typer.Option("bug_bounty", help="Scan profile to use")):
+def scan_cmd(domain: str, config: str = typer.Option(None, help="Path to config file")):
     """Start a new scan."""
-    if not runtime_service.run_preflight(domain, profile):
-        console.print("[red]Preflight validation failed.[/red]")
-        sys.exit(6)
-        
     cfg = default_config
     if config:
-        try:
-            with open(config, "r") as f:
-                if config.endswith(".json"):
-                    cfg = BugHunterConfig.model_validate(json.load(f))
-                else:
-                    cfg = BugHunterConfig.model_validate(yaml.safe_load(f))
-        except Exception as e:
-            console.print(f"[red]Config Error:[/red] {e}")
-            sys.exit(3)
+        with open(config, "r") as f:
+            if config.endswith(".json"):
+                cfg = BugHunterConfig.model_validate(json.load(f))
+            else:
+                cfg = BugHunterConfig.model_validate(yaml.safe_load(f))
                 
     try:
         job_id = scan_service.submit_scan(domain, cfg)
@@ -61,96 +48,63 @@ def scan_cmd(domain: str, config: str = typer.Option(None, help="Path to config 
         status = scan_service.get_status(job_id)
         if status and status["status"] == "failed":
             console.print(f"[red]Scan failed:[/red] {status.get('error')}")
-            sys.exit(1)
+            raise typer.Exit(code=1)
             
+    except ValueError as e:
+        console.print(f"[red]Validation Error:[/red] {e}")
+        raise typer.Exit(code=2)
     except Exception as e:
+        # Top-level CLI catch to prevent ugly stack traces from leaking to the user's terminal
+        import logging
+        logging.getLogger(__name__).error("Unexpected CLI error", exc_info=True)
         console.print(f"[red]Error:[/red] {e}")
-        sys.exit(1)
+        raise typer.Exit(code=1)
 
-@app.command("doctor")
-def doctor_cmd():
-    """Diagnose the host machine environment."""
-    report = runtime_service.run_doctor()
-    console.print(f"[bold]Doctor Report[/bold]")
-    for dep in report.dependencies:
-        color = "green" if dep.status == "PASS" else ("yellow" if dep.status == "WARNING" else "red")
-        console.print(f"[{color}]{dep.status}[/{color}]\t{dep.tool} ({dep.message})")
-    
-    for chk in report.checks:
-        color = "green" if chk.status == "PASS" else ("yellow" if chk.status == "WARNING" else "red")
-        console.print(f"[{color}]{chk.status}[/{color}]\t{chk.name}: {chk.message}")
-
-    console.print(f"\nSummary: PASS {report.summary_pass}, WARN {report.summary_warn}, FAIL {report.summary_fail}")
-    if report.summary_fail > 0:
-        sys.exit(2)
-
-@app.command("install")
-def install_cmd(dry_run: bool = typer.Option(False, "--dry-run", help="Show what would be installed")):
-    """Install dependencies and templates."""
-    summary = runtime_service.run_install(dry_run=dry_run)
-    if dry_run:
-        return
-    if not summary.success:
-        console.print("[red]Installation failed.[/red]")
-        sys.exit(5)
-    console.print("[green]Installation complete.[/green]")
-
-@app.command("verify")
-def verify_cmd():
-    """Verify installation integrity."""
-    report = runtime_service.run_verify()
-    if report.summary_fail > 0:
-        sys.exit(2)
-
-@app.command("self-test")
-def self_test_cmd():
-    """Validate BugHunter internal components."""
-    if not runtime_service.run_self_test():
-        sys.exit(1)
-
-@app.command("release-check")
-def release_check_cmd():
-    """Ultimate gate checking all systems."""
-    if not runtime_service.run_release_check():
-        console.print("[red]Release check FAIL[/red]")
-        sys.exit(1)
-    console.print("[green]READY[/green]")
-
-@app.command("plugins")
-def plugins_cmd():
-    """Show plugin capability matrix."""
-    from execution.plugins.registry import REGISTRY
-    table = Table("Plugin", "Capabilities", "Status")
-    for name in REGISTRY.list_plugins():
-        plugin = REGISTRY.get_plugin(name)
-        meta = plugin.metadata()
-        status = "PASS" if plugin.health_check() else "FAIL"
-        caps = ", ".join([c.value for c in meta.capabilities])
-        table.add_row(name, caps, status)
+@app.command("status")
+def status_cmd(job_id: str):
+    """Get the status of a job."""
+    status_info = scan_service.get_status(job_id)
+    if not status_info:
+        console.print("[red]Job not found.[/red]")
+        raise typer.Exit(code=1)
+        
+    table = Table(title=f"Status for {job_id}")
+    table.add_column("Field", style="cyan")
+    table.add_column("Value", style="magenta")
+    for k, v in status_info.items():
+        table.add_row(k, str(v))
     console.print(table)
 
-@app.command("workspace")
-def workspace_cmd(action: str = typer.Argument(..., help="list|clean|archive")):
-    """Manage the BugHunter workspace."""
-    if action == "list":
-        sessions = ws_manager.list_sessions()
-        table = Table("Session ID", "Target", "Profile", "Status")
-        for s in sessions:
-            table.add_row(s.session_id, s.target, s.profile, s.status)
-        console.print(table)
-    elif action == "clean":
-        ws_manager.clean_temp()
-        console.print("Workspace temporary files cleaned.")
-    elif action == "archive":
-        console.print("Provide a session ID to archive via `bughunter archive <id>`.")
+@app.command("report")
+def report_cmd(job_id: str, format: str = typer.Option("json", help="Format: json or markdown")):
+    """Get the report for a job."""
+    rep = report_service.get_report(job_id, format)
+    if not rep:
+        console.print("[red]Report not found or not yet generated.[/red]")
+        raise typer.Exit(code=1)
+    console.print(rep.content)
 
-@app.command("version")
-def version_cmd():
-    """Show detailed version info."""
-    from cli.version import __version__
-    console.print(f"BugHunter v{__version__}")
-    console.print("Config Schema: v2")
-    console.print("Git Commit: latest")
+@app.command("cancel")
+def cancel_cmd(job_id: str):
+    """Cancel a running job."""
+    success = scan_service.cancel_scan(job_id)
+    if success:
+        console.print(f"[green]Job {job_id} cancelled.[/green]")
+    else:
+        console.print(f"[red]Job {job_id} could not be cancelled (might not exist or already finished).[/red]")
+
+@app.command("list-jobs")
+def list_jobs_cmd():
+    """List all transient jobs."""
+    jobs = registry.get_all_jobs()
+    if not jobs:
+        console.print("No jobs found in current session.")
+        return
+        
+    table = Table("Job ID", "Target", "Status", "Progress")
+    for job in jobs:
+        table.add_row(job.job_id, job.target_domain, job.status.value, f"{job.progress:.1f}%")
+    console.print(table)
 
 @app.command("validate-config")
 def validate_config_cmd(config_path: str):
@@ -162,6 +116,17 @@ def validate_config_cmd(config_path: str):
             else:
                 BugHunterConfig.model_validate(yaml.safe_load(f))
         console.print("[green]Configuration is valid.[/green]")
-    except Exception as e:
+    except ValueError as e:
         console.print(f"[red]Invalid configuration:[/red] {e}")
-        sys.exit(3)
+        raise typer.Exit(code=2)
+    except Exception as e:
+        # Top-level CLI catch to prevent ugly stack traces from leaking to the user's terminal
+        import logging
+        logging.getLogger(__name__).error("Unexpected CLI error", exc_info=True)
+        console.print(f"[red]Unexpected Error:[/red] {e}")
+        raise typer.Exit(code=1)
+
+@app.command("version")
+def version_cmd():
+    """Show the application version."""
+    console.print("BugHunter v0.1.0")
