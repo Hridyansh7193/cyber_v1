@@ -2,6 +2,7 @@ import pytest
 from orchestrator.transitions import recon_transition, js_transition, api_transition, vuln_transition, analysis_transition
 from orchestrator.orchestration_state import OrchestrationState
 from orchestrator.graph_state import GraphState
+from langgraph.graph import END
 
 def test_recon_transition():
     state: GraphState = {"execution_state": None, "orchestration_state": OrchestrationState(task_status={"recon": "COMPLETED"}, errors={})}
@@ -14,10 +15,10 @@ def test_recon_transition():
     assert recon_transition(state) == "js_node"
     
     state["orchestration_state"].task_status["recon"] = "PENDING"
-    assert recon_transition(state) == "error_handler"
+    assert recon_transition(state) == END
     
     state["orchestration_state"].task_status["recon"] = "RUNNING"
-    assert recon_transition(state) == "error_handler"
+    assert recon_transition(state) == END
 
 def test_js_transition():
     state: GraphState = {"execution_state": None, "orchestration_state": OrchestrationState(task_status={"js": "COMPLETED"}, errors={})}
@@ -30,7 +31,7 @@ def test_js_transition():
     assert js_transition(state) == "api_node"
     
     state["orchestration_state"].task_status["js"] = "PENDING"
-    assert js_transition(state) == "error_handler"
+    assert js_transition(state) == END
 
 def test_api_transition():
     state: GraphState = {"execution_state": None, "orchestration_state": OrchestrationState(task_status={"api": "COMPLETED"}, errors={})}
@@ -43,20 +44,20 @@ def test_api_transition():
     assert api_transition(state) == "vulnerability_node"
     
     state["orchestration_state"].task_status["api"] = "PENDING"
-    assert api_transition(state) == "error_handler"
+    assert api_transition(state) == END
 
 def test_vuln_transition():
-    state: GraphState = {"execution_state": None, "orchestration_state": OrchestrationState(task_status={"vuln": "COMPLETED"}, errors={})}
+    state: GraphState = {"execution_state": None, "orchestration_state": OrchestrationState(task_status={"vulnerability": "COMPLETED"}, errors={})}
     assert vuln_transition(state) == "analysis_node"
     
-    state["orchestration_state"].task_status["vuln"] = "FAILED"
+    state["orchestration_state"].task_status["vulnerability"] = "FAILED"
     assert vuln_transition(state) == "analysis_node"
     
-    state["orchestration_state"].task_status["vuln"] = "CANCELLED"
+    state["orchestration_state"].task_status["vulnerability"] = "CANCELLED"
     assert vuln_transition(state) == "analysis_node"
     
-    state["orchestration_state"].task_status["vuln"] = "PENDING"
-    assert vuln_transition(state) == "error_handler"
+    state["orchestration_state"].task_status["vulnerability"] = "PENDING"
+    assert vuln_transition(state) == END
 
 def test_analysis_transition():
     state: GraphState = {"execution_state": None, "orchestration_state": OrchestrationState(task_status={"analysis": "COMPLETED"}, errors={})}
@@ -69,4 +70,4 @@ def test_analysis_transition():
     assert analysis_transition(state) == "report_node"
     
     state["orchestration_state"].task_status["analysis"] = "PENDING"
-    assert analysis_transition(state) == "error_handler"
+    assert analysis_transition(state) == END

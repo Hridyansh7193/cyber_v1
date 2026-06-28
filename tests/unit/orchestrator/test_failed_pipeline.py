@@ -8,7 +8,7 @@ def test_failed_tasks_reach_report():
         "recon": "FAILED",
         "js": "FAILED",
         "api": "FAILED",
-        "vuln": "FAILED",
+        "vulnerability": "FAILED",
         "analysis": "FAILED"
     }, errors={})
     

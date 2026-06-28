@@ -12,34 +12,34 @@ def test_process_runner_success():
         mock_process.stderr = ""
         mock_run.return_value = mock_process
 
-        exit_code, stdout, stderr, ex_time = ProcessRunner.run(["ls"], "test_tool")
+        res = ProcessRunner.run(["ls"], "test_tool")
 
-        assert exit_code == 0
-        assert stdout == "test output"
-        assert stderr == ""
-        assert ex_time >= 0
+        assert res.exit_code == 0
+        assert res.stdout == "test output"
+        assert res.stderr == ""
+        assert res.execution_time >= 0
 
 def test_process_runner_timeout():
     with patch("execution.utils.process_runner.subprocess.run", side_effect=subprocess.TimeoutExpired(["ls"], 300, b"partial out")):
-        exit_code, stdout, stderr, ex_time = ProcessRunner.run(["ls"], "test_tool")
+        res = ProcessRunner.run(["ls"], "test_tool")
 
-        assert exit_code == -1
-        assert stdout == "partial out"
-        assert "timed out" in stderr
+        assert res.exit_code == -1
+        assert res.stdout == "partial out"
+        assert "timed out" in res.stderr
 
 def test_process_runner_oserror():
     with patch("execution.utils.process_runner.subprocess.run", side_effect=OSError("No such file")):
-        exit_code, stdout, stderr, ex_time = ProcessRunner.run(["ls"], "test_tool")
-        assert exit_code == -2
-        assert stdout == ""
-        assert "No such file" in stderr
+        res = ProcessRunner.run(["ls"], "test_tool")
+        assert res.exit_code == -2
+        assert res.stdout == ""
+        assert "No such file" in res.stderr
 
 def test_process_runner_called_process_error():
     with patch("execution.utils.process_runner.subprocess.run", side_effect=subprocess.CalledProcessError(127, ["ls"], b"out", b"err")):
-        exit_code, stdout, stderr, ex_time = ProcessRunner.run(["ls"], "test_tool")
-        assert exit_code == 127
-        assert stdout == "out"
-        assert stderr == "err"
+        res = ProcessRunner.run(["ls"], "test_tool")
+        assert res.exit_code == 127
+        assert res.stdout == "out"
+        assert res.stderr == "err"
 
 def test_process_runner_programming_errors_propagate():
     with patch("execution.utils.process_runner.subprocess.run", side_effect=TypeError("Bad type")):

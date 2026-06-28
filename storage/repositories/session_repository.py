@@ -61,6 +61,9 @@ class SessionRepository:
     def get_by_session_id(self, db: Session, session_id: str) -> Optional[ScanSessionModel]:
         return db.query(ScanSessionModel).filter(ScanSessionModel.session_id == session_id).first()
 
+    def get_all(self, db: Session) -> List[ScanSessionModel]:
+        return db.query(ScanSessionModel).order_by(ScanSessionModel.started_at.desc()).all()
+
     def update_status(self, db: Session, session_id: str, status: str) -> Optional[ScanSessionModel]:
         model = self.get_by_session_id(db, session_id)
         if model:

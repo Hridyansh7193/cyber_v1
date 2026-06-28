@@ -11,7 +11,7 @@ def test_empty_findings_pipeline():
         "recon": "COMPLETED",
         "js": "COMPLETED",
         "api": "COMPLETED",
-        "vuln": "COMPLETED",
+        "vulnerability": "COMPLETED",
         "analysis": "COMPLETED"
     }, errors={})
     

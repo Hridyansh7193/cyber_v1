@@ -18,13 +18,12 @@ def test_scan_service_submit_scan():
         reporting={"report_formats": ["json"], "output_directories": {}}
     )
     
-    mock_adapter.get_status.return_value = {"status": "PENDING", "target_domain": "example.com"}
     job_id = scan_service.submit_scan("example.com", config)
     assert job_id is not None
     
     status = scan_service.get_status(job_id)
-    assert status["status"] == "PENDING"
-    assert status["target_domain"] == "example.com"
+    assert status["status"] == "pending"
+    assert status["target"] == "example.com"
 
 def test_scan_service_cancel_job():
     mock_adapter = Mock(spec=OrchestratorAdapter)
@@ -45,16 +44,15 @@ def test_scan_service_cancel_job():
     result = scan_service.cancel_scan(job_id)
     assert result is True
     
-    mock_adapter.get_status.return_value = {"status": "CANCELLED"}
+    registry.update_status(job_id, JobStatus.CANCELLED)
     status = scan_service.get_status(job_id)
-    assert status["status"] == "CANCELLED"
+    assert status["status"] == "cancelled"
 
 def test_scan_service_invalid_job():
     mock_adapter = Mock(spec=OrchestratorAdapter)
     registry = JobRegistry()
     scan_service = ScanService(mock_adapter, registry)
     
-    mock_adapter.get_status.return_value = None
     status = scan_service.get_status("invalid-id")
     assert status is None
     

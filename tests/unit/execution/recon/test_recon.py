@@ -1,50 +1,51 @@
 import pytest
-from unittest.mock import patch
+import os
 from execution.recon.subfinder_wrapper import SubfinderWrapper
-from execution.recon.httpx_wrapper import HttpxWrapper
+from execution.recon.httpx_wrapper import HttpxPlugin
 from execution.recon.assetfinder_wrapper import AssetfinderWrapper
-from execution.recon.katana_wrapper import KatanaWrapper
+from execution.recon.katana_wrapper import KatanaPlugin
 from execution.recon.gau_wrapper import GauWrapper
 
-@patch("execution.utils.process_runner.ProcessRunner.run")
-def test_subfinder_wrapper_success(mock_run):
-    mock_run.return_value = (0, "output", "", 1.0)
-    res = SubfinderWrapper.execute("example.com")
-    assert res.success
-    assert res.stdout == "output"
-    assert res.metadata["domain"] == "example.com"
+def read_fixture(name):
+    path = os.path.join(os.path.dirname(__file__), "../../../fixtures", name)
+    try:
+        with open(path, "r") as f:
+            return f.read()
+    except FileNotFoundError:
+        return ""
 
-@patch("execution.utils.process_runner.ProcessRunner.run")
-def test_httpx_wrapper_success(mock_run):
-    mock_run.return_value = (0, "httpx output", "", 1.0)
-    res = HttpxWrapper.execute(["sub.example.com"])
-    assert res.success
-    assert res.stdout == "httpx output"
+def test_subfinder_parser():
+    plugin = SubfinderWrapper()
+    out = read_fixture("subfinder.txt")
+    res = plugin.parse(out, "")
+    assert "sub1.example.com" in res
+    assert "sub2.example.com" in res
+    assert "sub3.example.com" in res
 
-def test_httpx_wrapper_empty():
-    res = HttpxWrapper.execute([])
-    assert res.success
-    assert res.metadata["input_count"] == 0
+def test_subfinder_command():
+    plugin = SubfinderWrapper()
+    cmd = plugin.build_command("example.com", {})
+    assert "subfinder" in cmd
+    assert "-d" in cmd
 
-@patch("execution.utils.process_runner.ProcessRunner.run")
-def test_assetfinder_wrapper_success(mock_run):
-    mock_run.return_value = (0, "asset out", "", 1.0)
-    res = AssetfinderWrapper.execute("example.com")
-    assert res.success
+def test_httpx_command():
+    plugin = HttpxPlugin()
+    cmd = plugin.build_command(["sub.example.com"], {})
+    assert "httpx" in cmd
+    assert "-l" in cmd
 
-@patch("execution.utils.process_runner.ProcessRunner.run")
-def test_katana_wrapper_success(mock_run):
-    mock_run.return_value = (0, "katana out", "", 1.0)
-    res = KatanaWrapper.execute(["http://example.com"])
-    assert res.success
+def test_assetfinder_command():
+    plugin = AssetfinderWrapper()
+    cmd = plugin.build_command("example.com", {})
+    assert "assetfinder" in cmd
 
-def test_katana_wrapper_empty():
-    res = KatanaWrapper.execute([])
-    assert res.success
+def test_katana_command():
+    plugin = KatanaPlugin()
+    cmd = plugin.build_command(["http://example.com"], {})
+    assert "katana" in cmd
 
-@patch("execution.utils.process_runner.ProcessRunner.run")
-def test_gau_wrapper_success(mock_run):
-    mock_run.return_value = (0, "gau out", "", 1.0)
-    res = GauWrapper.execute("example.com")
-    assert res.success
+def test_gau_command():
+    plugin = GauWrapper()
+    cmd = plugin.build_command("example.com", {})
+    assert "gau" in cmd
 

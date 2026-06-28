@@ -51,9 +51,9 @@ def get_status(job_id: str, scan_service: ScanService = Depends(get_scan_service
 def get_report(
     job_id: str, 
     format: str = "json",
-    report_service: ReportService = Depends(get_report_service)
+    scan_service: ScanService = Depends(get_scan_service)
 ):
-    rep = report_service.get_report(job_id, format)
+    rep = scan_service.get_report(job_id, format)
     if not rep:
         raise HTTPException(status_code=404, detail="Report not found or not generated")
         

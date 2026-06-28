@@ -40,7 +40,7 @@ def test_api_node(mock_config):
 
 def test_vuln_node(mock_config):
     res = vulnerability_node(get_base_state(), mock_config)
-    assert res.orchestration_state.task_status["vuln"] == "COMPLETED"
+    assert res.orchestration_state.task_status["vulnerability"] == "COMPLETED"
 
 def test_analysis_node(mock_config):
     res = analysis_node(get_base_state(), mock_config)

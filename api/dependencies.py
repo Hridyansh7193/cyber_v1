@@ -19,14 +19,27 @@ def _create_default_config() -> BugHunterConfig:
 
 _default_config = _create_default_config()
 _adapter = OrchestratorAdapter(_registry, _default_config)
-_scan_service = ScanService(_adapter, _registry)
-_report_service = ReportService(_adapter)
+from services.persistence_service import PersistenceService
+from runtime.workspace import WorkspaceManager
+from services.workspace_service import WorkspaceService
+
+from services.analytics_service import AnalyticsService
+
+_persistence_service = PersistenceService()
+_workspace_manager = WorkspaceManager()
+_workspace_service = WorkspaceService(_workspace_manager)
+_report_service = ReportService()
+_scan_service = ScanService(_adapter, _registry, _persistence_service, _report_service, _workspace_service)
+_analytics_service = AnalyticsService()
 
 def get_scan_service() -> ScanService:
     return _scan_service
 
 def get_report_service() -> ReportService:
     return _report_service
+
+def get_analytics_service() -> AnalyticsService:
+    return _analytics_service
 
 def get_default_config() -> BugHunterConfig:
     return _default_config

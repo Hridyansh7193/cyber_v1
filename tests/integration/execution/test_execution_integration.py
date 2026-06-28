@@ -1,31 +1,32 @@
 import pytest
 import subprocess
 from unittest.mock import patch
-from execution.recon.subfinder_wrapper import SubfinderWrapper
-from execution.vuln.nuclei_wrapper import NucleiWrapper
+from execution.utils.process_runner import ProcessRunner
 
 @patch("execution.utils.process_runner.subprocess.run")
-def test_integration_subfinder_process_runner(mock_subrun):
+@patch("execution.utils.process_runner.shutil.which")
+def test_integration_subfinder_process_runner(mock_which, mock_subrun):
+    mock_which.return_value = "/usr/bin/echo"
     # Setup mock
     mock_process = mock_subrun.return_value
     mock_process.returncode = 0
     mock_process.stdout = '{"host": "sub.example.com"}'
     mock_process.stderr = ""
     
-    # Execute through wrapper -> process_runner -> mock_subprocess
-    res = SubfinderWrapper.execute("example.com")
+    res = ProcessRunner.run(["echo", "hello"], "test")
     
-    # Verify
     assert res.success
     assert res.stdout == '{"host": "sub.example.com"}'
     mock_subrun.assert_called_once()
     
 @patch("execution.utils.process_runner.subprocess.run")
-def test_integration_nuclei_timeout(mock_subrun):
+@patch("execution.utils.process_runner.shutil.which")
+def test_integration_nuclei_timeout(mock_which, mock_subrun):
+    mock_which.return_value = "/usr/bin/nuclei"
     mock_subrun.side_effect = subprocess.TimeoutExpired(["nuclei"], 300)
     
-    res = NucleiWrapper.execute(["http://example.com"])
+    res = ProcessRunner.run(["nuclei"], "test")
     
     assert not res.success
     assert res.exit_code == -1
-    mock_subrun.assert_called_once()
+    assert mock_subrun.call_count == 2

@@ -5,6 +5,7 @@ from orchestrator.orchestration_state import OrchestrationState
 from orchestrator.graph_state import GraphState
 from orchestrator.graph import build_graph
 from orchestrator.checkpoint_manager import CheckpointManager
+from langgraph.graph import END
 from orchestrator.transitions import recon_transition, js_transition
 from orchestrator.delta_applier import apply_recon_delta
 from orchestrator.wrapper_result_applier import apply_recon_wrapper_result
@@ -49,15 +50,15 @@ def test_transitions():
     # Should not transition if PENDING
     orch_state = OrchestrationState(task_status={"recon": "PENDING"}, errors={})
     state["orchestration_state"] = orch_state
-    assert recon_transition(state) == "error_handler"
+    assert recon_transition(state) == END
 
 def test_wrapper_applier():
     from schemas.state import ExecutionState, TargetState
     from schemas.tool_result import ToolResult
     exec_state = ExecutionState(target=TargetState(domain="example.com", scope=[], session_id="sess_1", start_time=datetime.now(timezone.utc)))
     
-    wrapper_out = ToolResult(tool_name="test", metadata={"new_subdomains": ["sub1"]}, errors=[], success=True, exit_code=0, stdout="", stderr="", execution_time=0.0)
-    new_state = apply_recon_wrapper_result(exec_state, wrapper_out)
+    wrapper_out = ToolResult(tool_name="test", metadata={"new_subdomains": ["sub1"]}, success=True, exit_code=0, stdout="", stderr="", execution_time=0.0)
+    new_state = apply_recon_wrapper_result(exec_state, (wrapper_out,))
     assert "sub1" in new_state.recon_state.subdomains
 
 def test_delta_applier():
@@ -77,16 +78,17 @@ def test_checkpoint_recovery(mock_config, base_state):
 
 def test_node_executor(mock_config):
     from schemas.tool_result import ToolResult
+    from schemas.runtime import Capability
     exec_state = ExecutionState(target=TargetState(domain="example.com", scope=[], session_id="sess_1", start_time=datetime.now(timezone.utc)))
     orch_state = OrchestrationState(task_status={}, errors={})
     
-    def dummy_wrapper(s): return ToolResult(tool_name="test", metadata={"new_subdomains": ["sub1"]}, errors=[], success=True, exit_code=0, stdout="", stderr="", execution_time=0.0)
+    def dummy_wrapper(s): return (ToolResult(tool_name="test", metadata={"new_subdomains": ["sub1"]}, success=True, exit_code=0, stdout="", stderr="", execution_time=0.0),)
     def dummy_agent(s, c): return ReconDelta(subdomains=("sub1",), alive_hosts=(), urls=())
     
     # execute_node now takes current_exec directly
     new_exec = execute_node(
-        current_exec=exec_state, config=mock_config,
-        wrapper=dummy_wrapper, wrapper_applier=apply_recon_wrapper_result,
+        current_exec=exec_state, config=mock_config, capability=Capability.RECON,
+        wrapper_func=dummy_wrapper, wrapper_applier=apply_recon_wrapper_result,
         agent=dummy_agent, delta_applier=apply_recon_delta
     )
     

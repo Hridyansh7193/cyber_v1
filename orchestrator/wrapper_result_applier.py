@@ -1,11 +1,29 @@
 from schemas.state import ExecutionState, ReconState, JSState, APIState, VulnerabilityState
 from schemas.tool_result import ToolResult
-from typing import Tuple
+from typing import Tuple, List, Mapping, Any
+
+def _extract_telemetry(wrapper_out: Tuple[ToolResult, ...]) -> List[Mapping[str, Any]]:
+    return [{
+        "type": "tool_telemetry",
+        "tool_name": t.tool_name,
+        "version": t.plugin_version,
+        "runtime": t.execution_time,
+        "exit_code": t.exit_code,
+        "timeout": t.exit_code == -1,
+        "stdout_size": t.stdout_size,
+        "stderr_size": len(t.stderr),
+        "parsed_objects": t.parsed_findings,
+        "parser_errors": len([e for e in t.errors if "Parse error" in e]),
+        "wrapper_errors": len([e for e in t.errors if "Parse error" not in e]),
+        "memory": 0.0,
+        "success": t.success
+    } for t in wrapper_out]
 
 def apply_recon_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResult, ...]) -> ExecutionState:
     new_subdomains = list(state.recon_state.subdomains)
     new_hosts = list(state.recon_state.alive_hosts)
     new_urls = list(state.recon_state.urls)
+    new_logs = list(state.logs) + _extract_telemetry(wrapper_out)
     
     for tool_res in wrapper_out:
         output = tool_res.metadata or {}
@@ -23,11 +41,12 @@ def apply_recon_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolRes
         urls=merged_urls,
         parameters=state.recon_state.parameters
     )
-    return state.model_copy(deep=True, update={"recon_state": new_recon})
+    return state.model_copy(deep=True, update={"recon_state": new_recon, "logs": tuple(new_logs)})
 
 def apply_js_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResult, ...]) -> ExecutionState:
     new_js_files = list(state.js_state.js_files)
     new_endpoints = list(state.js_state.endpoints)
+    new_logs = list(state.logs) + _extract_telemetry(wrapper_out)
     
     for tool_res in wrapper_out:
         output = tool_res.metadata or {}
@@ -42,11 +61,12 @@ def apply_js_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResult
         endpoints=merged_endpoints,
         secrets=state.js_state.secrets
     )
-    return state.model_copy(deep=True, update={"js_state": new_js})
+    return state.model_copy(deep=True, update={"js_state": new_js, "logs": tuple(new_logs)})
 
 def apply_api_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResult, ...]) -> ExecutionState:
     new_swagger = list(state.api_state.swagger_urls)
     new_graphql = list(state.api_state.graphql_urls)
+    new_logs = list(state.logs) + _extract_telemetry(wrapper_out)
     
     for tool_res in wrapper_out:
         output = tool_res.metadata or {}
@@ -60,11 +80,12 @@ def apply_api_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResul
         swagger_urls=merged_swagger,
         graphql_urls=merged_graphql
     )
-    return state.model_copy(deep=True, update={"api_state": new_api})
+    return state.model_copy(deep=True, update={"api_state": new_api, "logs": tuple(new_logs)})
 
 def apply_vuln_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResult, ...]) -> ExecutionState:
     new_nuclei = list(state.vuln_state.nuclei_results)
     new_dalfox = list(state.vuln_state.dalfox_results)
+    new_logs = list(state.logs) + _extract_telemetry(wrapper_out)
     
     for tool_res in wrapper_out:
         output = tool_res.metadata or {}
@@ -76,4 +97,4 @@ def apply_vuln_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResu
         dalfox_results=tuple(new_dalfox),
         takeovers=state.vuln_state.takeovers
     )
-    return state.model_copy(deep=True, update={"vuln_state": new_vuln})
+    return state.model_copy(deep=True, update={"vuln_state": new_vuln, "logs": tuple(new_logs)})

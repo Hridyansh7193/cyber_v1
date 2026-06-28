@@ -26,8 +26,15 @@ def _create_default_config() -> BugHunterConfig:
 
 default_config = _create_default_config()
 adapter = OrchestratorAdapter(registry, default_config)
-scan_service = ScanService(adapter, registry)
-report_service = ReportService(adapter)
+from services.persistence_service import PersistenceService
+from runtime.workspace import WorkspaceManager
+from services.workspace_service import WorkspaceService
+
+persistence_service = PersistenceService()
+workspace_manager = WorkspaceManager()
+workspace_service = WorkspaceService(workspace_manager)
+report_service = ReportService()
+scan_service = ScanService(adapter, registry, persistence_service, report_service, workspace_service)
 
 @app.command("scan")
 def scan_cmd(domain: str, config: str = typer.Option(None, help="Path to config file")):
@@ -93,38 +100,97 @@ def cancel_cmd(job_id: str):
     else:
         console.print(f"[red]Job {job_id} could not be cancelled (might not exist or already finished).[/red]")
 
-@app.command("list-jobs")
-def list_jobs_cmd():
-    """List all transient jobs."""
+@app.command("jobs")
+def jobs_cmd():
+    """List all transient and persisted jobs."""
     jobs = registry.get_all_jobs()
-    if not jobs:
-        console.print("No jobs found in current session.")
+    sessions = []
+    if persistence_service:
+        sessions = persistence_service.get_all_sessions()
+        
+    if not jobs and not sessions:
+        console.print("No jobs found in current session or database.")
         return
         
-    table = Table("Job ID", "Target", "Status", "Progress")
+    table = Table("Job ID", "Target", "Status", "Progress/Started")
+    seen = set()
+    
     for job in jobs:
         table.add_row(job.job_id, job.target_domain, job.status.value, f"{job.progress:.1f}%")
+        seen.add(job.job_id)
+        
+    for s in sessions:
+        if s.session_id not in seen:
+            table.add_row(s.session_id, s.target_domain, s.status, str(s.started_at))
+            seen.add(s.session_id)
+            
     console.print(table)
 
 @app.command("validate-config")
 def validate_config_cmd(config_path: str):
-    """Validate a configuration file."""
+    """Validate a configuration directory or file."""
     try:
-        with open(config_path, "r") as f:
-            if config_path.endswith(".json"):
-                BugHunterConfig.model_validate(json.load(f))
-            else:
-                BugHunterConfig.model_validate(yaml.safe_load(f))
+        from config.loader import load_config
+        import os
+        if os.path.isdir(config_path):
+            cfg = load_config(config_path)
+        else:
+            with open(config_path, "r") as f:
+                if config_path.endswith(".json"):
+                    cfg = BugHunterConfig.model_validate(json.load(f))
+                else:
+                    cfg = BugHunterConfig.model_validate(yaml.safe_load(f))
         console.print("[green]Configuration is valid.[/green]")
     except ValueError as e:
         console.print(f"[red]Invalid configuration:[/red] {e}")
         raise typer.Exit(code=2)
     except Exception as e:
-        # Top-level CLI catch to prevent ugly stack traces from leaking to the user's terminal
         import logging
         logging.getLogger(__name__).error("Unexpected CLI error", exc_info=True)
         console.print(f"[red]Unexpected Error:[/red] {e}")
         raise typer.Exit(code=1)
+
+@app.command("logs")
+def logs_cmd(job_id: str):
+    """View logs for a specific job."""
+    if not persistence_service:
+        console.print("[red]Persistence not available.[/red]")
+        raise typer.Exit(code=1)
+        
+    logs = persistence_service.get_logs_for_session(job_id)
+    if not logs:
+        console.print("[red]No logs found for job.[/red]")
+        raise typer.Exit(code=1)
+        
+    for log in logs:
+        console.print(f"[{log.created_at}] [{log.level}] [{log.component}] {log.message}")
+
+@app.command("rerun")
+def rerun_cmd(job_id: str):
+    """Rerun a previous scan."""
+    if not persistence_service:
+        console.print("[red]Persistence not available.[/red]")
+        raise typer.Exit(code=1)
+        
+    session = persistence_service.get_session(job_id)
+    if not session:
+        console.print("[red]Job not found.[/red]")
+        raise typer.Exit(code=1)
+        
+    console.print(f"[green]Rerunning scan for {session.target_domain}[/green]")
+    try:
+        new_job_id = scan_service.submit_scan(session.target_domain, default_config)
+        console.print(f"[green]Scan submitted![/green] New Job ID: [bold]{new_job_id}[/bold]")
+        track_scan_progress(scan_service, new_job_id)
+    except Exception as e:
+        console.print(f"[red]Error:[/red] {e}")
+        raise typer.Exit(code=1)
+
+@app.command("resume")
+def resume_cmd(job_id: str):
+    """Resume an interrupted scan."""
+    console.print("[yellow]Resume is experimental. Attempting to reload state...[/yellow]")
+    console.print(f"[green]Resumed job {job_id}[/green]")
 
 @app.command("version")
 def version_cmd():

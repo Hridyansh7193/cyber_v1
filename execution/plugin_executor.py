@@ -4,6 +4,9 @@ from config.schemas import BugHunterConfig
 from execution.plugins.registry import REGISTRY
 from execution.plugins.base import ExecutionPlugin
 from execution.utils.process_runner import ProcessRunner
+from utils.logger import get_logger
+
+logger = get_logger("plugin_executor")
 
 class PluginExecutor:
     """Handles the execution of plugins, enforcing validation."""
@@ -22,29 +25,38 @@ class PluginExecutor:
                 
             # Execute
             command = plugin.build_command(target, {})
-            exit_code, stdout, stderr, execution_time = ProcessRunner.run(list(command), plugin.metadata().name)
+            logger.info(f"{plugin.metadata().name} started")
+            result = ProcessRunner.run(list(command), plugin.metadata().name)
+            logger.info(f"{plugin.metadata().name} finished in {result.execution_time:.2f}s (Exit code: {result.exit_code})")
             
             parsed = []
             errors = []
-            if exit_code == 0:
+            if result.exit_code == 0:
                 try:
-                    parsed = plugin.parse(stdout, stderr)
+                    parsed = plugin.parse(result.stdout, result.stderr)
                 except Exception as e:
                     errors.append(f"Parse error: {str(e)}")
             else:
-                errors.append(f"Execution failed with exit code {exit_code}")
+                errors.append(f"Execution failed with exit code {result.exit_code}")
+            
+            if result.error_message:
+                errors.append(result.error_message)
                 
             tool_res = ToolResult(
                 tool_name=plugin.metadata().name,
                 plugin_version=plugin.metadata().version,
-                success=exit_code == 0 and len(errors) == 0,
-                exit_code=exit_code,
-                stdout=stdout,
-                stderr=stderr,
-                stdout_size=len(stdout),
+                binary_path=result.binary_path,
+                command=result.command,
+                working_directory=result.cwd,
+                success=result.success and len(errors) == 0,
+                exit_code=result.exit_code,
+                stdout=result.stdout,
+                stderr=result.stderr,
+                stdout_size=result.stdout_size,
                 parsed_findings=len(parsed) if isinstance(parsed, list) else 0,
                 errors=tuple(errors),
-                execution_time=execution_time,
+                error_message=result.error_message if result.error_message else None,
+                execution_time=result.execution_time,
                 metadata={result_key: parsed}
             )
             results.append(tool_res)

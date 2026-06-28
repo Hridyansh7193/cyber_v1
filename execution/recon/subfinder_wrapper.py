@@ -40,22 +40,3 @@ class SubfinderWrapper(ExecutionPlugin):
     def health_check(self) -> bool:
         return True
 
-    @staticmethod
-    def execute(domain: str) -> ToolResult:
-        plugin = SubfinderWrapper()
-        command = plugin.build_command(domain, {})
-        exit_code, stdout, stderr, execution_time = ProcessRunner.run(list(command), "subfinder")
-        
-        parsed = []
-        if exit_code == 0:
-            parsed = plugin.parse(stdout, stderr)
-            
-        return ToolResult(
-            tool_name="subfinder",
-            success=exit_code == 0,
-            exit_code=exit_code,
-            stdout=stdout,
-            stderr=stderr,
-            execution_time=execution_time,
-            metadata={"domain": domain, "new_subdomains": parsed},
-        )

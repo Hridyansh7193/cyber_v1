@@ -7,50 +7,32 @@ from schemas.manifests import WorkspaceMetadata
 
 class WorkspaceManager:
     """Manages the BugHunter workspace layout and sessions."""
-    def __init__(self, root_dir: str = "workspace"):
+    def __init__(self, root_dir: str = "workspaces"):
         self.root_dir = Path(root_dir)
-        self.sessions_dir = self.root_dir / "sessions"
-        self.archives_dir = self.root_dir / "archives"
-        self.exports_dir = self.root_dir / "exports"
-        self.reports_dir = self.root_dir / "reports"
-        self.logs_dir = self.root_dir / "logs"
-        self.cache_dir = self.root_dir / "cache"
-        self.temp_dir = self.root_dir / "temp"
 
     def initialize(self) -> None:
-        """Create all required workspace directories."""
-        dirs = [
-            self.root_dir,
-            self.sessions_dir,
-            self.archives_dir,
-            self.exports_dir,
-            self.reports_dir,
-            self.logs_dir,
-            self.cache_dir,
-            self.temp_dir,
-        ]
-        for d in dirs:
-            d.mkdir(parents=True, exist_ok=True)
+        """Create root workspace directory."""
+        self.root_dir.mkdir(parents=True, exist_ok=True)
 
     def verify_integrity(self) -> bool:
-        """Check if all workspace directories exist."""
-        dirs = [
-            self.root_dir,
-            self.sessions_dir,
-            self.archives_dir,
-            self.exports_dir,
-            self.reports_dir,
-            self.logs_dir,
-            self.cache_dir,
-            self.temp_dir,
-        ]
-        return all(d.exists() and d.is_dir() for d in dirs)
+        """Check if root workspace directory exists."""
+        return self.root_dir.exists() and self.root_dir.is_dir()
+
+    def get_target_dir(self, target: str) -> Path:
+        return self.root_dir / target
+
+    def get_session_dir(self, target: str, session_id: str) -> Path:
+        return self.get_target_dir(target) / "sessions" / session_id
 
     def create_session(self, session_id: str, target: str, profile: str) -> Path:
         """Create a new session directory and session.json."""
         import datetime
-        session_dir = self.sessions_dir / session_id
+        session_dir = self.get_session_dir(target, session_id)
         session_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Create reports and logs directories for this session
+        (session_dir / "reports").mkdir(exist_ok=True)
+        (session_dir / "logs").mkdir(exist_ok=True)
         
         metadata = WorkspaceMetadata(
             session_id=session_id,
@@ -60,14 +42,11 @@ class WorkspaceManager:
             status="running"
         )
         
-        self.update_session_metadata(session_id, metadata)
+        self.update_session_metadata(target, session_id, metadata)
         return session_dir
 
-    def get_session_dir(self, session_id: str) -> Path:
-        return self.sessions_dir / session_id
-
-    def update_session_metadata(self, session_id: str, metadata: WorkspaceMetadata) -> None:
-        session_dir = self.get_session_dir(session_id)
+    def update_session_metadata(self, target: str, session_id: str, metadata: WorkspaceMetadata) -> None:
+        session_dir = self.get_session_dir(target, session_id)
         if not session_dir.exists():
             return
         
@@ -75,39 +54,43 @@ class WorkspaceManager:
         with open(manifest_file, "w") as f:
             f.write(metadata.model_dump_json(indent=2))
 
-    def get_session_metadata(self, session_id: str) -> Optional[WorkspaceMetadata]:
-        manifest_file = self.get_session_dir(session_id) / "session.json"
+    def get_session_metadata(self, target: str, session_id: str) -> Optional[WorkspaceMetadata]:
+        manifest_file = self.get_session_dir(target, session_id) / "session.json"
         if not manifest_file.exists():
             return None
         with open(manifest_file, "r") as f:
             data = json.load(f)
             return WorkspaceMetadata(**data)
 
-    def list_sessions(self) -> List[WorkspaceMetadata]:
-        """List all valid sessions."""
+    def list_sessions(self, target: str) -> List[WorkspaceMetadata]:
+        """List all valid sessions for a target."""
         sessions = []
-        if not self.sessions_dir.exists():
+        target_sessions_dir = self.get_target_dir(target) / "sessions"
+        if not target_sessions_dir.exists():
             return sessions
             
-        for child in self.sessions_dir.iterdir():
+        for child in target_sessions_dir.iterdir():
             if child.is_dir():
-                meta = self.get_session_metadata(child.name)
+                meta = self.get_session_metadata(target, child.name)
                 if meta:
                     sessions.append(meta)
         return sessions
 
     def clean_temp(self) -> None:
-        """Clean the temporary directory."""
-        if self.temp_dir.exists():
-            shutil.rmtree(self.temp_dir)
-            self.temp_dir.mkdir()
+        """Clean the temporary directory (global temp)."""
+        temp_dir = self.root_dir / "temp"
+        if temp_dir.exists():
+            shutil.rmtree(temp_dir)
+        temp_dir.mkdir(exist_ok=True)
 
-    def archive_session(self, session_id: str) -> str:
+    def archive_session(self, target: str, session_id: str) -> str:
         """Archive a session directory into a zip file."""
-        session_dir = self.get_session_dir(session_id)
+        session_dir = self.get_session_dir(target, session_id)
         if not session_dir.exists():
             raise FileNotFoundError(f"Session {session_id} not found")
             
-        archive_path = self.archives_dir / session_id
+        archives_dir = self.get_target_dir(target) / "archives"
+        archives_dir.mkdir(exist_ok=True)
+        archive_path = archives_dir / session_id
         shutil.make_archive(str(archive_path), 'zip', str(session_dir))
         return str(archive_path) + ".zip"

@@ -44,22 +44,3 @@ class FfufPlugin(ExecutionPlugin):
 
 class FfufWrapper:
     """Deprecated: deterministic wrapper. Maintained for backward compatibility."""
-    @staticmethod
-    def execute(target_url: str, wordlist: str) -> ToolResult:
-        plugin = FfufPlugin()
-        command = plugin.build_command(target_url, {"wordlist": wordlist})
-        exit_code, stdout, stderr, execution_time = ProcessRunner.run(list(command), "ffuf")
-
-        parsed = []
-        if exit_code == 0:
-            parsed = plugin.parse(stdout, stderr)
-
-        return ToolResult(
-            tool_name="ffuf",
-            success=exit_code == 0,
-            exit_code=exit_code,
-            stdout=stdout,
-            stderr=stderr,
-            execution_time=execution_time,
-            metadata={"target_url": target_url, "wordlist": wordlist, "parsed_results": parsed},
-        )

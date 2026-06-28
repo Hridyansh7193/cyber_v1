@@ -15,7 +15,7 @@ def get_tool_result(metadata):
 
 def test_apply_recon_wrapper():
     state = get_base_state()
-    res = apply_recon_wrapper_result(state, get_tool_result({"new_subdomains": ["sub1"], "new_hosts": ["h1"], "new_urls": ["u1"]}))
+    res = apply_recon_wrapper_result(state, (get_tool_result({"new_subdomains": ["sub1"], "new_hosts": ["h1"], "new_urls": ["u1"]}),))
     assert res is not state
     assert "sub1" in res.recon_state.subdomains
     assert "h1" in res.recon_state.alive_hosts
@@ -23,21 +23,21 @@ def test_apply_recon_wrapper():
 
 def test_apply_js_wrapper():
     state = get_base_state()
-    res = apply_js_wrapper_result(state, get_tool_result({"new_js_files": ["js1"], "new_endpoints": ["e1"]}))
+    res = apply_js_wrapper_result(state, (get_tool_result({"new_js_files": ["js1"], "new_endpoints": ["e1"]}),))
     assert res is not state
     assert "js1" in res.js_state.js_files
     assert "e1" in res.js_state.endpoints
 
 def test_apply_api_wrapper():
     state = get_base_state()
-    res = apply_api_wrapper_result(state, get_tool_result({"new_swagger": ["s1"], "new_graphql": ["g1"]}))
+    res = apply_api_wrapper_result(state, (get_tool_result({"new_swagger": ["s1"], "new_graphql": ["g1"]}),))
     assert res is not state
     assert "s1" in res.api_state.swagger_urls
     assert "g1" in res.api_state.graphql_urls
 
 def test_apply_vuln_wrapper():
     state = get_base_state()
-    res = apply_vuln_wrapper_result(state, get_tool_result({"new_nuclei": [{"id": "vuln1"}], "new_dalfox": [{"id": "vuln2"}]}))
+    res = apply_vuln_wrapper_result(state, (get_tool_result({"new_nuclei": [{"id": "vuln1"}], "new_dalfox": [{"id": "vuln2"}]}),))
     assert res is not state
     assert len(res.vuln_state.nuclei_results) == 1
     assert len(res.vuln_state.dalfox_results) == 1

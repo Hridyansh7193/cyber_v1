@@ -6,6 +6,9 @@ from schemas.target import TargetState
 from orchestrator.orchestration_state import OrchestrationState
 from config.schemas import BugHunterConfig
 from services.job_registry import JobRegistry, JobStatus
+from utils.logger import get_logger
+
+logger = get_logger("orchestrator_adapter")
 
 class OrchestratorAdapter:
     def __init__(self, job_registry: JobRegistry, config: BugHunterConfig):
@@ -52,17 +55,15 @@ class OrchestratorAdapter:
                         
                     progress = min(100.0, ((i + 1) / len(stages)) * 100.0)
                     self._job_registry.update_progress(job_id, node_name, progress)
+                    logger.info(f"Node '{node_name}' completed (Progress: {progress:.1f}%)")
             
             self._job_registry.update_progress(job_id, "completed", 100.0)
             self._job_registry.update_status(job_id, JobStatus.COMPLETED)
-            print("========== FINAL STATE ==========")
-            print("Reports:", len(final_state.reports))
-            print("Findings:", len(final_state.findings))
-            print("Recon:", len(final_state.recon_state.subdomains))
-            print("JS:", len(final_state.js_state.js_files))
-            print("API:", len(final_state.api_state.swagger_urls))
-            print("Vuln:", len(final_state.vuln_state.nuclei_results))
-            print("===============================")
+            
+            logger.info(f"Scan Pipeline completed for job {job_id}")
+            logger.debug(f"Stats - Reports: {len(final_state.reports)}, Findings: {len(final_state.findings)}, "
+                         f"Recon: {len(final_state.recon_state.subdomains)}, JS: {len(final_state.js_state.js_files)}, "
+                         f"API: {len(final_state.api_state.swagger_urls)}, Vuln: {len(final_state.vuln_state.nuclei_results)}")
             return final_state
             
         except Exception as e:

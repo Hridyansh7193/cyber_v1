@@ -1,18 +1,25 @@
-from typing import List, Iterable
+from typing import List, Iterable, Mapping, Any
 from sqlalchemy.orm import Session
 from storage.database import get_db_session
 from storage.repositories.finding_repository import FindingRepository
 from storage.repositories.report_repository import ReportRepository
+from storage.repositories.session_repository import SessionRepository
+from storage.repositories.log_repository import LogRepository
+from storage.analytics_repository import AnalyticsRepository
 from schemas.finding import Finding
 from schemas.report import Report
-from storage.models import FindingModel, ReportModel
+from schemas.tool_metrics import ToolMetrics
+from storage.models import FindingModel, ReportModel, ScanSessionModel, LogModel
 
 class PersistenceService:
     """Service to handle persistence of domain models using Repositories."""
     
-    def __init__(self):
+    def __init__(self, analytics_repo: AnalyticsRepository = None):
         self.finding_repo = FindingRepository()
         self.report_repo = ReportRepository()
+        self.session_repo = SessionRepository()
+        self.log_repo = LogRepository()
+        self.analytics_repo = analytics_repo or AnalyticsRepository()
         
     def _get_session(self):
         return get_db_session()
@@ -26,3 +33,30 @@ class PersistenceService:
         """Save a batch of reports to the database."""
         with self._get_session() as db:
             return self.report_repo.create_bulk(db, reports)
+
+    def get_reports_for_session(self, session_id: str) -> List[ReportModel]:
+        """Get all reports for a specific session."""
+        with self._get_session() as db:
+            return self.report_repo.get_by_session(db, session_id)
+            
+    def get_all_sessions(self) -> List[ScanSessionModel]:
+        """Get all scan sessions."""
+        with self._get_session() as db:
+            return self.session_repo.get_all(db)
+            
+    def get_session(self, session_id: str) -> ScanSessionModel:
+        """Get a specific scan session."""
+        with self._get_session() as db:
+            return self.session_repo.get_by_session_id(db, session_id)
+            
+    def get_logs_for_session(self, session_id: str) -> List[LogModel]:
+        """Get logs for a specific session."""
+        with self._get_session() as db:
+            return self.log_repo.get_by_session(db, session_id)
+            
+    def save_telemetry(self, logs: Iterable[Mapping[str, Any]]) -> None:
+        """Save tool telemetry from execution state logs."""
+        for log in logs:
+            if log.get("type") == "tool_telemetry":
+                metric = ToolMetrics(**{k: v for k, v in log.items() if k != "type"})
+                self.analytics_repo.insert_metric(metric)

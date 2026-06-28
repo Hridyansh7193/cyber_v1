@@ -62,26 +62,24 @@ def test_get_status(monkeypatch):
     app.dependency_overrides.clear()
 
 def test_get_report(monkeypatch):
-    mock_report_service = Mock(spec=ReportService)
+    mock_scan_service = Mock(spec=ScanService)
     
     # Mock generated report
     gen_report = GeneratedReport(
         report_id=uuid.uuid4(),
-        session_id="job-123",
-        report_format=ReportFormat.JSON,
-        format=ReportFormat.JSON,
+        format="json",
         filename="report.json",
         mime_type="application/json",
         content='{"test": "data"}'
     )
-    mock_report_service.get_report.return_value = gen_report
-    app.dependency_overrides[get_report_service] = lambda: mock_report_service
+    mock_scan_service.get_report.return_value = gen_report
+    app.dependency_overrides[get_scan_service] = lambda: mock_scan_service
     
     response = client.get("/report/job-123")
     assert response.status_code == 200
     assert response.json() == {"test": "data"}
     
-    mock_report_service.get_report.return_value = None
+    mock_scan_service.get_report.return_value = None
     response = client.get("/report/invalid-job")
     assert response.status_code == 404
     
@@ -117,18 +115,16 @@ def test_start_scan_exception():
     app.dependency_overrides.clear()
 
 def test_get_report_markdown():
-    mock_report_service = Mock(spec=ReportService)
+    mock_scan_service = Mock(spec=ScanService)
     gen_report = GeneratedReport(
         report_id=uuid.uuid4(),
-        session_id="job-123",
-        report_format=ReportFormat.MARKDOWN,
-        format=ReportFormat.MARKDOWN,
+        format="markdown",
         filename="report.md",
         mime_type="text/markdown",
         content="# Report Data"
     )
-    mock_report_service.get_report.return_value = gen_report
-    app.dependency_overrides[get_report_service] = lambda: mock_report_service
+    mock_scan_service.get_report.return_value = gen_report
+    app.dependency_overrides[get_scan_service] = lambda: mock_scan_service
     
     response = client.get("/report/job-123?format=markdown")
     assert response.status_code == 200

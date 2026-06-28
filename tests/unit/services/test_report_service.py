@@ -5,38 +5,32 @@ from services.report_service import ReportService
 from services.orchestrator_adapter import OrchestratorAdapter
 from schemas.report import Report, ReportFormat
 
-def test_report_service_get_report_success():
-    mock_adapter = Mock(spec=OrchestratorAdapter)
-    
-    report_id = uuid.uuid4()
-    db_report = Report(
-        report_id=report_id,
+def test_report_service_render_reports_json():
+    report_service = ReportService()
+    report = Report(
+        report_id=uuid.uuid4(),
         session_id="job-123",
-        report_format=ReportFormat.JSON
+        report_format=ReportFormat.JSON,
     )
     
-    mock_adapter.get_report.return_value = [db_report]
-    report_service = ReportService(mock_adapter)
-    
-    report = report_service.get_report("job-123", "json")
-    assert report is not None
-    assert "job-123" in report.content
-    mock_adapter.get_report.assert_called_once_with("job-123")
+    generated = report_service.render_reports([report])
+    assert len(generated) == 1
+    assert generated[0].format == "json"
+    assert "job-123" in generated[0].content
+    assert generated[0].mime_type == "application/json"
+    assert "report_" in generated[0].filename
 
-def test_report_service_get_report_missing():
-    mock_adapter = Mock(spec=OrchestratorAdapter)
-    mock_adapter.get_report.return_value = []
+def test_report_service_render_reports_markdown():
+    report_service = ReportService()
+    report = Report(
+        report_id=uuid.uuid4(),
+        session_id="job-123",
+        report_format=ReportFormat.MARKDOWN,
+    )
     
-    report_service = ReportService(mock_adapter)
-    report = report_service.get_report("job-123", "json")
-    
-    assert report is None
-    mock_adapter.get_report.assert_called_once_with("job-123")
-
-def test_report_service_get_report_exception():
-    mock_adapter = Mock(spec=OrchestratorAdapter)
-    mock_adapter.get_report.side_effect = RuntimeError("Storage connection failed")
-    
-    report_service = ReportService(mock_adapter)
-    with pytest.raises(RuntimeError):
-        report_service.get_report("job-123", "json")
+    generated = report_service.render_reports([report])
+    assert len(generated) == 1
+    assert generated[0].format == "markdown"
+    assert "## Raw Findings" in generated[0].content
+    assert generated[0].mime_type == "text/markdown"
+    assert "report_" in generated[0].filename
