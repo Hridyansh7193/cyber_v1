@@ -36,9 +36,18 @@ class ScanService:
             job_id = self._registry.create_job(domain, metadata)
             
         target = TargetService.normalize_target(domain, job_id, metadata)
+        print("\n===== SCAN SERVICE =====")
+        print("Before run_scan()")
         final_state = self._adapter.run_scan(job_id, target)
+        print("After run_scan()")
+        print("Final state:", final_state)
         
         if final_state:
+            print("\n===== SERVICES =====")
+            print("Persistence:", self._persistence_service)
+            print("Report:", self._report_service)
+            print("Workspace:", self._workspace_service)
+            print("Entered persistence block")
             # 1. Persist to DB
             if self._persistence_service:
                 self._persistence_service.save_findings(job_id, final_state.findings)
@@ -48,6 +57,8 @@ class ScanService:
             rendered_reports = []
             if self._report_service:
                 rendered_reports = self._report_service.render_reports(final_state.reports)
+                print("Rendered reports:", len(rendered_reports))
+                print(rendered_reports)
                 
             # 3. Write to Workspace
             if self._workspace_service and rendered_reports:

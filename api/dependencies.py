@@ -20,7 +20,7 @@ def _create_default_config() -> BugHunterConfig:
 _default_config = _create_default_config()
 _adapter = OrchestratorAdapter(_registry, _default_config)
 _scan_service = ScanService(_adapter, _registry)
-_report_service = ReportService(_adapter)
+_report_service = ReportService()
 
 def get_scan_service() -> ScanService:
     return _scan_service

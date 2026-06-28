@@ -16,4 +16,5 @@ class WorkspaceService:
             with open(file_path, "w", encoding=report.encoding) as f:
                 f.write(report.content)
             saved_paths.append(str(file_path))
+        print("Saving to:", file_path)
         return saved_paths

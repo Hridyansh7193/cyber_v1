@@ -55,6 +55,14 @@ class OrchestratorAdapter:
             
             self._job_registry.update_progress(job_id, "completed", 100.0)
             self._job_registry.update_status(job_id, JobStatus.COMPLETED)
+            print("========== FINAL STATE ==========")
+            print("Reports:", len(final_state.reports))
+            print("Findings:", len(final_state.findings))
+            print("Recon:", len(final_state.recon_state.subdomains))
+            print("JS:", len(final_state.js_state.js_files))
+            print("API:", len(final_state.api_state.swagger_urls))
+            print("Vuln:", len(final_state.vuln_state.nuclei_results))
+            print("===============================")
             return final_state
             
         except Exception as e:

@@ -55,6 +55,8 @@ core_logging/logger_factory.py
 core_logging/masking.py
 core_logging/types.py
 execution/__init__.py
+execution/plugin_executor.py
+execution/wrappers.py
 execution/api/__init__.py
 execution/api/graphql_wrapper.py
 execution/api/swagger_wrapper.py
@@ -86,6 +88,7 @@ orchestrator/__init__.py
 orchestrator/checkpoint_manager.py
 orchestrator/delta_applier.py
 orchestrator/error_handler.py
+orchestrator/execution_coordinator.py
 orchestrator/graph.py
 orchestrator/graph_state.py
 orchestrator/node_executor.py
@@ -139,10 +142,12 @@ schemas/tool_result.py
 services/__init__.py
 services/job_registry.py
 services/orchestrator_adapter.py
+services/persistence_service.py
 services/report_service.py
 services/runtime_service.py
 services/scan_service.py
 services/target_service.py
+services/workspace_service.py
 storage/__init__.py
 storage/analytics_repository.py
 storage/database.py

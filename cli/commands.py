@@ -32,7 +32,7 @@ def _create_default_config() -> BugHunterConfig:
 default_config = _create_default_config()
 adapter = OrchestratorAdapter(registry, default_config)
 scan_service = ScanService(adapter, registry)
-report_service = ReportService(adapter)
+report_service = ReportService()
 
 @app.command("scan")
 def scan_cmd(domain: str, config: str = typer.Option(None, help="Path to config file"), profile: str = typer.Option("bug_bounty", help="Scan profile to use")):
