@@ -94,3 +94,52 @@ class WorkspaceManager:
         archive_path = archives_dir / session_id
         shutil.make_archive(str(archive_path), 'zip', str(session_dir))
         return str(archive_path) + ".zip"
+
+    def list_all_sessions(self) -> List[WorkspaceMetadata]:
+        """List all valid sessions across all targets."""
+        sessions = []
+        if not self.root_dir.exists():
+            return sessions
+        for target_dir in self.root_dir.iterdir():
+            if target_dir.is_dir() and target_dir.name != "temp":
+                sessions.extend(self.list_sessions(target_dir.name))
+        return sessions
+
+    def get_workspace_stats(self) -> Dict[str, Any]:
+        """Calculate statistics about the workspace (counts and sizes)."""
+        stats = {
+            "targets": 0,
+            "sessions": 0,
+            "reports": 0,
+            "logs": 0,
+            "total_size_bytes": 0
+        }
+        if not self.root_dir.exists():
+            return stats
+
+        for target_dir in self.root_dir.iterdir():
+            if target_dir.is_dir() and target_dir.name != "temp":
+                stats["targets"] += 1
+                sessions_dir = target_dir / "sessions"
+                if sessions_dir.exists():
+                    for session_dir in sessions_dir.iterdir():
+                        if session_dir.is_dir():
+                            stats["sessions"] += 1
+                            reports_dir = session_dir / "reports"
+                            if reports_dir.exists():
+                                stats["reports"] += len(list(reports_dir.iterdir()))
+                            logs_dir = session_dir / "logs"
+                            if logs_dir.exists():
+                                stats["logs"] += len(list(logs_dir.iterdir()))
+
+        def get_size(start_path):
+            total_size = 0
+            for dirpath, dirnames, filenames in os.walk(start_path):
+                for f in filenames:
+                    fp = os.path.join(dirpath, f)
+                    if not os.path.islink(fp):
+                        total_size += os.path.getsize(fp)
+            return total_size
+
+        stats["total_size_bytes"] = get_size(str(self.root_dir))
+        return stats

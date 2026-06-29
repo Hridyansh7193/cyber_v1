@@ -1,4 +1,4 @@
-from typing import List, Iterable, Mapping, Any
+from typing import List, Iterable, Mapping, Any, Optional
 from sqlalchemy.orm import Session
 from storage.database import get_db_session
 from storage.repositories.finding_repository import FindingRepository
@@ -38,11 +38,26 @@ class PersistenceService:
         """Get all reports for a specific session."""
         with self._get_session() as db:
             return self.report_repo.get_by_session(db, session_id)
+
+    def get_findings_for_session(self, session_id: str) -> List[FindingModel]:
+        """Get all findings for a specific session."""
+        with self._get_session() as db:
+            return self.finding_repo.get_by_session(db, session_id)
             
     def get_all_sessions(self) -> List[ScanSessionModel]:
         """Get all scan sessions."""
         with self._get_session() as db:
             return self.session_repo.get_all(db)
+            
+    def create_session(self, session_id: str, target_domain: str) -> ScanSessionModel:
+        """Create a new scan session."""
+        with self._get_session() as db:
+            return self.session_repo.create(db, session_id, target_domain)
+            
+    def update_session(self, session_id: str, status: str) -> Optional[ScanSessionModel]:
+        """Update scan session status."""
+        with self._get_session() as db:
+            return self.session_repo.update_status(db, session_id, status)
             
     def get_session(self, session_id: str) -> ScanSessionModel:
         """Get a specific scan session."""

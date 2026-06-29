@@ -18,7 +18,7 @@ def test_cli_scan(mock_scan_service):
     assert "Scan submitted!" in result.stdout
     assert "job-123" in result.stdout
 
-@patch("cli.commands.scan_service")
+@patch("cli.commands_jobs.scan_service")
 def test_cli_status(mock_scan_service):
     mock_scan_service.get_status.return_value = {
         "job_id": "job-123",
@@ -102,7 +102,7 @@ def test_cli_scan_with_config(mock_scan_service):
     finally:
         os.unlink(f_name)
 
-@patch("cli.commands.scan_service")
+@patch("cli.commands_jobs.scan_service")
 def test_cli_status_not_found(mock_scan_service):
     mock_scan_service.get_status.return_value = None
     result = runner.invoke(app, ["status", "job-123"])
@@ -116,7 +116,7 @@ def test_cli_report_not_found(mock_report_service):
     assert result.exit_code == 1
     assert "Report not found" in result.stdout
 
-@patch("cli.commands.scan_service")
+@patch("cli.commands_jobs.scan_service")
 def test_cli_cancel(mock_scan_service):
     mock_scan_service.cancel_scan.return_value = True
     result = runner.invoke(app, ["cancel", "job-123"])
@@ -136,15 +136,16 @@ class MockJob:
         self.status = JobStatus.RUNNING
         self.progress = 50.0
 
-@patch("cli.commands.registry")
+@patch("cli.commands_jobs.persistence_service", None)
+@patch("cli.commands_jobs.registry")
 def test_cli_list_jobs(mock_registry):
     mock_registry.get_all_jobs.return_value = []
-    result = runner.invoke(app, ["list-jobs"])
+    result = runner.invoke(app, ["jobs"])
     assert result.exit_code == 0
     assert "No jobs found" in result.stdout
     
     mock_registry.get_all_jobs.return_value = [MockJob()]
-    result = runner.invoke(app, ["list-jobs"])
+    result = runner.invoke(app, ["jobs"])
     assert result.exit_code == 0
     assert "job-1" in result.stdout
 

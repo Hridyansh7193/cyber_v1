@@ -15,7 +15,7 @@ def init_db(database_url: str = "sqlite:///bughunter.db"):
     if _engine is None:
         # SQLite requirement: check_same_thread=False is needed for standard web/agent use
         _engine = create_engine(database_url, connect_args={"check_same_thread": False})
-        _SessionFactory = sessionmaker(autocommit=False, autoflush=False, bind=_engine)
+        _SessionFactory = sessionmaker(autocommit=False, autoflush=False, expire_on_commit=False, bind=_engine)
     return _engine
 
 def get_engine():
@@ -48,4 +48,4 @@ def override_db(database_url: str):
     """Override database for testing purposes."""
     global _engine, _SessionFactory
     _engine = create_engine(database_url, connect_args={"check_same_thread": False})
-    _SessionFactory = sessionmaker(autocommit=False, autoflush=False, bind=_engine)
+    _SessionFactory = sessionmaker(autocommit=False, autoflush=False, expire_on_commit=False, bind=_engine)

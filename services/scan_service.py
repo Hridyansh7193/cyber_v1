@@ -41,6 +41,9 @@ class ScanService:
         target = TargetService.normalize_target(domain, job_id, metadata)
         logger.info(f"Scan started for target: {domain} (Job: {job_id})")
         
+        if self._persistence_service:
+            self._persistence_service.create_session(job_id, domain)
+        
         final_state = self._adapter.run_scan(job_id, target)
         
         if final_state:
@@ -49,6 +52,7 @@ class ScanService:
             
             # 1. Persist to DB
             if self._persistence_service:
+                self._persistence_service.update_session(job_id, "completed")
                 self._persistence_service.save_findings(job_id, final_state.findings)
                 self._persistence_service.save_reports(final_state.reports)
                 if hasattr(final_state, 'logs') and final_state.logs:
@@ -65,13 +69,17 @@ class ScanService:
             if self._workspace_service and rendered_reports:
                 self._workspace_service.save_reports(domain, job_id, rendered_reports)
                 logger.debug("Workspace output written.")
+        else:
+            if self._persistence_service:
+                self._persistence_service.update_session(job_id, "failed")
                 
         return job_id
 
     def get_status(self, job_id: str) -> Optional[Dict[str, Any]]:
         job = self._registry.get_job(job_id)
+        status_dict = None
         if job:
-            return {
+            status_dict = {
                 "job_id": job.job_id,
                 "target": job.target_domain,
                 "status": job.status.value,
@@ -79,14 +87,17 @@ class ScanService:
                 "current_stage": job.current_stage,
                 "started_at": job.started_at,
                 "completed_at": job.completed_at,
-                "error": job.error
+                "error": job.error,
+                "workspace_path": f"workspace/sessions/{job_id}",
+                "finding_count": 0,
+                "report_count": 0
             }
             
-        # Fallback to persistence service
-        if self._persistence_service:
+        # Fallback to persistence service if not in registry
+        if not status_dict and self._persistence_service:
             session = self._persistence_service.get_session(job_id)
             if session:
-                return {
+                status_dict = {
                     "job_id": session.session_id,
                     "target": session.target_domain,
                     "status": session.status,
@@ -94,12 +105,31 @@ class ScanService:
                     "current_stage": "unknown",
                     "started_at": session.started_at,
                     "completed_at": session.finished_at,
-                    "error": None
+                    "error": None,
+                    "workspace_path": f"workspace/sessions/{job_id}",
+                    "finding_count": 0,
+                    "report_count": 0
                 }
-        return None
+                
+        # Augment with counts from persistence if available
+        if status_dict and self._persistence_service:
+            try:
+                # Use a new context to avoid messing up active transactions
+                with self._persistence_service._get_session() as db:
+                    reports = self._persistence_service.report_repo.get_by_session(db, job_id)
+                    findings = self._persistence_service.finding_repo.get_by_session(db, job_id)
+                    status_dict["report_count"] = len(reports)
+                    status_dict["finding_count"] = len(findings)
+            except Exception:
+                pass
+                
+        return status_dict
 
     def cancel_scan(self, job_id: str) -> bool:
-        return self._adapter.cancel(job_id)
+        cancelled = self._adapter.cancel(job_id)
+        if cancelled and self._persistence_service:
+            self._persistence_service.update_session(job_id, "cancelled")
+        return cancelled
 
     def get_report(self, job_id: str, format: str = "json"):
         from schemas.generated_report import GeneratedReport
