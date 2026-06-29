@@ -51,3 +51,6 @@ class SecretRepository:
 
     def get_by_session(self, db: Session, session_id: str) -> List[SecretModel]:
         return db.query(SecretModel).filter(SecretModel.session_id == session_id).all()
+
+    def get_all(self, db: Session) -> List[SecretModel]:
+        return db.query(SecretModel).all()

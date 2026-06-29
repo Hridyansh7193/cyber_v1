@@ -49,3 +49,6 @@ class SubdomainRepository:
 
     def get_by_session(self, db: Session, session_id: str) -> List[SubdomainModel]:
         return db.query(SubdomainModel).filter(SubdomainModel.session_id == session_id).all()
+
+    def get_all(self, db: Session) -> List[SubdomainModel]:
+        return db.query(SubdomainModel).all()

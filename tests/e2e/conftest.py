@@ -29,8 +29,9 @@ def mock_subprocess_run(fixtures_dir):
         elif "nuclei" in cmd_str:
             stdout_data = (fixtures_dir / "nuclei.json").read_text(encoding="utf-8")
         
-        # Return a mock Tuple[int, str, str, float]
-        return (0, stdout_data, "", 1.0)
+        # Return a mock ProcessResult
+        from execution.utils.process_runner import ProcessResult
+        return ProcessResult(exit_code=0, stdout=stdout_data, stderr="", execution_time=1.0)
 
     with patch("execution.utils.process_runner.ProcessRunner.run", side_effect=side_effect) as m:
         yield m

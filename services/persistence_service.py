@@ -5,11 +5,16 @@ from storage.repositories.finding_repository import FindingRepository
 from storage.repositories.report_repository import ReportRepository
 from storage.repositories.session_repository import SessionRepository
 from storage.repositories.log_repository import LogRepository
+from storage.repositories.url_repository import URLRepository
+from storage.repositories.subdomain_repository import SubdomainRepository
+from storage.repositories.secret_repository import SecretRepository
 from storage.analytics_repository import AnalyticsRepository
 from schemas.finding import Finding
 from schemas.report import Report
 from schemas.tool_metrics import ToolMetrics
+from schemas.intelligence import PlannerDecision
 from storage.models import FindingModel, ReportModel, ScanSessionModel, LogModel
+import json
 
 class PersistenceService:
     """Service to handle persistence of domain models using Repositories."""
@@ -19,6 +24,9 @@ class PersistenceService:
         self.report_repo = ReportRepository()
         self.session_repo = SessionRepository()
         self.log_repo = LogRepository()
+        self.url_repo = URLRepository()
+        self.subdomain_repo = SubdomainRepository()
+        self.secret_repo = SecretRepository()
         self.analytics_repo = analytics_repo or AnalyticsRepository()
         
     def _get_session(self):
@@ -75,3 +83,38 @@ class PersistenceService:
             if log.get("type") == "tool_telemetry":
                 metric = ToolMetrics(**{k: v for k, v in log.items() if k != "type"})
                 self.analytics_repo.insert_metric(metric)
+
+    def get_planner_decision(self, session_id: str) -> Optional[PlannerDecision]:
+        """Extracts the PlannerDecision from the persisted state_blob of a session."""
+        session = self.get_session(session_id)
+        if not session or not session.state_blob:
+            return None
+            
+        try:
+            state_dict = json.loads(session.state_blob)
+            intel = state_dict.get("intelligence")
+            if intel and intel.get("planner"):
+                return PlannerDecision(**intel["planner"])
+        except Exception:
+            pass
+        return None
+
+    def get_all_reports(self) -> List[ReportModel]:
+        with self._get_session() as db:
+            return self.report_repo.get_all(db)
+            
+    def get_all_findings(self) -> List[FindingModel]:
+        with self._get_session() as db:
+            return self.finding_repo.get_all(db)
+            
+    def get_all_urls(self) -> List[Any]:
+        with self._get_session() as db:
+            return self.url_repo.get_all(db)
+            
+    def get_all_subdomains(self) -> List[Any]:
+        with self._get_session() as db:
+            return self.subdomain_repo.get_all(db)
+            
+    def get_all_secrets(self) -> List[Any]:
+        with self._get_session() as db:
+            return self.secret_repo.get_all(db)

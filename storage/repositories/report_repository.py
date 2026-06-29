@@ -57,3 +57,6 @@ class ReportRepository:
 
     def get_by_session(self, db: Session, session_id: str) -> List[ReportModel]:
         return db.query(ReportModel).filter(ReportModel.session_id == session_id).all()
+
+    def get_all(self, db: Session) -> List[ReportModel]:
+        return db.query(ReportModel).all()

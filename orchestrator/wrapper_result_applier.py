@@ -27,9 +27,9 @@ def apply_recon_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolRes
     
     for tool_res in wrapper_out:
         output = tool_res.metadata or {}
-        new_subdomains.extend(output.get("new_subdomains", []))
-        new_hosts.extend(output.get("new_hosts", []))
-        new_urls.extend(output.get("new_urls", []))
+        new_subdomains.extend(x.get("host", x.get("url", str(x))) if isinstance(x, dict) else x for x in output.get("new_subdomains", []))
+        new_hosts.extend(x.get("host", x.get("url", str(x))) if isinstance(x, dict) else x for x in output.get("new_hosts", []))
+        new_urls.extend(x.get("url", x.get("host", str(x))) if isinstance(x, dict) else x for x in output.get("new_urls", []))
 
     merged_subs = tuple(dict.fromkeys(new_subdomains))
     merged_hosts = tuple(dict.fromkeys(new_hosts))

@@ -49,3 +49,7 @@ class URLRepository:
 
     def get_by_session(self, db: Session, session_id: str) -> List[UrlModel]:
         return db.query(UrlModel).filter(UrlModel.session_id == session_id).all()
+
+    def get_all(self, db: Session) -> List[UrlModel]:
+        return db.query(UrlModel).all()
+

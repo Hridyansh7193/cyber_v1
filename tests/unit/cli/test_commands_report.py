@@ -48,6 +48,8 @@ def test_inspect_cmd_success(mock_persistence, mock_manager):
     class DummySession:
         target_domain = "example.com"
         status = "completed"
+        started_at = "2026-06-29T12:00:00"
+        finished_at = "2026-06-29T12:05:00"
     mock_persistence.get_session.return_value = DummySession()
     
     mock_persistence.get_findings_for_session.return_value = []

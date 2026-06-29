@@ -8,7 +8,7 @@ from execution.utils.process_runner import ProcessRunner
 class SwaggerPlugin(ExecutionPlugin):
     def metadata(self) -> PluginMetadata:
         return PluginMetadata(
-            name="swagger_discovery",
+            name="swagger",
             version="1.0.0",
             description="Swagger endpoint discovery",
             capabilities=(Capability.API,),

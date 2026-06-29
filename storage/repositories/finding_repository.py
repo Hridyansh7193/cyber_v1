@@ -65,3 +65,6 @@ class FindingRepository:
 
     def get_by_session(self, db: Session, session_id: str) -> List[FindingModel]:
         return db.query(FindingModel).filter(FindingModel.session_id == session_id).all()
+
+    def get_all(self, db: Session) -> List[FindingModel]:
+        return db.query(FindingModel).all()

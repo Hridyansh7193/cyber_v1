@@ -5,7 +5,7 @@ from config.schemas import (
     SettingsConfig, LLMConfig, ToolsConfig, TimeoutsConfig, ReportingConfig, BugHunterConfig
 )
 
-def load_config(config_dir: str | Path) -> BugHunterConfig:
+def load_config(config_dir: str | Path = "config") -> BugHunterConfig:
     config_path = Path(config_dir)
     
     with open(config_path / "defaults" / "settings.yaml", "r", encoding="utf-8") as f:

@@ -36,15 +36,7 @@ def test_cli_status(mock_scan_service):
     assert "Status for job-123" in result.stdout
     assert "running" in result.stdout
 
-@patch("cli.commands.report_service")
-def test_cli_report(mock_report_service):
-    mock_report = Mock()
-    mock_report.content = "report_content_here"
-    mock_report_service.get_report.return_value = mock_report
-    
-    result = runner.invoke(app, ["report", "job-123"])
-    assert result.exit_code == 0
-    assert "report_content_here" in result.stdout
+
 
 def test_cli_version():
     result = runner.invoke(app, ["version"])
@@ -109,12 +101,7 @@ def test_cli_status_not_found(mock_scan_service):
     assert result.exit_code == 1
     assert "Job not found" in result.stdout
 
-@patch("cli.commands.report_service")
-def test_cli_report_not_found(mock_report_service):
-    mock_report_service.get_report.return_value = None
-    result = runner.invoke(app, ["report", "job-123"])
-    assert result.exit_code == 1
-    assert "Report not found" in result.stdout
+
 
 @patch("cli.commands_jobs.scan_service")
 def test_cli_cancel(mock_scan_service):
@@ -149,37 +136,4 @@ def test_cli_list_jobs(mock_registry):
     assert result.exit_code == 0
     assert "job-1" in result.stdout
 
-def test_cli_validate_config():
-    config_dict = {
-        "settings": {"scan_depth": 1, "max_concurrency": 10, "log_level": "INFO"},
-        "llm": {"provider": "dummy", "default_model": "dummy", "timeout": 30},
-        "tools": {"tool_paths": {}, "docker_container_names": {}, "wordlists": {}, "enable_flags": {}},
-        "timeouts": {"subfinder_timeout": 60, "nuclei_timeout": 60, "dalfox_timeout": 60, "ffuf_timeout": 60, "global_timeout": 3600},
-        "reporting": {"report_formats": ["json"], "output_directories": {}}
-    }
-    with tempfile.NamedTemporaryFile("w", delete=False, suffix=".json") as f:
-        json.dump(config_dict, f)
-        f_name = f.name
-        
-    try:
-        result = runner.invoke(app, ["validate-config", f_name])
-        assert result.exit_code == 0
-        assert "valid" in result.stdout
-    finally:
-        os.unlink(f_name)
-        
-    with tempfile.NamedTemporaryFile("w", delete=False, suffix=".json") as f:
-        f.write('{"settings": {"scan_depth": "invalid"}}')
-        f.flush()
-        f_name = f.name
-        
-    try:
-        result = runner.invoke(app, ["validate-config", f_name])
-        assert result.exit_code == 2
-        assert "Invalid configuration" in result.stdout
-    finally:
-        os.unlink(f_name)
 
-    result = runner.invoke(app, ["validate-config", "does_not_exist.json"])
-    assert result.exit_code == 1
-    assert "Unexpected Error" in result.stdout

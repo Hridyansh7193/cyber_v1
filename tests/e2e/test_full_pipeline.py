@@ -37,7 +37,7 @@ def test_full_pipeline_success(e2e_db, mock_subprocess_run, base_config, determi
     assert "recon" in orch_state.task_status
     assert "js" in orch_state.task_status
     assert "api" in orch_state.task_status
-    assert "vuln" in orch_state.task_status
+    assert "vulnerability" in orch_state.task_status
     assert "analysis" in orch_state.task_status
     assert "report" in orch_state.task_status
     
