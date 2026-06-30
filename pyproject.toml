@@ -46,7 +46,8 @@ include = [
     "runtime*",
     "schemas*",
     "services*",
-    "storage*"
+    "storage*",
+    "utils*"
 ]
 exclude = [
     "tests*",

@@ -15,10 +15,11 @@ def show_cmd(
 ):
     try:
         cfg = load_config()
+        cfg_dict = cfg.model_dump()
         if json_out:
-            OutputFormatter.render(cfg, format="json")
+            OutputFormatter.render(cfg.model_dump(), format="json")
         else:
-            OutputFormatter.render_tree("Active Configuration", cfg)
+            OutputFormatter.render_tree("Active Configuration", cfg_dict)
         raise typer.Exit(code=SUCCESS)
     except typer.Exit:
         raise
@@ -34,9 +35,13 @@ def dump_cmd(
     try:
         cfg = load_config()
         if format == "json":
-            OutputFormatter.render(cfg, format="json")
+            OutputFormatter.render(cfg.model_dump(), format="json")
         elif format == "yaml":
-            yaml_str = yaml.dump(cfg, default_flow_style=False)
+            yaml_str = yaml.safe_dump(
+            cfg.model_dump(),
+            sort_keys=False,
+            default_flow_style=False,
+        )       
             OutputFormatter.render_success(yaml_str)
         else:
             OutputFormatter.render_error(f"Unsupported format: {format}")
@@ -54,25 +59,27 @@ def validate_cmd(
     json_out: bool = typer.Option(False, "--json", help="Output in JSON format")
 ):
     try:
-        cfg = load_config()
-        # In a real scenario, this would validate against a schema
-        is_valid = isinstance(cfg, dict) and "execution" in cfg
-        
-        result = {"status": "valid" if is_valid else "invalid", "message": "Configuration is valid." if is_valid else "Configuration invalid."}
+        # If this succeeds, the configuration is valid.
+        load_config()
+
+        result = {
+            "status": "valid",
+            "message": "Configuration is valid."
+        }
+
         if json_out:
             OutputFormatter.render(result, format="json")
         else:
-            if is_valid:
-                OutputFormatter.render_success(result["message"])
-            else:
-                OutputFormatter.render_error(result["message"])
-        
-        raise typer.Exit(code=SUCCESS if is_valid else CONFIG_ERROR)
+            OutputFormatter.render_success(result["message"])
+
+        raise typer.Exit(code=SUCCESS)
+
     except typer.Exit:
         raise
+
     except Exception as e:
         OutputFormatter.render_error(str(e))
-        raise typer.Exit(code=INTERNAL_ERROR)
+        raise typer.Exit(code=CONFIG_ERROR)
 
 @app.command("doctor")
 @timed_cli_command
@@ -108,8 +115,13 @@ def diff_cmd(
         cfg1 = load_cfg(target1)
         cfg2 = load_cfg(target2)
         
-        str1 = json_lib.dumps(cfg1, indent=2).splitlines()
-        str2 = json_lib.dumps(cfg2, indent=2).splitlines()
+        if hasattr(cfg1, "model_dump"):
+            cfg1 = cfg1.model_dump()
+
+        if hasattr(cfg2, "model_dump"):
+            cfg2 = cfg2.model_dump()
+        #str1 = json_lib.dumps(cfg1, indent=2).splitlines()
+        #str2 = json_lib.dumps(cfg2, indent=2).splitlines()
         
         diff = list(difflib.unified_diff(str1, str2, lineterm=""))
         
