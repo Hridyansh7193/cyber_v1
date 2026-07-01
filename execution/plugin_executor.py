@@ -9,11 +9,13 @@ from utils.logger import get_logger
 
 logger = get_logger("plugin_executor")
 
+from schemas.state import ExecutionState
+
 class PluginExecutor:
     """Handles the execution of plugins, enforcing validation."""
     
     @staticmethod
-    def execute_plugins(plugin_names: Tuple[str, ...], config: BugHunterConfig, target: Any) -> Tuple[ToolResult, ...]:
+    def execute_plugins(plugin_names: Tuple[str, ...], config: BugHunterConfig, state: ExecutionState, target: Any = None) -> Tuple[ToolResult, ...]:
         results: List[ToolResult] = []
         
         for name in plugin_names:
@@ -21,13 +23,97 @@ class PluginExecutor:
             if not plugin:
                 continue
                 
-            if not plugin.validate(target, {}):
+            if not plugin.validate(state, {}):
                 continue
                 
+            # Retrieve Tool Binary
+            tool_name = plugin.metadata().supported_tools[0]
+            binary_path = tool_name
+            tool_version = "unknown"
+            
+            if state.runtime_context and state.runtime_context.tool_manager:
+                tool_info = state.runtime_context.tool_manager.get_tool(tool_name)
+                if not tool_info:
+                    logger.warning(f"Tool {tool_name} missing. Skipping {plugin.metadata().name}")
+                    # Telemetry for skipped plugin
+                    continue
+                binary_path = tool_info.binary_path
+                if tool_info.version:
+                    tool_version = tool_info.version
+                    
+            final_command = [binary_path]
+            
+            # Auto-extract target from state if not provided
+            current_target = target
+            if current_target is None:
+                if plugin.metadata().name in ["subfinder", "assetfinder", "gau"]:
+                    current_target = state.target.domain
+                elif plugin.metadata().name in ["httpx"]:
+                    current_target = list(state.recon_state.subdomains) if state.recon_state.subdomains else state.target.domain
+                elif plugin.metadata().name in ["katana"]:
+                    current_target = list(state.recon_state.alive_hosts) if state.recon_state.alive_hosts else state.target.resolved_url or state.target.domain
+                elif plugin.metadata().name in ["nuclei", "subzy", "ffuf", "dalfox"]:
+                    # Vuln plugins act on URLs or endpoints
+                    urls = set(state.recon_state.urls)
+                    urls.update(state.js_state.endpoints)
+                    urls.update(state.api_state.swagger_urls)
+                    urls.update(state.api_state.graphql_urls)
+                    current_target = list(urls) if urls else state.target.resolved_url or state.target.domain
+                else:
+                    # Generic fallback
+                    current_target = state.target.resolved_url or state.target.domain
+            
+            # Map plugin to its (single_target_flag, list_target_flag)
+            flag_map = {
+                "httpx": ("-u", "-l"),
+                "nuclei": ("-u", "-l"),
+                "katana": ("-u", "-list"),
+                "subfinder": ("-d", "-dL"),
+                "dalfox": ("url", "file"),
+                "gau": (None, None),
+                "assetfinder": (None, None),
+                "subzy": ("--target", "--targets")
+            }
+            
+            if current_target is not None and plugin.metadata().name in flag_map:
+                import tempfile
+                import os
+                single_flag, list_flag = flag_map[plugin.metadata().name]
+                
+                if isinstance(current_target, (list, tuple, set)):
+                    if list_flag:
+                        fd, temp_path = tempfile.mkstemp(text=True)
+                        with os.fdopen(fd, 'w') as f:
+                            f.write("\n".join(current_target))
+                        final_command.extend([list_flag, temp_path])
+                    else:
+                        # Fallback for tools that don't support lists natively (e.g. gau, assetfinder)
+                        # but we still want to run them. We would need a wrapper loop, but for now we just use the first item.
+                        if current_target:
+                            if single_flag:
+                                final_command.extend([single_flag, str(current_target[0])])
+                            else:
+                                final_command.append(str(current_target[0]))
+                else:
+                    if single_flag:
+                        final_command.extend([single_flag, str(current_target)])
+                    else:
+                        final_command.append(str(current_target))
+                        
+            # Wordlist handling inside PluginExecutor
+            if plugin.metadata().name == "ffuf" and state.runtime_context and state.runtime_context.wordlist_manager:
+                wordlist_path = state.runtime_context.wordlist_manager.get("common")
+                if wordlist_path:
+                    final_command.extend(["-w", wordlist_path])
+                else:
+                    logger.warning("FFUF missing wordlist. Skipping.")
+                    continue
+            
             # Execute
-            command = plugin.build_command(target, {})
+            command = plugin.build_command(state, {})
+            final_command.extend(command)
             logger.info(f"{plugin.metadata().name} started")
-            result = ProcessRunner.run(list(command), plugin.metadata().name)
+            result = ProcessRunner.run(final_command, plugin.metadata().name)
             logger.info(f"{plugin.metadata().name} finished in {result.execution_time:.2f}s (Exit code: {result.exit_code})")
             
             parsed = []

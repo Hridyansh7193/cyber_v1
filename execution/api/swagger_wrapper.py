@@ -1,3 +1,4 @@
+from schemas.state import ExecutionState
 import json
 from typing import Tuple, Any, Mapping, List, Dict
 from execution.constants import NEW_SWAGGER
@@ -17,11 +18,11 @@ class SwaggerPlugin(ExecutionPlugin):
             supported_tools=("swagger_discover",)
         )
 
-    def build_command(self, target: Any, config: Mapping[str, Any]) -> Tuple[str, ...]:
-        return ("python3", "swagger_discover.py", "-u", str(target))
+    def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
+        return ("-u", state.target.resolved_url or state.target.domain)
 
-    def validate(self, target: Any, config: Mapping[str, Any]) -> bool:
-        return bool(target)
+    def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
+        return bool(state.target.domain)
 
     def parse(self, stdout: str, stderr: str) -> List[str]:
         results = []

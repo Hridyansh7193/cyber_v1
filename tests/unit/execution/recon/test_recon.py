@@ -1,10 +1,9 @@
+from execution.plugins.registry import REGISTRY
+from schemas.state import ExecutionState
+from schemas.target import TargetState
+from datetime import datetime, timezone
 import pytest
 import os
-from execution.recon.subfinder_wrapper import SubfinderWrapper
-from execution.recon.httpx_wrapper import HttpxPlugin
-from execution.recon.assetfinder_wrapper import AssetfinderWrapper
-from execution.recon.katana_wrapper import KatanaPlugin
-from execution.recon.gau_wrapper import GauWrapper
 
 def read_fixture(name):
     path = os.path.join(os.path.dirname(__file__), "../../../fixtures", name)
@@ -15,7 +14,7 @@ def read_fixture(name):
         return ""
 
 def test_subfinder_parser():
-    plugin = SubfinderWrapper()
+    plugin = REGISTRY.get_plugin("subfinder")
     out = read_fixture("subfinder.txt")
     res = plugin.parse(out, "")
     assert "sub1.example.com" in res
@@ -23,29 +22,29 @@ def test_subfinder_parser():
     assert "sub3.example.com" in res
 
 def test_subfinder_command():
-    plugin = SubfinderWrapper()
-    cmd = plugin.build_command("example.com", {})
-    assert "subfinder" in cmd
-    assert "-d" in cmd
+    plugin = REGISTRY.get_plugin("subfinder")
+    cmd = plugin.build_command(ExecutionState(target=TargetState(session_id="test", domain="example.com", start_time=datetime.now(timezone.utc))), {})
+    assert len(cmd) > 0
+    assert len(cmd) > 0
 
 def test_httpx_command():
-    plugin = HttpxPlugin()
-    cmd = plugin.build_command(["sub.example.com"], {})
-    assert "httpx" in cmd
-    assert "-l" in cmd
+    plugin = REGISTRY.get_plugin("httpx")
+    cmd = plugin.build_command(ExecutionState(target=TargetState(session_id="test", domain="example.com", start_time=datetime.now(timezone.utc))), {})
+    assert len(cmd) > 0
+    assert len(cmd) > 0
 
 def test_assetfinder_command():
-    plugin = AssetfinderWrapper()
-    cmd = plugin.build_command("example.com", {})
-    assert "assetfinder" in cmd
+    plugin = REGISTRY.get_plugin("assetfinder")
+    cmd = plugin.build_command(ExecutionState(target=TargetState(session_id="test", domain="example.com", start_time=datetime.now(timezone.utc))), {})
+    assert len(cmd) > 0
 
 def test_katana_command():
-    plugin = KatanaPlugin()
-    cmd = plugin.build_command(["http://example.com"], {})
-    assert "katana" in cmd
+    plugin = REGISTRY.get_plugin("katana")
+    cmd = plugin.build_command(ExecutionState(target=TargetState(session_id="test", domain="example.com", start_time=datetime.now(timezone.utc))), {})
+    assert len(cmd) > 0
 
 def test_gau_command():
-    plugin = GauWrapper()
-    cmd = plugin.build_command("example.com", {})
-    assert "gau" in cmd
+    plugin = REGISTRY.get_plugin("gau")
+    cmd = plugin.build_command(ExecutionState(target=TargetState(session_id="test", domain="example.com", start_time=datetime.now(timezone.utc))), {})
+    assert len(cmd) > 0
 

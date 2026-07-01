@@ -1,3 +1,4 @@
+from schemas.state import ExecutionState
 import tempfile
 import os
 import json
@@ -19,12 +20,12 @@ class FfufPlugin(ExecutionPlugin):
             supported_tools=("ffuf",)
         )
 
-    def build_command(self, target: Any, config: Mapping[str, Any]) -> Tuple[str, ...]:
+    def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
         wordlist = config.get("wordlist", "common.txt")
-        return ("ffuf", "-u", f"{str(target)}/FUZZ", "-w", wordlist, "-json", "-silent")
+        return ("-u", f"{state.target.resolved_url or state.target.domain}/FUZZ", "-json", "-silent")
 
-    def validate(self, target: Any, config: Mapping[str, Any]) -> bool:
-        return bool(target)
+    def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
+        return bool(state.target.domain)
 
     def parse(self, stdout: str, stderr: str) -> List[Mapping[str, Any]]:
         results = []

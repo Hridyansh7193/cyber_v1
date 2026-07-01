@@ -9,6 +9,7 @@ from .report import Report
 from .intelligence import IntelligenceState
 from .operational import OperationalState
 from .telemetry import ExecutionTelemetry
+from .runtime_context import RuntimeContext
 
 class ReconState(BaseModel):
     model_config = ConfigDict(frozen=True)
@@ -48,6 +49,7 @@ class ExecutionState(BaseModel):
     metadata: Mapping[str, Any] = Field(default_factory=lambda: MappingProxyType({}))
     intelligence: Optional[IntelligenceState] = Field(default=None)
     operational: Optional[OperationalState] = Field(default=None)
+    runtime_context: Optional[RuntimeContext] = Field(default=None)
 
     @field_serializer('metadata')
     def serialize_metadata(self, v: Mapping[str, Any], _info):

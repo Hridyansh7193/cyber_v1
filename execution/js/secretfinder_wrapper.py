@@ -1,3 +1,4 @@
+from schemas.state import ExecutionState
 import tempfile
 import os
 import re
@@ -20,11 +21,11 @@ class SecretFinderWrapper(ExecutionPlugin):
             supported_tools=("secretfinder",)
         )
 
-    def build_command(self, target: Any, config: Mapping[str, Any]) -> Tuple[str, ...]:
-        return ("python3", "SecretFinder.py", "-i", str(target), "-o", "cli")
+    def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
+        return ("-i", state.target.resolved_url or state.target.domain, "-o", "cli")
 
-    def validate(self, target: Any, config: Mapping[str, Any]) -> bool:
-        return bool(target)
+    def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
+        return bool(state.target.domain)
 
     def parse(self, stdout: str, stderr: str) -> List[str]:
         results = []

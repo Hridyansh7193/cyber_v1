@@ -1,3 +1,4 @@
+from schemas.state import ExecutionState
 from typing import Tuple, Any, Mapping, List
 from execution.constants import NEW_SUBDOMAINS
 from execution.plugins.base import ExecutionPlugin, PluginMetadata
@@ -16,11 +17,11 @@ class AssetfinderWrapper(ExecutionPlugin):
             supported_tools=("assetfinder",)
         )
 
-    def build_command(self, target: Any, config: Mapping[str, Any]) -> Tuple[str, ...]:
-        return ("assetfinder", "--subs-only", str(target))
+    def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
+        return ("--subs-only", )
 
-    def validate(self, target: Any, config: Mapping[str, Any]) -> bool:
-        return bool(target)
+    def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
+        return bool(state.target.domain)
 
     def parse(self, stdout: str, stderr: str) -> List[str]:
         results = []

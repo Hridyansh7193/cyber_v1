@@ -12,7 +12,7 @@ class ExecutionCoordinator:
         state: ExecutionState, 
         config: BugHunterConfig, 
         capability: Capability,
-        wrapper_func: Callable[[Tuple[str, ...], BugHunterConfig, str], Tuple[ToolResult, ...]]
+        wrapper_func: Callable[[Tuple[str, ...], BugHunterConfig, ExecutionState], Tuple[ToolResult, ...]]
     ) -> Tuple[ToolResult, ...]:
         
         plan = None
@@ -35,7 +35,5 @@ class ExecutionCoordinator:
         if not plugin_names:
             return ()
             
-        target = state.target.domain
-        
         # Future architecture hook: handle retries, cancellation, timeouts, telemetry here
-        return wrapper_func(plugin_names, config, target)
+        return wrapper_func(plugin_names, config, state)

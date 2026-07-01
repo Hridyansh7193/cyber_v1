@@ -3,6 +3,7 @@ from typing import Tuple, Any, Mapping
 from pydantic import BaseModel, ConfigDict
 
 from schemas.runtime import Capability
+from schemas.state import ExecutionState
 
 class PluginMetadata(BaseModel):
     model_config = ConfigDict(frozen=True)
@@ -16,7 +17,7 @@ class PluginMetadata(BaseModel):
 
 class PluginValidator(ABC):
     @abstractmethod
-    def validate(self, target: Any, config: Mapping[str, Any]) -> bool:
+    def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
         pass
 
 class PluginParser(ABC):
@@ -33,7 +34,7 @@ class PluginParser(ABC):
 
 class PluginRunner(ABC):
     @abstractmethod
-    def build_command(self, target: Any, config: Mapping[str, Any]) -> Tuple[str, ...]:
+    def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
         pass
         
     @abstractmethod

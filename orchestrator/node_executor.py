@@ -9,7 +9,7 @@ def execute_node(
     current_exec: ExecutionState,
     config: BugHunterConfig,
     capability: Capability = None,
-    wrapper_func: Callable[[Tuple[str, ...], BugHunterConfig, str], Tuple[ToolResult, ...]] = None,
+    wrapper_func: Callable[[Tuple[str, ...], BugHunterConfig, ExecutionState], Tuple[ToolResult, ...]] = None,
     wrapper_applier: Callable[[Any, Any], Any] = None,
     agent: Callable[[Any, Any], Any] = None,
     delta_applier: Callable[[Any, Any], Any] = None

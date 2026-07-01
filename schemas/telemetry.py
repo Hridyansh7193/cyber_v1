@@ -6,6 +6,7 @@ class ExecutionTelemetry(BaseModel):
     tool: str
     version: str
     command: Optional[str] = None
+    arguments: Tuple[str, ...] = Field(default_factory=tuple)
     execution_time: float
     exit_code: int
     stdout_size: int
@@ -17,6 +18,8 @@ class ExecutionTelemetry(BaseModel):
     parser_errors: Tuple[str, ...] = Field(default_factory=tuple)
     binary_path: Optional[str] = None
     working_directory: Optional[str] = None
+    exception_type: Optional[str] = None
+    retry_count: int = 0
 class OperationalTelemetry(BaseModel):
     model_config = ConfigDict(frozen=True)
     
@@ -25,6 +28,9 @@ class OperationalTelemetry(BaseModel):
     analysis_duration: float = Field(default=0.0)
     report_duration: float = Field(default=0.0)
     checkpoint_duration: float = Field(default=0.0)
+    wall_clock_duration: float = Field(default=0.0)
+    reasoning_duration: float = Field(default=0.0)
+    
     
     checkpoint_count: int = Field(default=0)
     subdomains: int = Field(default=0)

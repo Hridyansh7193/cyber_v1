@@ -3,6 +3,9 @@ from unittest.mock import patch
 from execution.plugin_executor import PluginExecutor
 from config.schemas import BugHunterConfig
 from schemas.tool_result import ToolResult
+from schemas.state import ExecutionState
+from schemas.target import TargetState
+from datetime import datetime, timezone
 from execution.utils.process_runner import ProcessResult
 
 @patch("execution.utils.process_runner.ProcessRunner.run")
@@ -24,7 +27,10 @@ def test_plugin_executor_recon(mock_run):
         timeouts={"subfinder_timeout": 60, "nuclei_timeout": 60, "dalfox_timeout": 60, "ffuf_timeout": 60, "global_timeout": 3600},
         reporting={"report_formats": ["json"], "output_directories": {}}
     )
-    results = PluginExecutor.execute_plugins(("subfinder",), config, "example.com")
+    
+    target = TargetState(session_id="test", domain="example.com", start_time=datetime.now(timezone.utc))
+    state = ExecutionState(target=target)
+    results = PluginExecutor.execute_plugins(("subfinder",), config, state)
     
     assert len(results) == 1
     assert results[0].success
@@ -50,7 +56,10 @@ def test_plugin_executor_js(mock_run):
         timeouts={"subfinder_timeout": 60, "nuclei_timeout": 60, "dalfox_timeout": 60, "ffuf_timeout": 60, "global_timeout": 3600},
         reporting={"report_formats": ["json"], "output_directories": {}}
     )
-    results = PluginExecutor.execute_plugins(("linkfinder",), config, "example.com")
+    
+    target = TargetState(session_id="test", domain="example.com", start_time=datetime.now(timezone.utc))
+    state = ExecutionState(target=target)
+    results = PluginExecutor.execute_plugins(("linkfinder",), config, state)
     
     assert len(results) == 1
     assert results[0].success
@@ -76,7 +85,10 @@ def test_plugin_executor_vuln(mock_run):
         timeouts={"subfinder_timeout": 60, "nuclei_timeout": 60, "dalfox_timeout": 60, "ffuf_timeout": 60, "global_timeout": 3600},
         reporting={"report_formats": ["json"], "output_directories": {}}
     )
-    results = PluginExecutor.execute_plugins(("nuclei",), config, "example.com")
+    
+    target = TargetState(session_id="test", domain="example.com", start_time=datetime.now(timezone.utc))
+    state = ExecutionState(target=target)
+    results = PluginExecutor.execute_plugins(("nuclei",), config, state)
     
     assert len(results) == 1
     assert results[0].success

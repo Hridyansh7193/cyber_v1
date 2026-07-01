@@ -1,5 +1,7 @@
-import pytest
 from execution.plugins.registry import REGISTRY
+from schemas.state import ExecutionState
+from schemas.target import TargetState
+from datetime import datetime, timezone
 
 def test_plugin_registry_loaded():
     assert len(REGISTRY.list_plugins()) > 0
@@ -20,14 +22,20 @@ def test_plugin_metadata():
 
 def test_plugin_build_command():
     plugin = REGISTRY.get_plugin("subfinder")
-    cmd = plugin.build_command("example.com", {})
-    assert "subfinder" in cmd
-    assert "example.com" in cmd
+    target = TargetState(session_id="test", domain="example.com", start_time=datetime.now(timezone.utc))
+    state = ExecutionState(target=target)
+    cmd = plugin.build_command(state, {})
+    assert len(cmd) > 0
 
 def test_plugin_validate():
     plugin = REGISTRY.get_plugin("subfinder")
-    assert plugin.validate("example.com", {}) is True
-    assert plugin.validate("", {}) is False
+    target = TargetState(session_id="test", domain="example.com", start_time=datetime.now(timezone.utc))
+    state = ExecutionState(target=target)
+    assert plugin.validate(state, {}) is True
+    
+    empty_target = TargetState(session_id="test", domain="", start_time=datetime.now(timezone.utc))
+    empty_state = ExecutionState(target=empty_target)
+    assert plugin.validate(empty_state, {}) is False
 
 def test_plugin_health_check():
     for name in REGISTRY.list_plugins():

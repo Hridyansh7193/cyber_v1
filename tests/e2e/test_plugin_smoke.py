@@ -1,5 +1,7 @@
-import pytest
 from execution.plugins.registry import REGISTRY
+from schemas.state import ExecutionState
+from schemas.target import TargetState
+from datetime import datetime, timezone
 
 def test_plugin_smoke():
     """Verify all plugins exist and their commands are structurally valid."""
@@ -16,7 +18,9 @@ def test_plugin_smoke():
         assert meta.version is not None
         
         # Verify we can build command
-        cmd = plugin.build_command("example.com", {})
+        target = TargetState(session_id="test", domain="example.com", start_time=datetime.now(timezone.utc))
+        state = ExecutionState(target=target)
+        cmd = plugin.build_command(state, {})
         assert isinstance(cmd, tuple)
         assert len(cmd) > 0
         

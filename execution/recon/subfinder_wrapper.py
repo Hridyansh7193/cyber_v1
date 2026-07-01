@@ -1,3 +1,4 @@
+from schemas.state import ExecutionState
 import json
 from typing import Tuple, Any, Mapping, List
 from execution.constants import NEW_SUBDOMAINS
@@ -17,11 +18,11 @@ class SubfinderWrapper(ExecutionPlugin):
             supported_tools=("subfinder",)
         )
 
-    def build_command(self, target: Any, config: Mapping[str, Any]) -> Tuple[str, ...]:
-        return ("subfinder", "-d", str(target), "-silent", "-json")
+    def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
+        return ("-silent", "-json")
 
-    def validate(self, target: Any, config: Mapping[str, Any]) -> bool:
-        return bool(target)
+    def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
+        return bool(state.target.domain)
 
     def parse(self, stdout: str, stderr: str) -> List[str]:
         results = []

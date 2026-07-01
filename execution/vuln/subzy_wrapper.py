@@ -1,3 +1,4 @@
+from schemas.state import ExecutionState
 import tempfile
 import os
 import json
@@ -19,11 +20,11 @@ class SubzyPlugin(ExecutionPlugin):
             supported_tools=("subzy",)
         )
 
-    def build_command(self, target: Any, config: Mapping[str, Any]) -> Tuple[str, ...]:
-        return ("subzy", "run", "--targets", str(target), "--output", "json")
+    def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
+        return ("run", "--hide_fails", "--json")
 
-    def validate(self, target: Any, config: Mapping[str, Any]) -> bool:
-        return bool(target)
+    def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
+        return bool(state.target.domain)
 
     def parse(self, stdout: str, stderr: str) -> List[Mapping[str, Any]]:
         results = []

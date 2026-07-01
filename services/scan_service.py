@@ -8,6 +8,10 @@ from services.report_service import ReportService
 from services.workspace_service import WorkspaceService
 from config.schemas import BugHunterConfig
 from utils.logger import get_logger
+from schemas.runtime_context import RuntimeContext
+from services.tool_manager import ToolManager
+from services.wordlist_manager import WordlistManager
+from services.target_resolver import TargetResolver
 
 logger = get_logger("scan_service")
 
@@ -41,10 +45,26 @@ class ScanService:
         target = TargetService.normalize_target(domain, job_id, metadata)
         logger.info(f"Scan started for target: {domain} (Job: {job_id})")
         
+        # Initialize Runtime Context
+        tool_manager = ToolManager()
+        tool_manager.detect()
+        
+        wordlist_manager = WordlistManager()
+        wordlist_manager.detect()
+        
+        target_resolver = TargetResolver()
+        target = target_resolver.resolve_target(target)
+        
+        runtime_context = RuntimeContext(
+            tool_manager=tool_manager,
+            wordlist_manager=wordlist_manager,
+            target_resolver=target_resolver
+        )
+        
         if self._persistence_service:
             self._persistence_service.create_session(job_id, domain)
         
-        final_state = self._adapter.run_scan(job_id, target)
+        final_state = self._adapter.run_scan(job_id, target, runtime_context)
         
         if final_state:
             logger.info("Scan finished successfully.")

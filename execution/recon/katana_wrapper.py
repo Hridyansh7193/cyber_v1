@@ -1,3 +1,4 @@
+from schemas.state import ExecutionState
 import tempfile
 import os
 import json
@@ -19,11 +20,11 @@ class KatanaPlugin(ExecutionPlugin):
             supported_tools=("katana",)
         )
 
-    def build_command(self, target: Any, config: Mapping[str, Any]) -> Tuple[str, ...]:
-        return ("katana", "-list", str(target), "-silent", "-json")
+    def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
+        return ("-silent", "-json")
 
-    def validate(self, target: Any, config: Mapping[str, Any]) -> bool:
-        return bool(target)
+    def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
+        return bool(state.target.domain)
 
     def parse(self, stdout: str, stderr: str) -> List[Mapping[str, Any]]:
         results = []

@@ -1,3 +1,4 @@
+from schemas.state import ExecutionState
 import tempfile
 import os
 import json
@@ -19,15 +20,11 @@ class HttpxPlugin(ExecutionPlugin):
             supported_tools=("httpx",)
         )
 
-    def build_command(self, target: Any, config: Mapping[str, Any]) -> Tuple[str, ...]:
-        # Target here can be a list of subdomains, or a file path. We will expect a file path for httpx if target is a list.
-        # But to be safe, if it's a list, we will generate a temporary file in the wrapper, NOT in the plugin's build_command since build_command shouldn't have side effects.
-        # Instead, we will assume target is already a file path when called from the wrapper, or we just support a file path.
-        # Actually, let's just make `target` the file path.
-        return ("httpx", "-l", str(target), "-silent", "-json", "-title", "-tech-detect", "-rt")
+    def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
+        return ("-silent", "-json", "-title", "-tech-detect", "-rt")
 
-    def validate(self, target: Any, config: Mapping[str, Any]) -> bool:
-        return bool(target)
+    def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
+        return bool(state.recon_state.subdomains or state.target.domain)
 
     def parse(self, stdout: str, stderr: str) -> List[Mapping[str, Any]]:
         results = []

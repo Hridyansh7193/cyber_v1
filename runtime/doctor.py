@@ -4,6 +4,8 @@ import psutil
 from typing import List
 from schemas.runtime import RuntimeReport, EnvironmentStatus, DependencyStatus, PluginStatus, SystemBenchmark, RuntimeCheck
 from execution.plugins.registry import REGISTRY
+from services.tool_manager import ToolManager
+from services.wordlist_manager import WordlistManager
 
 class Doctor:
     """Diagnoses host machine environment without running scans."""
@@ -68,24 +70,41 @@ class Doctor:
                 status="PASS" if installed else "FAIL",
                 message=f"{tool} is {'installed' if installed else 'missing'}"
             ))
+            
+        # Check Wordlists
+        wm = WordlistManager()
+        wm.detect()
+        for wl in ["common", "raft-small-words", "api"]:
+            installed = wm.has(wl)
+            deps.append(DependencyStatus(
+                tool=f"wordlist:{wl}",
+                version=None,
+                installed=installed,
+                status="PASS" if installed else "WARNING",
+                message=f"Wordlist {wl} is {'installed' if installed else 'missing'}"
+            ))
         return deps
 
     def _check_plugins(self) -> List[PluginStatus]:
         statuses = []
+        tm = ToolManager()
+        tm.detect()
+        
         for name in REGISTRY.list_plugins():
             plugin = REGISTRY.get_plugin(name)
             meta = plugin.metadata()
             
-            # Use health_check to verify binary exists
-            health = plugin.health_check()
-            status = "PASS" if health else "WARNING"
+            tool_name = meta.supported_tools[0]
+            tool_info = tm.get_tool(tool_name)
+            
+            status = "PASS" if tool_info else "WARNING"
             
             statuses.append(PluginStatus(
                 plugin=name,
                 capabilities=list(meta.capabilities),
                 version=meta.version,
                 status=status,
-                message="OK" if health else "Binary missing or failing"
+                message=f"Binary {tool_name} found at {tool_info.binary_path}" if tool_info else f"Binary {tool_name} missing"
             ))
         return statuses
 

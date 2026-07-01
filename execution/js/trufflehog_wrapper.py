@@ -1,3 +1,4 @@
+from schemas.state import ExecutionState
 import json
 import tempfile
 import os
@@ -19,14 +20,14 @@ class TrufflehogWrapper(ExecutionPlugin):
             supported_tools=("trufflehog",)
         )
 
-    def build_command(self, target: Any, config: Mapping[str, Any]) -> Tuple[str, ...]:
+    def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
         # Target here could be a repo or a file path
         # Assuming config specifies type: {"mode": "git" | "filesystem"}
         mode = config.get("mode", "filesystem")
-        return ("trufflehog", mode, str(target), "--json")
+        return (mode, "--json")
 
-    def validate(self, target: Any, config: Mapping[str, Any]) -> bool:
-        return bool(target)
+    def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
+        return bool(state.target.domain)
 
     def parse(self, stdout: str, stderr: str) -> List[Mapping[str, Any]]:
         results = []

@@ -3,6 +3,7 @@ from typing import Dict, Any, Optional, List
 from orchestrator.graph import build_graph
 from schemas.state import ExecutionState
 from schemas.target import TargetState
+from schemas.runtime_context import RuntimeContext
 from orchestrator.orchestration_state import OrchestrationState
 from config.schemas import BugHunterConfig
 from services.job_registry import JobRegistry, JobStatus
@@ -16,12 +17,12 @@ class OrchestratorAdapter:
         self._config = config
         self._app = build_graph(config)
 
-    def run_scan(self, job_id: str, target: TargetState) -> Optional[ExecutionState]:
+    def run_scan(self, job_id: str, target: TargetState, runtime_context: Optional[RuntimeContext] = None) -> Optional[ExecutionState]:
         """Run the scan synchronously, returning the final ExecutionState."""
         self._job_registry.update_status(job_id, JobStatus.RUNNING)
         self._job_registry.update_progress(job_id, "init", 0.0)
         
-        initial_exec_state = ExecutionState(target=target)
+        initial_exec_state = ExecutionState(target=target, runtime_context=runtime_context)
         initial_state = OrchestrationState(
             execution_state=initial_exec_state,
             config=self._config,

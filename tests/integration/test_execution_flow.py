@@ -30,11 +30,11 @@ def test_full_pipeline_mocked_subfinder():
         mock_exec.return_value = (mock_tool_result,)
         
         # 2. Run Wrapper
-        wrapper_results = ReconWrapper.execute(("subfinder",), config, "example.com")
-        
         from datetime import datetime, UTC
-        # 3. Apply Wrapper Result to State
         initial_state = ExecutionState(target=TargetState(session_id="test", target="example.com", domain="example.com", start_time=datetime.now(UTC)))
+        wrapper_results = ReconWrapper.execute(("subfinder",), config, initial_state)
+        
+        # 3. Apply Wrapper Result to State
         state_after_wrapper = apply_recon_wrapper_result(initial_state, wrapper_results)
         
         # Check invariants
