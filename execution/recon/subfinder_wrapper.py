@@ -1,5 +1,6 @@
 import json
 from typing import Tuple, Any, Mapping, List
+from execution.constants import NEW_SUBDOMAINS
 from execution.plugins.base import ExecutionPlugin, PluginMetadata
 from schemas.runtime import Capability
 from schemas.tool_result import ToolResult
@@ -40,3 +41,5 @@ class SubfinderWrapper(ExecutionPlugin):
     def health_check(self) -> bool:
         return True
 
+    def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
+        return {NEW_SUBDOMAINS: parsed}

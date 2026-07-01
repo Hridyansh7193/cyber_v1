@@ -8,6 +8,7 @@ from .finding import Finding
 from .report import Report
 from .intelligence import IntelligenceState
 from .operational import OperationalState
+from .telemetry import ExecutionTelemetry
 
 class ReconState(BaseModel):
     model_config = ConfigDict(frozen=True)
@@ -43,7 +44,7 @@ class ExecutionState(BaseModel):
     vuln_state: VulnerabilityState = Field(default_factory=VulnerabilityState)
     findings: Tuple[Finding, ...] = Field(default=())
     reports: Tuple[Report, ...] = Field(default=())
-    logs: Tuple[Mapping[str, Any], ...] = Field(default=())
+    logs: Tuple[ExecutionTelemetry, ...] = Field(default=())
     metadata: Mapping[str, Any] = Field(default_factory=lambda: MappingProxyType({}))
     intelligence: Optional[IntelligenceState] = Field(default=None)
     operational: Optional[OperationalState] = Field(default=None)

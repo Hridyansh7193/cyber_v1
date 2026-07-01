@@ -30,7 +30,7 @@ _workspace_manager = WorkspaceManager()
 _workspace_service = WorkspaceService(_workspace_manager)
 _report_service = ReportService()
 _scan_service = ScanService(_adapter, _registry, _persistence_service, _report_service, _workspace_service)
-_analytics_service = AnalyticsService()
+_analytics_service = AnalyticsService(_persistence_service)
 
 def get_scan_service() -> ScanService:
     return _scan_service

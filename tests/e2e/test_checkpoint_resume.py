@@ -21,29 +21,26 @@ def test_checkpoint_resume(e2e_db, mock_subprocess_run, base_config, determinist
     
     wrapper_calls = {"recon": 0, "js": 0, "api": 0, "vuln": 0}
     
-    from orchestrator.nodes.recon_node import dummy_recon_wrapper
-    from orchestrator.nodes.js_node import dummy_js_wrapper
-    from orchestrator.nodes.api_node import dummy_api_wrapper
-    from orchestrator.nodes.vulnerability_node import dummy_vuln_wrapper
+    from execution.plugin_executor import PluginExecutor
     
-    def count_recon(state):
+    def count_recon(*args, **kwargs):
         wrapper_calls["recon"] += 1
-        return dummy_recon_wrapper(state)
+        return tuple()
         
-    def count_js(state):
+    def count_js(*args, **kwargs):
         wrapper_calls["js"] += 1
-        return dummy_js_wrapper(state)
+        return tuple()
         
-    def count_api(state):
+    def count_api(*args, **kwargs):
         wrapper_calls["api"] += 1
-        return dummy_api_wrapper(state)
+        return tuple()
         
-    def crash_vuln(state):
+    def crash_vuln(*args, **kwargs):
         raise ValueError("Simulated Vuln Crash")
         
-    def count_vuln(state):
+    def count_vuln(*args, **kwargs):
         wrapper_calls["vuln"] += 1
-        return dummy_vuln_wrapper(state)
+        return tuple()
     
     config_run = {"configurable": {"thread_id": "e2e_checkpoint_thread"}}
     graph_state_input = {
@@ -52,10 +49,10 @@ def test_checkpoint_resume(e2e_db, mock_subprocess_run, base_config, determinist
     }
     
     # First Run: Vuln fails
-    with patch("orchestrator.nodes.recon_node.dummy_recon_wrapper", side_effect=count_recon), \
-         patch("orchestrator.nodes.js_node.dummy_js_wrapper", side_effect=count_js), \
-         patch("orchestrator.nodes.api_node.dummy_api_wrapper", side_effect=count_api), \
-         patch("orchestrator.nodes.vulnerability_node.dummy_vuln_wrapper", side_effect=crash_vuln):
+    with patch("execution.wrappers.ReconWrapper.execute", side_effect=count_recon), \
+         patch("execution.wrappers.JSWrapper.execute", side_effect=count_js), \
+         patch("execution.wrappers.APIWrapper.execute", side_effect=count_api), \
+         patch("execution.wrappers.VulnWrapper.execute", side_effect=crash_vuln):
         with pytest.raises(Exception):
             app.invoke(graph_state_input, config=config_run)
             
@@ -65,10 +62,10 @@ def test_checkpoint_resume(e2e_db, mock_subprocess_run, base_config, determinist
     assert wrapper_calls["vuln"] == 0
             
     # Second Run: Graph resumes, Vuln succeeds
-    with patch("orchestrator.nodes.recon_node.dummy_recon_wrapper", side_effect=count_recon), \
-         patch("orchestrator.nodes.js_node.dummy_js_wrapper", side_effect=count_js), \
-         patch("orchestrator.nodes.api_node.dummy_api_wrapper", side_effect=count_api), \
-         patch("orchestrator.nodes.vulnerability_node.dummy_vuln_wrapper", side_effect=count_vuln):
+    with patch("execution.wrappers.ReconWrapper.execute", side_effect=count_recon), \
+         patch("execution.wrappers.JSWrapper.execute", side_effect=count_js), \
+         patch("execution.wrappers.APIWrapper.execute", side_effect=count_api), \
+         patch("execution.wrappers.VulnWrapper.execute", side_effect=count_vuln):
         final_state = app.invoke(None, config=config_run)
     
     exec_state = final_state["execution_state"]

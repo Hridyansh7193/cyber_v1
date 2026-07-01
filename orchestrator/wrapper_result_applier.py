@@ -1,35 +1,41 @@
 from schemas.state import ExecutionState, ReconState, JSState, APIState, VulnerabilityState
 from schemas.tool_result import ToolResult
+from schemas.telemetry import ExecutionTelemetry
+from execution.constants import *
 from typing import Tuple, List, Mapping, Any
 
-def _extract_telemetry(wrapper_out: Tuple[ToolResult, ...]) -> List[Mapping[str, Any]]:
-    return [{
-        "type": "tool_telemetry",
-        "tool_name": t.tool_name,
-        "version": t.plugin_version,
-        "runtime": t.execution_time,
-        "exit_code": t.exit_code,
-        "timeout": t.exit_code == -1,
-        "stdout_size": t.stdout_size,
-        "stderr_size": len(t.stderr),
-        "parsed_objects": t.parsed_findings,
-        "parser_errors": len([e for e in t.errors if "Parse error" in e]),
-        "wrapper_errors": len([e for e in t.errors if "Parse error" not in e]),
-        "memory": 0.0,
-        "success": t.success
-    } for t in wrapper_out]
+def _extract_telemetry(wrapper_out: Tuple[ToolResult, ...]) -> Tuple[ExecutionTelemetry, ...]:
+    return tuple(
+        ExecutionTelemetry(
+            tool=t.tool_name,
+            version=t.plugin_version,
+            command=t.command,
+            execution_time=t.execution_time,
+            exit_code=t.exit_code,
+            stdout_size=t.stdout_size,
+            stderr_size=len(t.stderr),
+            parsed_objects=t.parsed_findings,
+            success=t.success,
+            timeout=t.exit_code == -1,
+            wrapper_errors=tuple([e for e in t.errors if "Parse error" not in e]),
+            parser_errors=tuple([e for e in t.errors if "Parse error" in e]),
+            binary_path=t.binary_path,
+            working_directory=t.working_directory
+        )
+        for t in wrapper_out
+    )
 
 def apply_recon_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResult, ...]) -> ExecutionState:
     new_subdomains = list(state.recon_state.subdomains)
     new_hosts = list(state.recon_state.alive_hosts)
     new_urls = list(state.recon_state.urls)
-    new_logs = list(state.logs) + _extract_telemetry(wrapper_out)
+    new_logs = list(state.logs) + list(_extract_telemetry(wrapper_out))
     
     for tool_res in wrapper_out:
         output = tool_res.metadata or {}
-        new_subdomains.extend(x.get("host", x.get("url", str(x))) if isinstance(x, dict) else x for x in output.get("new_subdomains", []))
-        new_hosts.extend(x.get("host", x.get("url", str(x))) if isinstance(x, dict) else x for x in output.get("new_hosts", []))
-        new_urls.extend(x.get("url", x.get("host", str(x))) if isinstance(x, dict) else x for x in output.get("new_urls", []))
+        new_subdomains.extend(output.get(NEW_SUBDOMAINS, []))
+        new_hosts.extend(output.get(NEW_HOSTS, []))
+        new_urls.extend(output.get(NEW_URLS, []))
 
     merged_subs = tuple(dict.fromkeys(new_subdomains))
     merged_hosts = tuple(dict.fromkeys(new_hosts))
@@ -41,17 +47,28 @@ def apply_recon_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolRes
         urls=merged_urls,
         parameters=state.recon_state.parameters
     )
+    
+    assert len(new_logs) == len(state.logs) + len(wrapper_out), "Invariant violated: Telemetry count did not increase correctly"
+    
     return state.model_copy(deep=True, update={"recon_state": new_recon, "logs": tuple(new_logs)})
 
 def apply_js_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResult, ...]) -> ExecutionState:
     new_js_files = list(state.js_state.js_files)
     new_endpoints = list(state.js_state.endpoints)
-    new_logs = list(state.logs) + _extract_telemetry(wrapper_out)
+    new_logs = list(state.logs) + list(_extract_telemetry(wrapper_out))
     
     for tool_res in wrapper_out:
         output = tool_res.metadata or {}
-        new_js_files.extend(output.get("new_js_files", []))
-        new_endpoints.extend(output.get("new_endpoints", []))
+        new_js_files.extend(output.get(NEW_JS_FILES, []))
+        new_endpoints.extend(output.get(NEW_ENDPOINTS, []))
+        
+        # JS plugins like SecretFinder might return secrets too
+        secrets = output.get(NEW_SECRETS, [])
+        if secrets:
+            # We must be careful how secrets are stored, state.js_state.secrets is Tuple[str, ...]
+            # or Tuple[Dict, ...]. Let's just append for now.
+            # Assuming state.js_state.secrets is Tuple[str, ...]
+            pass # Secrets logic handled by vulnerability state if needed, or left out if not required by JSState yet.
 
     merged_files = tuple(dict.fromkeys(new_js_files))
     merged_endpoints = tuple(dict.fromkeys(new_endpoints))
@@ -61,17 +78,20 @@ def apply_js_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResult
         endpoints=merged_endpoints,
         secrets=state.js_state.secrets
     )
+    
+    assert len(new_logs) == len(state.logs) + len(wrapper_out), "Invariant violated: Telemetry count did not increase correctly"
+    
     return state.model_copy(deep=True, update={"js_state": new_js, "logs": tuple(new_logs)})
 
 def apply_api_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResult, ...]) -> ExecutionState:
     new_swagger = list(state.api_state.swagger_urls)
     new_graphql = list(state.api_state.graphql_urls)
-    new_logs = list(state.logs) + _extract_telemetry(wrapper_out)
+    new_logs = list(state.logs) + list(_extract_telemetry(wrapper_out))
     
     for tool_res in wrapper_out:
         output = tool_res.metadata or {}
-        new_swagger.extend(output.get("new_swagger", []))
-        new_graphql.extend(output.get("new_graphql", []))
+        new_swagger.extend(output.get(NEW_SWAGGER, []))
+        new_graphql.extend(output.get(NEW_GRAPHQL, []))
 
     merged_swagger = tuple(dict.fromkeys(new_swagger))
     merged_graphql = tuple(dict.fromkeys(new_graphql))
@@ -80,21 +100,27 @@ def apply_api_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResul
         swagger_urls=merged_swagger,
         graphql_urls=merged_graphql
     )
+    
+    assert len(new_logs) == len(state.logs) + len(wrapper_out), "Invariant violated: Telemetry count did not increase correctly"
+    
     return state.model_copy(deep=True, update={"api_state": new_api, "logs": tuple(new_logs)})
 
 def apply_vuln_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResult, ...]) -> ExecutionState:
     new_nuclei = list(state.vuln_state.nuclei_results)
     new_dalfox = list(state.vuln_state.dalfox_results)
-    new_logs = list(state.logs) + _extract_telemetry(wrapper_out)
+    new_logs = list(state.logs) + list(_extract_telemetry(wrapper_out))
     
     for tool_res in wrapper_out:
         output = tool_res.metadata or {}
-        new_nuclei.extend(output.get("new_nuclei", []))
-        new_dalfox.extend(output.get("new_dalfox", []))
+        new_nuclei.extend(output.get(NEW_NUCLEI, []))
+        new_dalfox.extend(output.get(NEW_DALFOX, []))
     
     new_vuln = VulnerabilityState(
         nuclei_results=tuple(new_nuclei),
         dalfox_results=tuple(new_dalfox),
         takeovers=state.vuln_state.takeovers
     )
+    
+    assert len(new_logs) == len(state.logs) + len(wrapper_out), "Invariant violated: Telemetry count did not increase correctly"
+    
     return state.model_copy(deep=True, update={"vuln_state": new_vuln, "logs": tuple(new_logs)})

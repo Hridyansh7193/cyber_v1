@@ -1,5 +1,22 @@
 from pydantic import BaseModel, ConfigDict, Field
+from typing import Optional, Tuple
 
+class ExecutionTelemetry(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    tool: str
+    version: str
+    command: Optional[str] = None
+    execution_time: float
+    exit_code: int
+    stdout_size: int
+    stderr_size: int
+    parsed_objects: int
+    success: bool
+    timeout: bool = False
+    wrapper_errors: Tuple[str, ...] = Field(default_factory=tuple)
+    parser_errors: Tuple[str, ...] = Field(default_factory=tuple)
+    binary_path: Optional[str] = None
+    working_directory: Optional[str] = None
 class OperationalTelemetry(BaseModel):
     model_config = ConfigDict(frozen=True)
     

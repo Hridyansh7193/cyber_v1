@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, model_validator
 from enum import Enum
-from typing import Tuple
+from typing import Tuple, Any
+import hashlib
 
 class Severity(str, Enum):
     INFO = "info"
@@ -17,8 +18,19 @@ class Confidence(str, Enum):
 
 class Finding(BaseModel):
     model_config = ConfigDict(frozen=True)
+    id: str = Field(default="")
     title: str
     severity: Severity
     confidence: Confidence
     evidence: str
     references: Tuple[str, ...] = Field(default=())
+    
+    @model_validator(mode='before')
+    @classmethod
+    def generate_id(cls, data: dict) -> dict:
+        if not data.get('id'):
+            title = data.get('title', '')
+            evidence = data.get('evidence', '')
+            hasher = hashlib.sha256(f"{title}:{evidence}".encode('utf-8'))
+            data['id'] = hasher.hexdigest()[:16]
+        return data

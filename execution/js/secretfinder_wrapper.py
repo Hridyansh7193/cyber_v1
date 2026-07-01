@@ -1,8 +1,10 @@
 import tempfile
 import os
+import re
 import json
-from typing import List, Tuple, Any, Mapping
+from typing import List, Tuple, Any, Mapping, Dict
 from execution.plugins.base import ExecutionPlugin, PluginMetadata
+from execution.constants import NEW_SECRETS
 from schemas.runtime import Capability
 from schemas.tool_result import ToolResult
 from execution.utils.process_runner import ProcessRunner
@@ -34,4 +36,7 @@ class SecretFinderWrapper(ExecutionPlugin):
 
     def health_check(self) -> bool:
         return True
+
+    def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
+        return {NEW_SECRETS: parsed}
 

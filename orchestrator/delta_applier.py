@@ -5,52 +5,64 @@ import uuid
 
 def apply_recon_delta(state: ExecutionState, delta: ReconDelta) -> ExecutionState:
     new_recon = ReconState(
-        subdomains=tuple(delta.subdomains),
-        alive_hosts=tuple(delta.alive_hosts),
-        urls=tuple(delta.urls),
+        subdomains=tuple(dict.fromkeys(list(state.recon_state.subdomains) + list(delta.subdomains))),
+        alive_hosts=tuple(dict.fromkeys(list(state.recon_state.alive_hosts) + list(delta.alive_hosts))),
+        urls=tuple(dict.fromkeys(list(state.recon_state.urls) + list(delta.urls))),
         parameters=state.recon_state.parameters
     )
+    assert len(new_recon.subdomains) >= len(state.recon_state.subdomains), "Invariant violated: Subdomains lost during delta apply"
+    assert len(new_recon.alive_hosts) >= len(state.recon_state.alive_hosts), "Invariant violated: Hosts lost during delta apply"
+    assert len(new_recon.urls) >= len(state.recon_state.urls), "Invariant violated: URLs lost during delta apply"
     return state.model_copy(deep=True, update={"recon_state": new_recon})
 
 def apply_js_delta(state: ExecutionState, delta: JSDelta) -> ExecutionState:
     new_js = JSState(
-        js_files=tuple(delta.js_files),
-        endpoints=tuple(delta.endpoints),
+        js_files=tuple(dict.fromkeys(list(state.js_state.js_files) + list(delta.js_files))),
+        endpoints=tuple(dict.fromkeys(list(state.js_state.endpoints) + list(delta.endpoints))),
         secrets=state.js_state.secrets
     )
+    assert len(new_js.js_files) >= len(state.js_state.js_files), "Invariant violated: JS files lost during delta apply"
+    assert len(new_js.endpoints) >= len(state.js_state.endpoints), "Invariant violated: Endpoints lost during delta apply"
     return state.model_copy(deep=True, update={"js_state": new_js})
 
 def apply_api_delta(state: ExecutionState, delta: APIDelta) -> ExecutionState:
     new_api = APIState(
-        swagger_urls=tuple(delta.swagger_urls),
-        graphql_urls=tuple(delta.graphql_urls)
+        swagger_urls=tuple(dict.fromkeys(list(state.api_state.swagger_urls) + list(delta.swagger_urls))),
+        graphql_urls=tuple(dict.fromkeys(list(state.api_state.graphql_urls) + list(delta.graphql_urls)))
     )
+    assert len(new_api.swagger_urls) >= len(state.api_state.swagger_urls), "Invariant violated: Swagger URLs lost during delta apply"
+    assert len(new_api.graphql_urls) >= len(state.api_state.graphql_urls), "Invariant violated: GraphQL URLs lost during delta apply"
     return state.model_copy(deep=True, update={"api_state": new_api})
 
 def apply_vulnerability_delta(state: ExecutionState, delta: VulnerabilityDelta) -> ExecutionState:
-    # Overwrite vulnerabilities as per agent's deduplicated output
-    # But we don't map findings directly here unless Analysis phase.
-    # We update the raw lists based on delta. (Actually Delta only provides findings dict).
-    return state
+    existing_findings = {f.id: f for f in state.findings}
+    for f_dict in delta.findings:
+        finding = Finding(
+            id=f_dict.get('id', ''),
+            title=f_dict.get('title', 'Vulnerability'),
+            severity=f_dict.get('severity', 'info'),
+            confidence=f_dict.get('confidence', 'certain'),
+            evidence=f_dict.get('evidence', ''),
+            references=tuple(f_dict.get('references', []))
+        )
+        existing_findings[finding.id] = finding
+    return state.model_copy(deep=True, update={"findings": tuple(existing_findings.values())})
 
 def apply_analysis_delta(state: ExecutionState, delta: AnalysisDelta) -> ExecutionState:
-    # Convert grouped findings to actual Finding objects
-    new_findings = list(state.findings)
+    existing_findings = {f.id: f for f in state.findings}
     for group in delta.grouped_findings:
         finding = Finding(
-            id=str(uuid.uuid4()),
-            title="Associated Endpoint",
-            description=f"Endpoint {group.get('endpoint')} associated with {group.get('subdomains')}",
-            severity="info",
-            confidence="certain",
-            metadata=group,
-            evidence="Inferred via analysis node"
+            id=group.get('id', ''),
+            title=group.get('title', 'Associated Endpoint'),
+            severity=group.get('severity', 'info'),
+            confidence=group.get('confidence', 'certain'),
+            evidence=group.get('evidence', 'Inferred via analysis node'),
+            references=tuple(group.get('references', []))
         )
-        new_findings.append(finding)
-    return state.model_copy(deep=True, update={"findings": tuple(new_findings)})
+        existing_findings[finding.id] = finding
+    return state.model_copy(deep=True, update={"findings": tuple(existing_findings.values())})
 
 def apply_report_delta(state: ExecutionState, delta: ReportDelta) -> ExecutionState:
-    # Overwrite or append reports
     new_reports = tuple(state.reports) + tuple(delta.reports)
     return state.model_copy(deep=True, update={"reports": new_reports})
 
@@ -58,8 +70,6 @@ def apply_intelligence_delta(state: ExecutionState, delta: IntelligenceDelta) ->
     if not state.intelligence:
         return state.model_copy(deep=True, update={"intelligence": delta.intelligence})
     
-    # Merge existing intelligence state with incoming delta, overriding fields that are not None
-    # or appending tuples. The delta's intelligence acts as a patch.
     updates = {}
     if delta.intelligence.planner is not None:
         updates["planner"] = delta.intelligence.planner

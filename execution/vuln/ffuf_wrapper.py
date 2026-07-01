@@ -1,5 +1,8 @@
+import tempfile
+import os
 import json
-from typing import Tuple, Any, Mapping, List
+from typing import List, Tuple, Any, Mapping, Dict
+from execution.constants import NEW_FUZZ_RESULTS
 from execution.plugins.base import ExecutionPlugin, PluginMetadata
 from schemas.runtime import Capability
 from schemas.tool_result import ToolResult
@@ -41,6 +44,9 @@ class FfufPlugin(ExecutionPlugin):
 
     def health_check(self) -> bool:
         return True
+
+    def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
+        return {NEW_FUZZ_RESULTS: parsed}
 
 class FfufWrapper:
     """Deprecated: deterministic wrapper. Maintained for backward compatibility."""

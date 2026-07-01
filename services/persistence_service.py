@@ -77,11 +77,25 @@ class PersistenceService:
         with self._get_session() as db:
             return self.log_repo.get_by_session(db, session_id)
             
-    def save_telemetry(self, logs: Iterable[Mapping[str, Any]]) -> None:
+    def save_telemetry(self, logs: Iterable[Any]) -> None:
         """Save tool telemetry from execution state logs."""
+        from schemas.telemetry import ExecutionTelemetry
         for log in logs:
-            if log.get("type") == "tool_telemetry":
-                metric = ToolMetrics(**{k: v for k, v in log.items() if k != "type"})
+            if isinstance(log, ExecutionTelemetry):
+                metric = ToolMetrics(
+                    tool_name=log.tool,
+                    version=log.version,
+                    runtime=log.execution_time,
+                    exit_code=log.exit_code,
+                    timeout=log.timeout,
+                    stdout_size=log.stdout_size,
+                    stderr_size=log.stderr_size,
+                    parsed_objects=log.parsed_objects,
+                    parser_errors=len(log.parser_errors),
+                    wrapper_errors=len(log.wrapper_errors),
+                    memory=0.0,
+                    success=log.success
+                )
                 self.analytics_repo.insert_metric(metric)
 
     def get_planner_decision(self, session_id: str) -> Optional[PlannerDecision]:

@@ -24,6 +24,13 @@ class PluginParser(ABC):
     def parse(self, stdout: str, stderr: str) -> Any:
         pass
 
+    def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
+        """
+        DEPRECATED: Default implementation for backward compatibility.
+        Plugins should override this to return semantic metadata using execution.constants.
+        """
+        return {"new_findings": parsed}
+
 class PluginRunner(ABC):
     @abstractmethod
     def build_command(self, target: Any, config: Mapping[str, Any]) -> Tuple[str, ...]:

@@ -19,6 +19,8 @@ class ToolResult(BaseModel):
     error_message: Optional[str] = None
     execution_time: float = Field(ge=0.0)
     raw_output_path: Optional[str] = None
+    parsed_output: Tuple[Any, ...] = Field(default_factory=tuple)
+    metadata_schema_version: int = 1
     metadata: Mapping[str, Any] = Field(default_factory=lambda: MappingProxyType({}))
 
     @field_serializer('metadata')

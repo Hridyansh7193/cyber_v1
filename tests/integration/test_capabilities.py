@@ -24,12 +24,12 @@ def test_plugin_executor_recon(mock_run):
         timeouts={"subfinder_timeout": 60, "nuclei_timeout": 60, "dalfox_timeout": 60, "ffuf_timeout": 60, "global_timeout": 3600},
         reporting={"report_formats": ["json"], "output_directories": {}}
     )
-    results = PluginExecutor.execute_plugins(("subfinder",), config, "example.com", result_key="new_findings")
+    results = PluginExecutor.execute_plugins(("subfinder",), config, "example.com")
     
     assert len(results) == 1
     assert results[0].success
     assert results[0].tool_name == "subfinder"
-    assert "sub1.example.com" in results[0].metadata["new_findings"]
+    assert "sub1.example.com" in results[0].metadata["new_subdomains"]
 
 @patch("execution.utils.process_runner.ProcessRunner.run")
 def test_plugin_executor_js(mock_run):
@@ -50,7 +50,7 @@ def test_plugin_executor_js(mock_run):
         timeouts={"subfinder_timeout": 60, "nuclei_timeout": 60, "dalfox_timeout": 60, "ffuf_timeout": 60, "global_timeout": 3600},
         reporting={"report_formats": ["json"], "output_directories": {}}
     )
-    results = PluginExecutor.execute_plugins(("linkfinder",), config, "example.com", result_key="new_endpoints")
+    results = PluginExecutor.execute_plugins(("linkfinder",), config, "example.com")
     
     assert len(results) == 1
     assert results[0].success
@@ -76,9 +76,9 @@ def test_plugin_executor_vuln(mock_run):
         timeouts={"subfinder_timeout": 60, "nuclei_timeout": 60, "dalfox_timeout": 60, "ffuf_timeout": 60, "global_timeout": 3600},
         reporting={"report_formats": ["json"], "output_directories": {}}
     )
-    results = PluginExecutor.execute_plugins(("nuclei",), config, "example.com", result_key="new_vulnerabilities")
+    results = PluginExecutor.execute_plugins(("nuclei",), config, "example.com")
     
     assert len(results) == 1
     assert results[0].success
     assert results[0].tool_name == "nuclei"
-    assert results[0].metadata["new_vulnerabilities"][0]["template-id"] == "cve-1234"
+    assert results[0].metadata["new_nuclei"][0]["template-id"] == "cve-1234"

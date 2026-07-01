@@ -18,6 +18,14 @@ def generate_reports(state: ExecutionState, config: BugHunterConfig) -> ReportDe
             # produce identical ReportDelta values (pure function guarantee).
             deterministic_id = uuid.uuid5(uuid.NAMESPACE_URL, f"{target_id}:{fmt_str}")
             # Create typed report instances, no writing to disk
+            from schemas.report import DiscoveredAssets
+            assets = DiscoveredAssets(
+                subdomains=state.recon_state.subdomains,
+                hosts=state.recon_state.alive_hosts,
+                urls=state.recon_state.urls,
+                javascript=state.js_state.js_files,
+                apis=tuple(list(state.api_state.swagger_urls) + list(state.api_state.graphql_urls))
+            )
             rep = Report(
                 report_id=deterministic_id,
                 session_id=target_id,
@@ -25,6 +33,10 @@ def generate_reports(state: ExecutionState, config: BugHunterConfig) -> ReportDe
                 report_format=fmt,
                 created_at=report_time,
                 timestamp=report_time,
+                findings=state.findings,
+                total_findings=len(state.findings),
+                assets=assets,
+                telemetry=state.logs,
                 intelligence=state.intelligence,
                 operational=state.operational
             )

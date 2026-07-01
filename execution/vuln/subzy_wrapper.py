@@ -1,7 +1,8 @@
 import tempfile
 import os
 import json
-from typing import List, Tuple, Any, Mapping
+from typing import List, Tuple, Any, Mapping, Dict
+from execution.constants import NEW_TAKEOVERS
 from execution.plugins.base import ExecutionPlugin, PluginMetadata
 from schemas.runtime import Capability
 from schemas.tool_result import ToolResult
@@ -36,6 +37,9 @@ class SubzyPlugin(ExecutionPlugin):
 
     def health_check(self) -> bool:
         return True
+
+    def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
+        return {NEW_TAKEOVERS: parsed}
 
 class SubzyWrapper:
     """Deprecated: deterministic wrapper. Maintained for backward compatibility."""

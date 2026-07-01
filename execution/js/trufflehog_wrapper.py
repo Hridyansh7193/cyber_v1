@@ -1,5 +1,8 @@
 import json
-from typing import List, Tuple, Any, Mapping
+import tempfile
+import os
+from typing import List, Tuple, Any, Mapping, Dict
+from execution.constants import NEW_SECRETS
 from execution.plugins.base import ExecutionPlugin, PluginMetadata
 from schemas.runtime import Capability
 from schemas.tool_result import ToolResult
@@ -39,4 +42,7 @@ class TrufflehogWrapper(ExecutionPlugin):
 
     def health_check(self) -> bool:
         return True
+
+    def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
+        return {NEW_SECRETS: parsed}
 

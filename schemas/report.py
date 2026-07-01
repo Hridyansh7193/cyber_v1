@@ -7,11 +7,21 @@ from .finding import Finding
 from .intelligence import IntelligenceState
 from .operational import OperationalState
 
+from .telemetry import ExecutionTelemetry
+
 class ReportFormat(str, Enum):
     JSON = "json"
     MARKDOWN = "markdown"
     HTML = "html"
     PDF = "pdf"
+
+class DiscoveredAssets(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    subdomains: Tuple[str, ...] = Field(default=())
+    hosts: Tuple[str, ...] = Field(default=())
+    urls: Tuple[str, ...] = Field(default=())
+    javascript: Tuple[str, ...] = Field(default=())
+    apis: Tuple[str, ...] = Field(default=())
 
 class RuntimeMetadata(BaseModel):
     model_config = ConfigDict(frozen=True)
@@ -37,6 +47,8 @@ class Report(BaseModel):
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     findings: Tuple[Finding, ...] = Field(default=())
     total_findings: int = 0
+    assets: DiscoveredAssets = Field(default_factory=DiscoveredAssets)
+    telemetry: Tuple[ExecutionTelemetry, ...] = Field(default=())
     intelligence: Optional[IntelligenceState] = Field(default=None)
     operational: Optional[OperationalState] = Field(default=None)
     runtime_metadata: Optional[RuntimeMetadata] = Field(default=None)

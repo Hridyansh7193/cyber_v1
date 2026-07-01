@@ -1,7 +1,9 @@
 import tempfile
 import os
+import re
 import json
 from typing import List, Tuple, Any, Mapping
+from execution.constants import NEW_ENDPOINTS
 from execution.plugins.base import ExecutionPlugin, PluginMetadata
 from schemas.runtime import Capability
 from schemas.tool_result import ToolResult
@@ -35,4 +37,7 @@ class LinkFinderWrapper(ExecutionPlugin):
 
     def health_check(self) -> bool:
         return True
+
+    def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
+        return {NEW_ENDPOINTS: parsed}
 

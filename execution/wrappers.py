@@ -6,19 +6,19 @@ from execution.plugin_executor import PluginExecutor
 class ReconWrapper:
     @staticmethod
     def execute(plugin_names: Tuple[str, ...], config: BugHunterConfig, target: str) -> Tuple[ToolResult, ...]:
-        return PluginExecutor.execute_plugins(plugin_names, config, target, result_key="new_subdomains")
+        return PluginExecutor.execute_plugins(plugin_names, config, target)
 
 class JSWrapper:
     @staticmethod
     def execute(plugin_names: Tuple[str, ...], config: BugHunterConfig, target: str) -> Tuple[ToolResult, ...]:
-        return PluginExecutor.execute_plugins(plugin_names, config, target, result_key="new_endpoints")
+        return PluginExecutor.execute_plugins(plugin_names, config, target)
 
 class APIWrapper:
     @staticmethod
     def execute(plugin_names: Tuple[str, ...], config: BugHunterConfig, target: str) -> Tuple[ToolResult, ...]:
-        return PluginExecutor.execute_plugins(plugin_names, config, target, result_key="new_swagger")
+        return PluginExecutor.execute_plugins(plugin_names, config, target)
 
 class VulnWrapper:
     @staticmethod
     def execute(plugin_names: Tuple[str, ...], config: BugHunterConfig, target: str) -> Tuple[ToolResult, ...]:
-        return PluginExecutor.execute_plugins(plugin_names, config, target, result_key="new_nuclei")
+        return PluginExecutor.execute_plugins(plugin_names, config, target)

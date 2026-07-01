@@ -63,11 +63,7 @@ def test_real_scan_pipeline(mock_config, temp_workspace):
     # Reports should be generated in the workspace
     
     # Reports should be generated in the workspace
-    json_report_path = temp_workspace.reports_dir / f"report_{job_id}.json"
-    markdown_report_path = temp_workspace.reports_dir / f"report_{job_id}.md"
-    
-    # wait, they are written to workspace_service save_reports. Let's see what workspace_service does.
-    # usually reports are saved under reports_dir or session_dir.
-    # Let's just assert that SOME reports were generated in the workspace reports_dir
-    assert json_report_path.exists() or markdown_report_path.exists() or len(list(temp_workspace.reports_dir.glob("*.json"))) > 0, "No reports found"
+    reports_dir = workspace_svc.workspace_manager.get_session_dir(domain, job_id) / "reports"
+    reports = list(reports_dir.glob("*.json")) + list(reports_dir.glob("*.md"))
+    assert len(reports) > 0, "No reports found"
     

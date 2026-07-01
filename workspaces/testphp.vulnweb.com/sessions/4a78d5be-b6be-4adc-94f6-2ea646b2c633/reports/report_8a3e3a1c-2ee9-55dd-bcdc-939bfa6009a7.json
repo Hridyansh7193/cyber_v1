@@ -1,0 +1,323 @@
+{
+  "report_id": "8a3e3a1c-2ee9-55dd-bcdc-939bfa6009a7",
+  "session_id": "4a78d5be-b6be-4adc-94f6-2ea646b2c633",
+  "report_path": "reports/report.json",
+  "report_format": "json",
+  "created_at": "2026-06-30T09:57:10.266638Z",
+  "timestamp": "2026-06-30T09:57:10.266638Z",
+  "findings": [],
+  "total_findings": 0,
+  "assets": {
+    "subdomains": [],
+    "hosts": [],
+    "urls": [],
+    "javascript": [],
+    "apis": []
+  },
+  "telemetry": [
+    {
+      "tool": "subfinder",
+      "version": "2.6.6",
+      "command": "subfinder -d testphp.vulnweb.com -silent -json",
+      "execution_time": 0.0,
+      "exit_code": -3,
+      "stdout_size": 0,
+      "stderr_size": 0,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Execution failed with exit code -3",
+        "Executable 'subfinder' not found in PATH."
+      ],
+      "parser_errors": [],
+      "binary_path": "",
+      "working_directory": "C:\\Users\\hridy\\Desktop\\cyber"
+    },
+    {
+      "tool": "httpx",
+      "version": "1.6.0",
+      "command": "httpx -l testphp.vulnweb.com -silent -json -title -tech-detect -rt",
+      "execution_time": 0.2375962734222412,
+      "exit_code": 2,
+      "stdout_size": 0,
+      "stderr_size": 58,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Execution failed with exit code 2"
+      ],
+      "parser_errors": [],
+      "binary_path": "C:\\Python314\\Scripts\\httpx.EXE",
+      "working_directory": "C:\\Users\\hridy\\Desktop\\cyber"
+    },
+    {
+      "tool": "assetfinder",
+      "version": "0.1.1",
+      "command": "assetfinder --subs-only testphp.vulnweb.com",
+      "execution_time": 0.0,
+      "exit_code": -3,
+      "stdout_size": 0,
+      "stderr_size": 0,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Execution failed with exit code -3",
+        "Executable 'assetfinder' not found in PATH."
+      ],
+      "parser_errors": [],
+      "binary_path": "",
+      "working_directory": "C:\\Users\\hridy\\Desktop\\cyber"
+    },
+    {
+      "tool": "gau",
+      "version": "2.1.2",
+      "command": "gau testphp.vulnweb.com",
+      "execution_time": 0.0,
+      "exit_code": -3,
+      "stdout_size": 0,
+      "stderr_size": 0,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Execution failed with exit code -3",
+        "Executable 'gau' not found in PATH."
+      ],
+      "parser_errors": [],
+      "binary_path": "",
+      "working_directory": "C:\\Users\\hridy\\Desktop\\cyber"
+    },
+    {
+      "tool": "linkfinder",
+      "version": "1.0.0",
+      "command": "python3 linkfinder.py -i testphp.vulnweb.com -o cli",
+      "execution_time": 0.10318565368652344,
+      "exit_code": 2,
+      "stdout_size": 0,
+      "stderr_size": 167,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Execution failed with exit code 2"
+      ],
+      "parser_errors": [],
+      "binary_path": "C:\\Users\\hridy\\AppData\\Local\\Microsoft\\WindowsApps\\python3.EXE",
+      "working_directory": "C:\\Users\\hridy\\Desktop\\cyber"
+    },
+    {
+      "tool": "secretfinder",
+      "version": "1.0.0",
+      "command": "python3 SecretFinder.py -i testphp.vulnweb.com -o cli",
+      "execution_time": 0.10748720169067383,
+      "exit_code": 2,
+      "stdout_size": 0,
+      "stderr_size": 169,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Execution failed with exit code 2"
+      ],
+      "parser_errors": [],
+      "binary_path": "C:\\Users\\hridy\\AppData\\Local\\Microsoft\\WindowsApps\\python3.EXE",
+      "working_directory": "C:\\Users\\hridy\\Desktop\\cyber"
+    },
+    {
+      "tool": "trufflehog",
+      "version": "3.0.0",
+      "command": "trufflehog filesystem testphp.vulnweb.com --json",
+      "execution_time": 0.0,
+      "exit_code": -3,
+      "stdout_size": 0,
+      "stderr_size": 0,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Execution failed with exit code -3",
+        "Executable 'trufflehog' not found in PATH."
+      ],
+      "parser_errors": [],
+      "binary_path": "",
+      "working_directory": "C:\\Users\\hridy\\Desktop\\cyber"
+    },
+    {
+      "tool": "swagger",
+      "version": "1.0.0",
+      "command": "python3 swagger_discover.py -u testphp.vulnweb.com",
+      "execution_time": 0.09462690353393555,
+      "exit_code": 2,
+      "stdout_size": 0,
+      "stderr_size": 173,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Execution failed with exit code 2"
+      ],
+      "parser_errors": [],
+      "binary_path": "C:\\Users\\hridy\\AppData\\Local\\Microsoft\\WindowsApps\\python3.EXE",
+      "working_directory": "C:\\Users\\hridy\\Desktop\\cyber"
+    },
+    {
+      "tool": "graphql_discovery",
+      "version": "1.0.0",
+      "command": "python3 graphql_discover.py -u testphp.vulnweb.com",
+      "execution_time": 0.10504817962646484,
+      "exit_code": 2,
+      "stdout_size": 0,
+      "stderr_size": 173,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Execution failed with exit code 2"
+      ],
+      "parser_errors": [],
+      "binary_path": "C:\\Users\\hridy\\AppData\\Local\\Microsoft\\WindowsApps\\python3.EXE",
+      "working_directory": "C:\\Users\\hridy\\Desktop\\cyber"
+    },
+    {
+      "tool": "nuclei",
+      "version": "2.9.0",
+      "command": "nuclei -list testphp.vulnweb.com -silent -json",
+      "execution_time": 0.0,
+      "exit_code": -3,
+      "stdout_size": 0,
+      "stderr_size": 0,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Execution failed with exit code -3",
+        "Executable 'nuclei' not found in PATH."
+      ],
+      "parser_errors": [],
+      "binary_path": "",
+      "working_directory": "C:\\Users\\hridy\\Desktop\\cyber"
+    },
+    {
+      "tool": "dalfox",
+      "version": "2.8.0",
+      "command": "dalfox file testphp.vulnweb.com -silent --format json",
+      "execution_time": 0.0,
+      "exit_code": -3,
+      "stdout_size": 0,
+      "stderr_size": 0,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Execution failed with exit code -3",
+        "Executable 'dalfox' not found in PATH."
+      ],
+      "parser_errors": [],
+      "binary_path": "",
+      "working_directory": "C:\\Users\\hridy\\Desktop\\cyber"
+    },
+    {
+      "tool": "subzy",
+      "version": "1.0.0",
+      "command": "subzy run --targets testphp.vulnweb.com --output json",
+      "execution_time": 0.0,
+      "exit_code": -3,
+      "stdout_size": 0,
+      "stderr_size": 0,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Execution failed with exit code -3",
+        "Executable 'subzy' not found in PATH."
+      ],
+      "parser_errors": [],
+      "binary_path": "",
+      "working_directory": "C:\\Users\\hridy\\Desktop\\cyber"
+    },
+    {
+      "tool": "ffuf",
+      "version": "2.0.0",
+      "command": "ffuf -u testphp.vulnweb.com/FUZZ -w common.txt -json -silent",
+      "execution_time": 0.0,
+      "exit_code": -3,
+      "stdout_size": 0,
+      "stderr_size": 0,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Execution failed with exit code -3",
+        "Executable 'ffuf' not found in PATH."
+      ],
+      "parser_errors": [],
+      "binary_path": "",
+      "working_directory": "C:\\Users\\hridy\\Desktop\\cyber"
+    }
+  ],
+  "intelligence": {
+    "version": 1,
+    "planner": {
+      "execute_nodes": [
+        "recon_node",
+        "js_node",
+        "api_node",
+        "vulnerability_node"
+      ],
+      "skipped_nodes": [],
+      "execution_plan": {
+        "recon_plugins": [
+          "subfinder",
+          "httpx",
+          "assetfinder",
+          "gau"
+        ],
+        "js_plugins": [
+          "linkfinder",
+          "secretfinder",
+          "trufflehog"
+        ],
+        "api_plugins": [
+          "swagger",
+          "graphql"
+        ],
+        "vuln_plugins": [
+          "nuclei",
+          "dalfox",
+          "subzy",
+          "ffuf"
+        ]
+      },
+      "priority_overrides": [],
+      "reasoning": "No existing recon data, executing recon_node.",
+      "confidence": 1.0
+    },
+    "prioritized_assets": [],
+    "correlated_findings": [],
+    "attack_graph": {
+      "nodes": [
+        {
+          "id": "target_root",
+          "type": "TARGET",
+          "label": "Root Target"
+        }
+      ],
+      "edges": [],
+      "entry_points": [
+        "target_root"
+      ],
+      "attack_paths": [],
+      "confidence": 1.0
+    },
+    "risk_summary": {
+      "score": 0.0,
+      "level": "INFO",
+      "reasoning": "No significant findings"
+    }
+  },
+  "operational": null,
+  "runtime_metadata": null
+}
