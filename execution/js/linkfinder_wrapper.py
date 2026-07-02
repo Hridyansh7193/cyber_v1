@@ -22,6 +22,8 @@ class LinkFinderWrapper(ExecutionPlugin):
         )
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
+        # Fallback to python linkfinder.py if not in path, but executor handles binary_path.
+        # Ensure we output to JSON format in the current directory if supported, otherwise CLI
         return ("-i", state.target.resolved_url or state.target.domain, "-o", "cli")
 
     def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
@@ -32,8 +34,13 @@ class LinkFinderWrapper(ExecutionPlugin):
         for line in stdout.splitlines():
             line = line.strip()
             # Basic parsing of LinkFinder CLI output
-            if line and not line.startswith("[+]") and not line.startswith("Running"):
-                results.append(line)
+            # A typical LinkFinder line for cli output:
+            # http://example.com/api/v1/user
+            # /api/v2/config
+            if line and not line.startswith("[+]") and not line.startswith("Running") and not line.startswith("Invalid input") and not line.startswith("URL:"):
+                # Also avoid huge JS snippets
+                if len(line) < 500:
+                    results.append(line)
         return list(dict.fromkeys(results))
 
     def health_check(self) -> bool:

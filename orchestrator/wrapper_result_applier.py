@@ -70,6 +70,7 @@ def apply_recon_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolRes
 def apply_js_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResult, ...]) -> ExecutionState:
     new_js_files = list(state.js_state.js_files)
     new_endpoints = list(state.js_state.endpoints)
+    new_secrets = list(state.js_state.secrets)
     new_logs = list(state.logs) + list(_extract_telemetry(wrapper_out))
     
     for tool_res in wrapper_out:
@@ -77,21 +78,29 @@ def apply_js_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResult
         new_js_files.extend(output.get(NEW_JS_FILES, []))
         new_endpoints.extend(output.get(NEW_ENDPOINTS, []))
         
-        # JS plugins like SecretFinder might return secrets too
+        # JS plugins like SecretFinder or Trufflehog might return secrets
         secrets = output.get(NEW_SECRETS, [])
         if secrets:
-            # We must be careful how secrets are stored, state.js_state.secrets is Tuple[str, ...]
-            # or Tuple[Dict, ...]. Let's just append for now.
-            # Assuming state.js_state.secrets is Tuple[str, ...]
-            pass # Secrets logic handled by vulnerability state if needed, or left out if not required by JSState yet.
+            new_secrets.extend(secrets)
 
     merged_files = tuple(dict.fromkeys(new_js_files))
     merged_endpoints = tuple(dict.fromkeys(new_endpoints))
     
+    # Simple deduplication for secrets assuming they are dicts
+    seen_secrets = set()
+    merged_secrets = []
+    for secret in new_secrets:
+        # Create a hashable representation for deduplication
+        # fallback to raw string representation if needed
+        repr_str = str(sorted(secret.items())) if isinstance(secret, dict) else str(secret)
+        if repr_str not in seen_secrets:
+            seen_secrets.add(repr_str)
+            merged_secrets.append(secret)
+    
     new_js = JSState(
         js_files=merged_files,
         endpoints=merged_endpoints,
-        secrets=state.js_state.secrets
+        secrets=tuple(merged_secrets)
     )
     
     assert len(new_logs) == len(state.logs) + len(wrapper_out), "Invariant violated: Telemetry count did not increase correctly"
@@ -101,19 +110,42 @@ def apply_js_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResult
 def apply_api_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResult, ...]) -> ExecutionState:
     new_swagger = list(state.api_state.swagger_urls)
     new_graphql = list(state.api_state.graphql_urls)
+    new_endpoints = list(state.api_state.endpoints)
+    new_schemas = list(state.api_state.schemas)
     new_logs = list(state.logs) + list(_extract_telemetry(wrapper_out))
     
     for tool_res in wrapper_out:
         output = tool_res.metadata or {}
         new_swagger.extend(output.get(NEW_SWAGGER, []))
         new_graphql.extend(output.get(NEW_GRAPHQL, []))
+        new_endpoints.extend(output.get("new_endpoints", []))
+        new_schemas.extend(output.get("new_schemas", []))
 
     merged_swagger = tuple(dict.fromkeys(new_swagger))
     merged_graphql = tuple(dict.fromkeys(new_graphql))
     
+    # Deduplicate dicts
+    seen_endpoints = set()
+    merged_endpoints = []
+    for ep in new_endpoints:
+        repr_str = str(sorted(ep.items())) if isinstance(ep, dict) else str(ep)
+        if repr_str not in seen_endpoints:
+            seen_endpoints.add(repr_str)
+            merged_endpoints.append(ep)
+            
+    seen_schemas = set()
+    merged_schemas = []
+    for schema in new_schemas:
+        repr_str = str(sorted(schema.items())) if isinstance(schema, dict) else str(schema)
+        if repr_str not in seen_schemas:
+            seen_schemas.add(repr_str)
+            merged_schemas.append(schema)
+            
     new_api = APIState(
         swagger_urls=merged_swagger,
-        graphql_urls=merged_graphql
+        graphql_urls=merged_graphql,
+        endpoints=tuple(merged_endpoints),
+        schemas=tuple(merged_schemas)
     )
     
     assert len(new_logs) == len(state.logs) + len(wrapper_out), "Invariant violated: Telemetry count did not increase correctly"

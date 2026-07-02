@@ -28,12 +28,14 @@ class JSState(BaseModel):
     model_config = ConfigDict(frozen=True)
     js_files: Tuple[str, ...] = Field(default=())
     endpoints: Tuple[str, ...] = Field(default=())
-    secrets: Tuple[str, ...] = Field(default=())
+    secrets: Tuple[Mapping[str, Any], ...] = Field(default=())
 
 class APIState(BaseModel):
     model_config = ConfigDict(frozen=True)
     swagger_urls: Tuple[str, ...] = Field(default=())
     graphql_urls: Tuple[str, ...] = Field(default=())
+    endpoints: Tuple[Mapping[str, Any], ...] = Field(default=())
+    schemas: Tuple[Mapping[str, Any], ...] = Field(default=())
 
 class VulnerabilityState(BaseModel):
     model_config = ConfigDict(frozen=True)

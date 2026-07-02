@@ -24,19 +24,41 @@ class SwaggerPlugin(ExecutionPlugin):
     def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
         return bool(state.target.domain)
 
-    def parse(self, stdout: str, stderr: str) -> List[str]:
+    def parse(self, stdout: str, stderr: str) -> List[Any]:
         results = []
         for line in stdout.splitlines():
             line = line.strip()
-            if line:
+            if not line:
+                continue
+            try:
+                results.append(json.loads(line))
+            except json.JSONDecodeError:
                 results.append(line)
-        return list(dict.fromkeys(results))
+        return results
 
     def health_check(self) -> bool:
         return True
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
-        return {NEW_SWAGGER: parsed}
+        swagger_urls = []
+        endpoints = []
+        schemas = []
+        for item in parsed:
+            if isinstance(item, str):
+                swagger_urls.append(item)
+            elif isinstance(item, dict):
+                if "url" in item:
+                    swagger_urls.append(item["url"])
+                if "endpoint" in item:
+                    endpoints.append(item["endpoint"])
+                if "schema" in item:
+                    schemas.append(item["schema"])
+        
+        return {
+            NEW_SWAGGER: list(dict.fromkeys(swagger_urls)),
+            "new_endpoints": endpoints,
+            "new_schemas": schemas
+        }
 
 class SwaggerWrapper:
     """Deprecated: deterministic wrapper. Maintained for backward compatibility."""

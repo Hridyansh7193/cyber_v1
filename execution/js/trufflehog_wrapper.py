@@ -45,5 +45,14 @@ class TrufflehogWrapper(ExecutionPlugin):
         return True
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
-        return {NEW_SECRETS: parsed}
+        secrets = []
+        for secret in parsed:
+            secrets.append({
+                "detector": secret.get("DetectorName", "unknown"),
+                "verified": secret.get("Verified", False),
+                "redacted": secret.get("Redacted", ""),
+                "raw": secret.get("Raw", ""),
+                "file": secret.get("SourceMetadata", {}).get("Data", {}).get("Git", {}).get("file", "unknown")
+            })
+        return {NEW_SECRETS: secrets}
 
