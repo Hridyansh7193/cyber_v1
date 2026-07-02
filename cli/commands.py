@@ -13,9 +13,10 @@ console = Console()
 def scan_cmd(
     domain: str, 
     config: str = typer.Option(None, help="Path to config file"),
-    header: list[str] = typer.Option(None, "--header", "-H", help="Custom headers (e.g. 'Cookie: session=123')")
+    header: list[str] = typer.Option(None, "--header", "-H", help="Custom headers (e.g. 'Cookie: session=123')"),
+    resume: str = typer.Option(None, "--resume", help="Resume an interrupted scan given its session ID")
 ):
-    """Start a new scan."""
+    """Start a new scan or resume an interrupted one."""
     cfg = default_config
     if config:
         with open(config, "r") as f:
@@ -30,7 +31,7 @@ def scan_cmd(
         cfg = cfg.model_copy(update={"auth": new_auth})
                 
     try:
-        job_id = scan_service.submit_scan(domain, cfg)
+        job_id = scan_service.submit_scan(domain, cfg, resume_session_id=resume)
         console.print(f"[green]Scan submitted![/green] Job ID: [bold]{job_id}[/bold]")
         track_scan_progress(scan_service, job_id)
         

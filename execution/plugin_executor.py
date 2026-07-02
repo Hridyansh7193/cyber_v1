@@ -137,6 +137,27 @@ class PluginExecutor:
             result = ProcessRunner.run(final_command, plugin.metadata().name)
             logger.info(f"{plugin.metadata().name} finished in {result.execution_time:.2f}s (Exit code: {result.exit_code})")
             
+            # Evidence writing logic
+            if state.target.session_id:
+                # We need to construct the path to evidence dir
+                # Since WorkspaceService isn't passed here directly, we rely on a standard path format
+                # assuming target and session_id exist
+                target_str = state.target.domain
+                import os
+                evidence_dir = os.path.join("workspaces", target_str, "sessions", state.target.session_id, "evidence")
+                if os.path.exists(evidence_dir):
+                    stdout_file = os.path.join(evidence_dir, f"{plugin.metadata().name}_stdout.log")
+                    stderr_file = os.path.join(evidence_dir, f"{plugin.metadata().name}_stderr.log")
+                    try:
+                        if result.stdout:
+                            with open(stdout_file, "a", encoding="utf-8") as f:
+                                f.write(result.stdout + "\n")
+                        if result.stderr:
+                            with open(stderr_file, "a", encoding="utf-8") as f:
+                                f.write(result.stderr + "\n")
+                    except Exception as e:
+                        logger.error(f"Failed to write evidence for {plugin.metadata().name}: {e}")
+            
             parsed = []
             errors = []
             if result.exit_code == 0:

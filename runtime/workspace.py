@@ -30,9 +30,10 @@ class WorkspaceManager:
         session_dir = self.get_session_dir(target, session_id)
         session_dir.mkdir(parents=True, exist_ok=True)
         
-        # Create reports and logs directories for this session
+        # Create reports, logs, and evidence directories for this session
         (session_dir / "reports").mkdir(exist_ok=True)
         (session_dir / "logs").mkdir(exist_ok=True)
+        (session_dir / "evidence").mkdir(exist_ok=True)
         
         metadata = WorkspaceMetadata(
             session_id=session_id,

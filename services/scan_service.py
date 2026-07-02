@@ -31,19 +31,19 @@ class ScanService:
         self._workspace_service = workspace_service
         self._threads: Dict[str, threading.Thread] = {}
 
-    def submit_scan(self, domain: str, config: BugHunterConfig, metadata: dict = None) -> str:
-        job_id = self._registry.create_job(domain, metadata)
-        thread = threading.Thread(target=self.run_scan_sync, args=(domain, config, metadata, job_id), daemon=True)
+    def submit_scan(self, domain: str, config: BugHunterConfig, metadata: dict = None, resume_session_id: str = None) -> str:
+        job_id = resume_session_id if resume_session_id else self._registry.create_job(domain, metadata)
+        thread = threading.Thread(target=self.run_scan_sync, args=(domain, config, metadata, job_id, resume_session_id is not None), daemon=True)
         self._threads[job_id] = thread
         thread.start()
         return job_id
         
-    def run_scan_sync(self, domain: str, config: BugHunterConfig, metadata: dict = None, job_id: str = None) -> str:
+    def run_scan_sync(self, domain: str, config: BugHunterConfig, metadata: dict = None, job_id: str = None, is_resume: bool = False) -> str:
         if not job_id:
             job_id = self._registry.create_job(domain, metadata)
             
         target = TargetService.normalize_target(domain, job_id, metadata)
-        logger.info(f"Scan started for target: {domain} (Job: {job_id})")
+        logger.info(f"Scan started for target: {domain} (Job: {job_id}){' (Resuming)' if is_resume else ''}")
         
         # Initialize Runtime Context
         tool_manager = ToolManager()
@@ -61,10 +61,31 @@ class ScanService:
             target_resolver=target_resolver
         )
         
-        if self._persistence_service:
+        if self._persistence_service and not is_resume:
             self._persistence_service.create_session(job_id, domain)
+            
+        # If resuming, load state from checkpoint
+        resume_state = None
+        if is_resume:
+            try:
+                import os
+                import json
+                from schemas.state import ExecutionState
+                session_dir = os.path.join("workspaces", domain, "sessions", job_id)
+                checkpoint_path = os.path.join(session_dir, "checkpoint.json")
+                if os.path.exists(checkpoint_path):
+                    with open(checkpoint_path, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                        resume_state = ExecutionState(**data)
+                        # Re-inject runtime_context since it doesn't serialize
+                        resume_state = resume_state.model_copy(update={"runtime_context": runtime_context})
+                        logger.info("Successfully loaded checkpoint for resumption.")
+                else:
+                    logger.warning(f"No checkpoint found at {checkpoint_path}. Starting fresh.")
+            except Exception as e:
+                logger.error(f"Failed to load checkpoint: {e}. Starting fresh.")
         
-        final_state = self._adapter.run_scan(job_id, target, runtime_context)
+        final_state = self._adapter.run_scan(job_id, target, runtime_context, resume_state)
         
         if final_state:
             logger.info("Scan finished successfully.")

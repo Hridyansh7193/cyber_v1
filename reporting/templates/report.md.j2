@@ -62,5 +62,16 @@
 * **Confidence:** {{ finding.confidence.value if finding.confidence.value is defined else finding.confidence }}
 
 **Evidence:**
+```
 {{ finding.evidence }}
+```
+
+{% if finding.poc %}
+**Proof of Concept:**
+```
+{{ finding.poc }}
+```
+{% endif %}
+*Source Tool: {{ finding.source_tool }}*
+
 {% endfor %}
