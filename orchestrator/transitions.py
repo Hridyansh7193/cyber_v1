@@ -35,6 +35,12 @@ def js_transition(state: GraphState) -> str:
 def api_transition(state: GraphState) -> str:
     status = state["orchestration_state"].task_status.get("api", "PENDING")
     if status in {"COMPLETED", "FAILED", "CANCELLED"}:
+        return "parameter_node"
+    return END
+
+def parameter_transition(state: GraphState) -> str:
+    status = state["orchestration_state"].task_status.get("parameter", "PENDING")
+    if status in {"COMPLETED", "FAILED", "CANCELLED"}:
         return "vulnerability_node"
     return END
 

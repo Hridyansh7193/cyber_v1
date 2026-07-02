@@ -34,6 +34,8 @@ from execution.js.trufflehog_wrapper import TrufflehogWrapper
 from execution.vuln.ffuf_wrapper import FfufPlugin
 from execution.vuln.subzy_wrapper import SubzyPlugin
 
+from execution.discovery.arjun_wrapper import ArjunPlugin
+
 REGISTRY.register("subfinder", SubfinderWrapper())
 REGISTRY.register("httpx", HttpxPlugin())
 REGISTRY.register("katana", KatanaPlugin())
@@ -48,3 +50,4 @@ REGISTRY.register("graphql", GraphQLPlugin())
 REGISTRY.register("trufflehog", TrufflehogWrapper())
 REGISTRY.register("ffuf", FfufPlugin())
 REGISTRY.register("subzy", SubzyPlugin())
+REGISTRY.register("arjun", ArjunPlugin())

@@ -35,13 +35,13 @@ def test_js_transition():
 
 def test_api_transition():
     state: GraphState = {"execution_state": None, "orchestration_state": OrchestrationState(task_status={"api": "COMPLETED"}, errors={})}
-    assert api_transition(state) == "vulnerability_node"
+    assert api_transition(state) == "parameter_node"
     
     state["orchestration_state"].task_status["api"] = "FAILED"
-    assert api_transition(state) == "vulnerability_node"
+    assert api_transition(state) == "parameter_node"
     
     state["orchestration_state"].task_status["api"] = "CANCELLED"
-    assert api_transition(state) == "vulnerability_node"
+    assert api_transition(state) == "parameter_node"
     
     state["orchestration_state"].task_status["api"] = "PENDING"
     assert api_transition(state) == END

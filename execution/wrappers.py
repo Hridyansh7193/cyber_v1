@@ -24,3 +24,8 @@ class VulnWrapper:
     @staticmethod
     def execute(plugin_names: Tuple[str, ...], config: BugHunterConfig, state: ExecutionState) -> Tuple[ToolResult, ...]:
         return PluginExecutor.execute_plugins(plugin_names, config, state)
+
+class ParameterWrapper:
+    @staticmethod
+    def execute(plugin_names: Tuple[str, ...], config: BugHunterConfig, state: ExecutionState) -> Tuple[ToolResult, ...]:
+        return PluginExecutor.execute_plugins(plugin_names, config, state)

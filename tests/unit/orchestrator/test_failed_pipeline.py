@@ -16,6 +16,6 @@ def test_failed_tasks_reach_report():
     
     assert passive_recon_transition(state) == "scope_enforcement_node"
     assert js_transition(state) == "api_node"
-    assert api_transition(state) == "vulnerability_node"
+    assert api_transition(state) == "parameter_node"
     assert vuln_transition(state) == "analysis_node"
     assert analysis_transition(state) == "report_node"

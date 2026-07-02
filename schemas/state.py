@@ -17,6 +17,12 @@ class ReconState(BaseModel):
     alive_hosts: Tuple[str, ...] = Field(default=())
     urls: Tuple[str, ...] = Field(default=())
     parameters: Tuple[str, ...] = Field(default=())
+    tech_stack: Mapping[str, Tuple[str, ...]] = Field(default_factory=lambda: MappingProxyType({}))
+    waf_detected: Mapping[str, bool] = Field(default_factory=lambda: MappingProxyType({}))
+
+    @field_serializer('tech_stack', 'waf_detected')
+    def serialize_mappings(self, v: Mapping, _info):
+        return dict(v)
 
 class JSState(BaseModel):
     model_config = ConfigDict(frozen=True)

@@ -42,8 +42,27 @@ class HttpxPlugin(ExecutionPlugin):
         return True
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
-        hosts = [x.get("host", x.get("url", str(x))) if isinstance(x, dict) else str(x) for x in parsed]
-        return {NEW_HOSTS: hosts}
+        hosts = []
+        tech_stack = {}
+        waf_detected = {}
+        for x in parsed:
+            if isinstance(x, dict):
+                url = x.get("url", x.get("host", str(x)))
+                hosts.append(url)
+                techs = x.get("technologies", [])
+                if techs:
+                    tech_stack[url] = tuple(techs)
+                    waf_keywords = ["waf", "cloudflare", "akamai", "imperva", "sucuri", "incapsula", "aws web application firewall"]
+                    is_waf = any(any(wk in t.lower() for wk in waf_keywords) for t in techs)
+                    if is_waf:
+                        waf_detected[url] = True
+            else:
+                hosts.append(str(x))
+        return {
+            NEW_HOSTS: hosts,
+            "tech_stack": tech_stack,
+            "waf_detected": waf_detected
+        }
 
 class HttpxWrapper:
     """Deprecated: deterministic wrapper. Maintained for backward compatibility."""

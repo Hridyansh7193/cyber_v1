@@ -39,8 +39,10 @@ def test_missing_binary(base_config, mock_runtime_context):
     
     results = PluginExecutor.execute_plugins(("subfinder",), base_config, state)
     
-    # If binary is missing, it should skip execution and return empty results for that plugin
-    assert len(results) == 0
+    # If binary is missing, it should skip execution and return empty results for that plugin, actually it returns a failed ToolResult
+    assert len(results) == 1
+    assert results[0].success == False
+    assert results[0].exit_code == -2
 
 @patch("execution.utils.process_runner.ProcessRunner.run")
 def test_invalid_json_output(mock_run, base_config, mock_runtime_context):

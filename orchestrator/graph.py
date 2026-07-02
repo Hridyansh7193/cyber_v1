@@ -1,8 +1,8 @@
 from langgraph.graph import StateGraph, END
 from orchestrator.graph_state import GraphState
 from orchestrator.state_adapter import from_graph_state, to_graph_state
-from orchestrator.nodes import init_node, planner_node, passive_recon_node, active_recon_node, scope_enforcement_node, js_node, api_node, vulnerability_node, analysis_node, report_node
-from orchestrator.transitions import planner_transition, passive_recon_transition, scope_enforcement_transition, active_recon_transition, js_transition, api_transition, vuln_transition, analysis_transition
+from orchestrator.nodes import init_node, planner_node, passive_recon_node, active_recon_node, scope_enforcement_node, js_node, api_node, parameter_node, vulnerability_node, analysis_node, report_node
+from orchestrator.transitions import planner_transition, passive_recon_transition, scope_enforcement_transition, active_recon_transition, js_transition, api_transition, parameter_transition, vuln_transition, analysis_transition
 from orchestrator.retry_policy import get_retry_policy
 from orchestrator.checkpoint_manager import CheckpointManager
 from config.schemas import BugHunterConfig
@@ -61,6 +61,12 @@ def build_graph(config: BugHunterConfig, checkpointer: CheckpointManager = None)
         wrap_node(api_node),
         retry_policy=retry
     )
+    
+    workflow.add_node(
+        "parameter_node",
+        wrap_node(parameter_node),
+        retry_policy=retry
+    )
 
     workflow.add_node(
         "vulnerability_node",
@@ -88,7 +94,8 @@ def build_graph(config: BugHunterConfig, checkpointer: CheckpointManager = None)
     workflow.add_conditional_edges("scope_enforcement_node", scope_enforcement_transition, {"active_recon_node": "active_recon_node", "END": END})
     workflow.add_conditional_edges("active_recon_node", active_recon_transition, {"js_node": "js_node", "END": END})
     workflow.add_conditional_edges("js_node", js_transition, {"api_node": "api_node", "END": END})
-    workflow.add_conditional_edges("api_node", api_transition, {"vulnerability_node": "vulnerability_node", "END": END})
+    workflow.add_conditional_edges("api_node", api_transition, {"parameter_node": "parameter_node", "END": END})
+    workflow.add_conditional_edges("parameter_node", parameter_transition, {"vulnerability_node": "vulnerability_node", "END": END})
     workflow.add_conditional_edges("vulnerability_node", vuln_transition, {"analysis_node": "analysis_node", "END": END})
     workflow.add_conditional_edges("analysis_node", analysis_transition, {"report_node": "report_node", "END": END})
     workflow.add_edge("report_node", END)

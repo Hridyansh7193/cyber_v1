@@ -31,11 +31,24 @@ def apply_recon_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolRes
     new_urls = list(state.recon_state.urls)
     new_logs = list(state.logs) + list(_extract_telemetry(wrapper_out))
     
+    merged_tech = dict(state.recon_state.tech_stack)
+    merged_waf = dict(state.recon_state.waf_detected)
+    
     for tool_res in wrapper_out:
         output = tool_res.metadata or {}
         new_subdomains.extend(output.get(NEW_SUBDOMAINS, []))
         new_hosts.extend(output.get(NEW_HOSTS, []))
         new_urls.extend(output.get(NEW_URLS, []))
+        
+        # Merge tech stack
+        for k, v in output.get("tech_stack", {}).items():
+            if k in merged_tech:
+                merged_tech[k] = tuple(dict.fromkeys(list(merged_tech[k]) + list(v)))
+            else:
+                merged_tech[k] = v
+                
+        # Merge waf detected
+        merged_waf.update(output.get("waf_detected", {}))
 
     merged_subs = tuple(dict.fromkeys(new_subdomains))
     merged_hosts = tuple(dict.fromkeys(new_hosts))
@@ -45,7 +58,9 @@ def apply_recon_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolRes
         subdomains=merged_subs,
         alive_hosts=merged_hosts,
         urls=merged_urls,
-        parameters=state.recon_state.parameters
+        parameters=state.recon_state.parameters,
+        tech_stack=merged_tech,
+        waf_detected=merged_waf
     )
     
     assert len(new_logs) == len(state.logs) + len(wrapper_out), "Invariant violated: Telemetry count did not increase correctly"
@@ -124,3 +139,27 @@ def apply_vuln_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResu
     assert len(new_logs) == len(state.logs) + len(wrapper_out), "Invariant violated: Telemetry count did not increase correctly"
     
     return state.model_copy(deep=True, update={"vuln_state": new_vuln, "logs": tuple(new_logs)})
+
+def apply_parameter_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResult, ...]) -> ExecutionState:
+    new_logs = list(state.logs) + list(_extract_telemetry(wrapper_out))
+    
+    new_params = list(state.recon_state.parameters)
+    
+    for tool_res in wrapper_out:
+        output = tool_res.metadata or {}
+        new_params.extend(output.get("new_fuzz_results", []))
+
+    merged_params = tuple(dict.fromkeys(new_params))
+    
+    new_recon = ReconState(
+        subdomains=state.recon_state.subdomains,
+        alive_hosts=state.recon_state.alive_hosts,
+        urls=state.recon_state.urls,
+        parameters=merged_params,
+        tech_stack=state.recon_state.tech_stack,
+        waf_detected=state.recon_state.waf_detected
+    )
+    
+    assert len(new_logs) == len(state.logs) + len(wrapper_out), "Invariant violated: Telemetry count did not increase correctly"
+    
+    return state.model_copy(deep=True, update={"recon_state": new_recon, "logs": tuple(new_logs)})

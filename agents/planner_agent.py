@@ -43,11 +43,25 @@ def plan(state: ExecutionState, config: BugHunterConfig) -> IntelligenceDelta:
     # 4. Vuln node
     execute_nodes.append("vulnerability_node")
     
+    # 5. WAF and Tech Stack Logic
+    has_waf = any(state.recon_state.waf_detected.values())
+    vuln_plugins_list = list(vuln_plugins)
+    
+    if has_waf:
+        reasoning.append("WAF detected. Limiting aggressive tools (skipping Dalfox).")
+        if "dalfox" in vuln_plugins_list:
+            vuln_plugins_list.remove("dalfox")
+            
+    is_wordpress = any("wordpress" in str(techs).lower() for techs in state.recon_state.tech_stack.values())
+    if is_wordpress and "wpscan" not in vuln_plugins_list:
+        reasoning.append("WordPress detected. Enabling WPScan.")
+        vuln_plugins_list.append("wpscan")
+    
     plan = ExecutionPlan(
         recon_plugins=recon_plugins,
         js_plugins=js_plugins,
         api_plugins=api_plugins,
-        vuln_plugins=vuln_plugins
+        vuln_plugins=tuple(vuln_plugins_list)
     )
     
     decision = PlannerDecision(

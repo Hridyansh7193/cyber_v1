@@ -4,11 +4,23 @@ from schemas.finding import Finding
 import uuid
 
 def apply_recon_delta(state: ExecutionState, delta: ReconDelta) -> ExecutionState:
+    merged_tech = dict(state.recon_state.tech_stack)
+    for k, v in delta.tech_stack.items():
+        if k in merged_tech:
+            merged_tech[k] = tuple(dict.fromkeys(list(merged_tech[k]) + list(v)))
+        else:
+            merged_tech[k] = v
+            
+    merged_waf = dict(state.recon_state.waf_detected)
+    merged_waf.update(delta.waf_detected)
+
     new_recon = ReconState(
         subdomains=tuple(dict.fromkeys(list(state.recon_state.subdomains) + list(delta.subdomains))),
         alive_hosts=tuple(dict.fromkeys(list(state.recon_state.alive_hosts) + list(delta.alive_hosts))),
         urls=tuple(dict.fromkeys(list(state.recon_state.urls) + list(delta.urls))),
-        parameters=state.recon_state.parameters
+        parameters=state.recon_state.parameters,
+        tech_stack=merged_tech,
+        waf_detected=merged_waf
     )
     assert len(new_recon.subdomains) >= len(state.recon_state.subdomains), "Invariant violated: Subdomains lost during delta apply"
     assert len(new_recon.alive_hosts) >= len(state.recon_state.alive_hosts), "Invariant violated: Hosts lost during delta apply"

@@ -45,6 +45,10 @@ class ResourceLimitsConfig(BaseModel):
     max_urls: int = 50000
     max_findings: int = 1000
 
+class AuthConfig(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    headers: List[str] = []
+
 class BugHunterConfig(BaseModel):
     model_config = ConfigDict(frozen=True)
     version: str = "2"
@@ -54,3 +58,4 @@ class BugHunterConfig(BaseModel):
     timeouts: TimeoutsConfig
     reporting: ReportingConfig
     resource_limits: ResourceLimitsConfig = ResourceLimitsConfig()
+    auth: AuthConfig = AuthConfig()

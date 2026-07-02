@@ -10,7 +10,11 @@ app = typer.Typer()
 console = Console()
 
 @app.command("scan")
-def scan_cmd(domain: str, config: str = typer.Option(None, help="Path to config file")):
+def scan_cmd(
+    domain: str, 
+    config: str = typer.Option(None, help="Path to config file"),
+    header: list[str] = typer.Option(None, "--header", "-H", help="Custom headers (e.g. 'Cookie: session=123')")
+):
     """Start a new scan."""
     cfg = default_config
     if config:
@@ -19,6 +23,11 @@ def scan_cmd(domain: str, config: str = typer.Option(None, help="Path to config 
                 cfg = BugHunterConfig.model_validate(json.load(f))
             else:
                 cfg = BugHunterConfig.model_validate(yaml.safe_load(f))
+                
+    if header:
+        # Pydantic models with frozen=True require model_copy(update=...)
+        new_auth = cfg.auth.model_copy(update={"headers": list(header)})
+        cfg = cfg.model_copy(update={"auth": new_auth})
                 
     try:
         job_id = scan_service.submit_scan(domain, cfg)

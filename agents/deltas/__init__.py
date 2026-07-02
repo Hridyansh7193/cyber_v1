@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Tuple, Dict, Any
 
 from schemas.report import Report
@@ -13,6 +13,8 @@ class ReconDelta(BaseModel):
     subdomains: Tuple[str, ...]
     alive_hosts: Tuple[str, ...]
     urls: Tuple[str, ...]
+    tech_stack: Dict[str, Tuple[str, ...]] = Field(default_factory=dict)
+    waf_detected: Dict[str, bool] = Field(default_factory=dict)
 
 class JSDelta(BaseModel):
     model_config = ConfigDict(frozen=True)

@@ -12,6 +12,7 @@ class Capability(str, Enum):
     SECRETS = "Secrets"
     FUZZING = "Fuzzing"
     VULN = "Vuln"
+    PARAMETER_DISCOVERY = "ParameterDiscovery"
     REPORTING = "Reporting"
     ANALYTICS = "Analytics"
 
