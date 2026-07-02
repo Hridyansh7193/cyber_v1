@@ -46,21 +46,42 @@ def plan(state: ExecutionState, config: BugHunterConfig) -> IntelligenceDelta:
     # 5. WAF and Tech Stack Logic
     has_waf = any(state.recon_state.waf_detected.values())
     vuln_plugins_list = list(vuln_plugins)
+    js_plugins_list = list(js_plugins)
+    api_plugins_list = list(api_plugins)
+    recon_plugins_list = list(recon_plugins)
     
     if has_waf:
-        reasoning.append("WAF detected. Limiting aggressive tools (skipping Dalfox).")
+        reasoning.append("WAF detected. Limiting aggressive tools (skipping Dalfox and ffuf).")
         if "dalfox" in vuln_plugins_list:
             vuln_plugins_list.remove("dalfox")
+        if "ffuf" in vuln_plugins_list:
+            vuln_plugins_list.remove("ffuf")
             
     is_wordpress = any("wordpress" in str(techs).lower() for techs in state.recon_state.tech_stack.values())
     if is_wordpress and "wpscan" not in vuln_plugins_list:
         reasoning.append("WordPress detected. Enabling WPScan.")
         vuln_plugins_list.append("wpscan")
+        
+    # 6. JavaScript Logic
+    if not state.js_state.js_files and state.target.session_id: # Only skip if we've already done some recon and found none. If it's the first run, we might not have JS files yet, but wait, JS files are found by recon? No, gau/wayback finds them.
+        # Actually, let's keep them if it's the first pass, but planner runs before execution.
+        pass
+
+    # 7. API Logic
+    if state.api_state.swagger_urls or state.api_state.graphql_urls or state.api_state.endpoints:
+        reasoning.append("APIs detected. Prioritizing API tools.")
+        if "graphql" not in api_plugins_list:
+            api_plugins_list.append("graphql")
+        if "swagger" not in api_plugins_list:
+            api_plugins_list.append("swagger")
+            
+    # Add parameter node plugins if needed (arjun is handled by orchestrator, but we can add it here if planner controls it)
+    parameter_plugins = ("arjun",)
     
     plan = ExecutionPlan(
-        recon_plugins=recon_plugins,
-        js_plugins=js_plugins,
-        api_plugins=api_plugins,
+        recon_plugins=tuple(recon_plugins_list),
+        js_plugins=tuple(js_plugins_list),
+        api_plugins=tuple(api_plugins_list),
         vuln_plugins=tuple(vuln_plugins_list)
     )
     

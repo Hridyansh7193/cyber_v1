@@ -155,12 +155,53 @@ def apply_api_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResul
 def apply_vuln_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResult, ...]) -> ExecutionState:
     new_nuclei = list(state.vuln_state.nuclei_results)
     new_dalfox = list(state.vuln_state.dalfox_results)
+    new_findings = list(state.findings)
     new_logs = list(state.logs) + list(_extract_telemetry(wrapper_out))
+    
+    from schemas.finding import Finding, Severity, Confidence
     
     for tool_res in wrapper_out:
         output = tool_res.metadata or {}
-        new_nuclei.extend(output.get(NEW_NUCLEI, []))
-        new_dalfox.extend(output.get(NEW_DALFOX, []))
+        
+        # Parse nuclei
+        nuclei_out = output.get(NEW_NUCLEI, [])
+        new_nuclei.extend(nuclei_out)
+        for vuln in nuclei_out:
+            if isinstance(vuln, dict):
+                sev_str = vuln.get("info", {}).get("severity", "info").lower()
+                severity = Severity.INFO
+                if sev_str in ["low", "medium", "high", "critical"]:
+                    severity = Severity(sev_str)
+                    
+                finding = Finding(
+                    title=vuln.get("info", {}).get("name", "Nuclei Finding"),
+                    severity=severity,
+                    confidence=Confidence.HIGH,
+                    evidence=vuln.get("extracted-results", [""])[0] if vuln.get("extracted-results") else vuln.get("matched-at", ""),
+                    poc=vuln.get("curl-command", ""),
+                    source_tool="nuclei"
+                )
+                new_findings.append(finding)
+                
+        # Parse dalfox
+        dalfox_out = output.get(NEW_DALFOX, [])
+        new_dalfox.extend(dalfox_out)
+        for vuln in dalfox_out:
+            if isinstance(vuln, dict):
+                sev_str = vuln.get("severity", "low").lower()
+                severity = Severity.LOW
+                if sev_str in ["low", "medium", "high", "critical"]:
+                    severity = Severity(sev_str)
+                    
+                finding = Finding(
+                    title=f"Dalfox XSS: {vuln.get('type', 'Unknown')}",
+                    severity=severity,
+                    confidence=Confidence.HIGH,
+                    evidence=vuln.get("poc", ""),
+                    poc=vuln.get("message", ""),
+                    source_tool="dalfox"
+                )
+                new_findings.append(finding)
     
     new_vuln = VulnerabilityState(
         nuclei_results=tuple(new_nuclei),
@@ -168,9 +209,17 @@ def apply_vuln_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResu
         takeovers=state.vuln_state.takeovers
     )
     
+    # Deduplicate findings by id
+    seen_ids = set()
+    deduped_findings = []
+    for f in new_findings:
+        if f.id not in seen_ids:
+            seen_ids.add(f.id)
+            deduped_findings.append(f)
+    
     assert len(new_logs) == len(state.logs) + len(wrapper_out), "Invariant violated: Telemetry count did not increase correctly"
     
-    return state.model_copy(deep=True, update={"vuln_state": new_vuln, "logs": tuple(new_logs)})
+    return state.model_copy(deep=True, update={"vuln_state": new_vuln, "findings": tuple(deduped_findings), "logs": tuple(new_logs)})
 
 def apply_parameter_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResult, ...]) -> ExecutionState:
     new_logs = list(state.logs) + list(_extract_telemetry(wrapper_out))

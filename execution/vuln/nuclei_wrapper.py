@@ -21,7 +21,27 @@ class NucleiPlugin(ExecutionPlugin):
         )
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
-        return ("-silent", "-json")
+        cmd = ["-silent", "-json"]
+        
+        # Add dynamic tags based on tech stack
+        tech_tags = set()
+        for tech_list in state.recon_state.tech_stack.values():
+            for tech in tech_list:
+                tech_tags.add(tech.lower().replace(" ", "-"))
+        
+        # Also always run severe vulnerabilities and common CVEs
+        tags = ["cve", "high", "critical", "auth-bypass", "takeover"]
+        if tech_tags:
+            # We don't want to run all tags of every tech, just the tech name if it exists as a tag.
+            # Usually nuclei handles this well.
+            tags.extend(list(tech_tags))
+            
+        cmd.extend(["-tags", ",".join(tags)])
+        
+        # Optional: Add severity filter
+        cmd.extend(["-severity", "high,critical,medium"])
+        
+        return tuple(cmd)
 
     def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
         return bool(state.target.domain)

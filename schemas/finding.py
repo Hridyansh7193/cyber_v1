@@ -23,6 +23,8 @@ class Finding(BaseModel):
     severity: Severity
     confidence: Confidence
     evidence: str
+    poc: str = Field(default="")
+    source_tool: str = Field(default="unknown")
     references: Tuple[str, ...] = Field(default=())
     
     @model_validator(mode='before')

@@ -64,13 +64,16 @@ class PluginExecutor:
                     current_target = list(state.recon_state.subdomains) if state.recon_state.subdomains else state.target.domain
                 elif plugin.metadata().name in ["katana"]:
                     current_target = list(state.recon_state.alive_hosts) if state.recon_state.alive_hosts else state.target.resolved_url or state.target.domain
-                elif plugin.metadata().name in ["nuclei", "subzy", "ffuf", "dalfox"]:
+                elif plugin.metadata().name in ["nuclei", "subzy", "ffuf"]:
                     # Vuln plugins act on URLs or endpoints
                     urls = set(state.recon_state.urls)
                     urls.update(state.js_state.endpoints)
                     urls.update(state.api_state.swagger_urls)
                     urls.update(state.api_state.graphql_urls)
                     current_target = list(urls) if urls else state.target.resolved_url or state.target.domain
+                elif plugin.metadata().name == "dalfox":
+                    # Dalfox should only target discovered parameters to minimize noise
+                    current_target = list(state.recon_state.parameters) if state.recon_state.parameters else None
                 else:
                     # Generic fallback
                     current_target = state.target.resolved_url or state.target.domain
