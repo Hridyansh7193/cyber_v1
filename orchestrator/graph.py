@@ -1,8 +1,8 @@
 from langgraph.graph import StateGraph, END
 from orchestrator.graph_state import GraphState
 from orchestrator.state_adapter import from_graph_state, to_graph_state
-from orchestrator.nodes import init_node, planner_node, recon_node, js_node, api_node, vulnerability_node, analysis_node, report_node
-from orchestrator.transitions import planner_transition, recon_transition, js_transition, api_transition, vuln_transition, analysis_transition
+from orchestrator.nodes import init_node, planner_node, passive_recon_node, active_recon_node, scope_enforcement_node, js_node, api_node, vulnerability_node, analysis_node, report_node
+from orchestrator.transitions import planner_transition, passive_recon_transition, scope_enforcement_transition, active_recon_transition, js_transition, api_transition, vuln_transition, analysis_transition
 from orchestrator.retry_policy import get_retry_policy
 from orchestrator.checkpoint_manager import CheckpointManager
 from config.schemas import BugHunterConfig
@@ -33,8 +33,20 @@ def build_graph(config: BugHunterConfig, checkpointer: CheckpointManager = None)
     )
 
     workflow.add_node(
-        "recon_node",
-        wrap_node(recon_node),
+        "passive_recon_node",
+        wrap_node(passive_recon_node),
+        retry_policy=retry
+    )
+    
+    workflow.add_node(
+        "scope_enforcement_node",
+        wrap_node(scope_enforcement_node),
+        retry_policy=retry
+    )
+    
+    workflow.add_node(
+        "active_recon_node",
+        wrap_node(active_recon_node),
         retry_policy=retry
     )
 
@@ -66,13 +78,15 @@ def build_graph(config: BugHunterConfig, checkpointer: CheckpointManager = None)
         "report_node",
         wrap_node(report_node),
         retry_policy=retry
-)
+    )
 
     workflow.set_entry_point("init_node")
     workflow.add_edge("init_node", "planner_node")
     
-    workflow.add_conditional_edges("planner_node", planner_transition, {"recon_node": "recon_node", "END": END})
-    workflow.add_conditional_edges("recon_node", recon_transition, {"js_node": "js_node", "END": END})
+    workflow.add_conditional_edges("planner_node", planner_transition, {"passive_recon_node": "passive_recon_node", "END": END})
+    workflow.add_conditional_edges("passive_recon_node", passive_recon_transition, {"scope_enforcement_node": "scope_enforcement_node", "END": END})
+    workflow.add_conditional_edges("scope_enforcement_node", scope_enforcement_transition, {"active_recon_node": "active_recon_node", "END": END})
+    workflow.add_conditional_edges("active_recon_node", active_recon_transition, {"js_node": "js_node", "END": END})
     workflow.add_conditional_edges("js_node", js_transition, {"api_node": "api_node", "END": END})
     workflow.add_conditional_edges("api_node", api_transition, {"vulnerability_node": "vulnerability_node", "END": END})
     workflow.add_conditional_edges("vulnerability_node", vuln_transition, {"analysis_node": "analysis_node", "END": END})

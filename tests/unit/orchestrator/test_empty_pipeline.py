@@ -1,5 +1,5 @@
 import pytest
-from orchestrator.transitions import recon_transition, js_transition, api_transition, vuln_transition, analysis_transition
+from orchestrator.transitions import passive_recon_transition, js_transition, api_transition, vuln_transition, analysis_transition
 from orchestrator.orchestration_state import OrchestrationState
 from orchestrator.graph_state import GraphState
 
@@ -8,7 +8,7 @@ def test_empty_findings_pipeline():
     # but orchestration_state has COMPLETED tasks.
     # Transitions must ONLY check task statuses, ignoring findings completely.
     orch_state = OrchestrationState(task_status={
-        "recon": "COMPLETED",
+        "passive_recon": "COMPLETED",
         "js": "COMPLETED",
         "api": "COMPLETED",
         "vulnerability": "COMPLETED",
@@ -17,7 +17,7 @@ def test_empty_findings_pipeline():
     
     state: GraphState = {"execution_state": None, "orchestration_state": orch_state}
     
-    assert recon_transition(state) == "js_node"
+    assert passive_recon_transition(state) == "scope_enforcement_node"
     assert js_transition(state) == "api_node"
     assert api_transition(state) == "vulnerability_node"
     assert vuln_transition(state) == "analysis_node"

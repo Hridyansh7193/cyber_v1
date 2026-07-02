@@ -6,6 +6,7 @@ class TargetState(BaseModel):
     model_config = ConfigDict(frozen=True)
     domain: str
     scope: Tuple[str, ...] = Field(default=())
+    out_of_scope: Tuple[str, ...] = Field(default=())
     session_id: str
     start_time: datetime
     

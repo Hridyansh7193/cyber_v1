@@ -12,7 +12,7 @@ class GauWrapper(ExecutionPlugin):
             name="gau",
             version="2.1.2",
             description="Historical URL discovery",
-            capabilities=(Capability.RECON, Capability.HTTP),
+            capabilities=(Capability.PASSIVE_RECON, Capability.HTTP),
             minimum_version="0.0.1",
             supported_tools=("gau",)
         )

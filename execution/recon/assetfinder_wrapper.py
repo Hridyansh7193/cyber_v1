@@ -12,7 +12,7 @@ class AssetfinderWrapper(ExecutionPlugin):
             name="assetfinder",
             version="0.1.1",
             description="Subdomain discovery via assetfinder",
-            capabilities=(Capability.RECON, Capability.DNS),
+            capabilities=(Capability.PASSIVE_RECON, Capability.DNS),
             minimum_version="0.0.1",
             supported_tools=("assetfinder",)
         )

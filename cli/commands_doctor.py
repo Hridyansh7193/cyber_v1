@@ -62,9 +62,51 @@ def plugins_cmd(
 @app.command("verify")
 @timed_cli_command
 def verify_cmd():
-    """Verify runtime environment."""
-    console.print("[green]Environment is valid.[/green]")
-    raise typer.Exit(code=SUCCESS)
+    """Verify runtime environment tools against a test target."""
+    console.print("[bold cyan]Running Verification Scan against scanme.nmap.org...[/bold cyan]")
+    from config.schemas import BugHunterConfig, SettingsConfig, LLMConfig, ToolsConfig, TimeoutsConfig, ReportingConfig
+    from services.job_registry import JobRegistry
+    from services.orchestrator_adapter import OrchestratorAdapter
+    from services.report_service import ReportService
+    from cli.dependencies import workspace_service
+    from services.scan_service import ScanService
+    import time
+    
+    config = BugHunterConfig(
+        version='2', 
+        settings=SettingsConfig(scan_depth=1, max_concurrency=10, log_level='WARNING'),
+        llm=LLMConfig(provider="none", default_model="none", timeout=30),
+        tools=ToolsConfig(tool_paths={}, docker_container_names={}, wordlists={}, enable_flags={}),
+        timeouts=TimeoutsConfig(subfinder_timeout=60, nuclei_timeout=60, dalfox_timeout=60, ffuf_timeout=60, global_timeout=600),
+        reporting=ReportingConfig(report_formats=["json"], output_directories={})
+    )
+    
+    registry = JobRegistry()
+    adapter = OrchestratorAdapter(registry, config)
+    report_svc = ReportService()
+    # Mock or omit persistence for verification if it's not needed, or use the real DB. 
+    # The scan_service might need it. Let's provide None for persistence if allowed, or import it if it exists.
+    # Actually, persistence is gone. It's SessionRepository, TargetRepository etc.
+    # ScanService requires (adapter, registry, workspace). Let's check ScanService's signature.
+    from services.scan_service import ScanService
+    
+    # We will initialize it properly with dependencies
+    from cli.dependencies import scan_service as di_scan_service
+    scan_service = di_scan_service
+    
+    start_time = time.time()
+    try:
+        job_id = scan_service.run_scan_sync("scanme.nmap.org", config)
+        job = registry.get_job(job_id)
+        if job and job.status.value == "completed":
+            console.print(f"[green]Verification successful in {time.time() - start_time:.2f}s![/green]")
+            raise typer.Exit(code=SUCCESS)
+        else:
+            console.print(f"[red]Verification failed or timed out. Status: {job.status.value if job else 'Unknown'}[/red]")
+            raise typer.Exit(code=INTERNAL_ERROR)
+    except Exception as e:
+        console.print(f"[red]Verification encountered an error: {e}[/red]")
+        raise typer.Exit(code=INTERNAL_ERROR)
 
 @app.command("self-test")
 @timed_cli_command

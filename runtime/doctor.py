@@ -97,6 +97,14 @@ class Doctor:
             tool_name = meta.supported_tools[0]
             tool_info = tm.get_tool(tool_name)
             
+            if tool_info and tool_name == "nuclei":
+                # Auto-update templates
+                import subprocess
+                try:
+                    subprocess.run([tool_info.binary_path, "-update-templates"], capture_output=True, timeout=30)
+                except Exception:
+                    pass
+
             status = "PASS" if tool_info else "WARNING"
             
             statuses.append(PluginStatus(

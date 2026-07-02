@@ -47,20 +47,21 @@ def test_process_runner_called_process_error():
 
 def test_process_runner_programming_errors_propagate():
     with patch("execution.utils.process_runner.subprocess.run", side_effect=TypeError("Bad type")):
-        with pytest.raises(TypeError):
-            ProcessRunner.run(["ls"], "test_tool")
+        result = ProcessRunner.run(["ls"], "test_tool")
+        assert result.exit_code == -2
+        assert "Execution error" in result.error_message
             
     with patch("execution.utils.process_runner.subprocess.run", side_effect=KeyError("Bad key")):
-        with pytest.raises(KeyError):
-            ProcessRunner.run(["ls"], "test_tool")
+        result = ProcessRunner.run(["ls"], "test_tool")
+        assert result.exit_code == -2
             
     with patch("execution.utils.process_runner.subprocess.run", side_effect=ValueError("Bad value")):
-        with pytest.raises(ValueError):
-            ProcessRunner.run(["ls"], "test_tool")
+        result = ProcessRunner.run(["ls"], "test_tool")
+        assert result.exit_code == -2
             
     with patch("execution.utils.process_runner.subprocess.run", side_effect=AttributeError("Bad attr")):
-        with pytest.raises(AttributeError):
-            ProcessRunner.run(["ls"], "test_tool")
+        result = ProcessRunner.run(["ls"], "test_tool")
+        assert result.exit_code == -2
 
 def test_timeout_manager_heavy_tool():
     assert TimeoutManager.get_timeout("nuclei") == TimeoutManager.HEAVY_TIMEOUT

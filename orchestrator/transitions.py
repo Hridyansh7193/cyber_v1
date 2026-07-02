@@ -5,11 +5,23 @@ from langgraph.graph import END
 def planner_transition(state: GraphState) -> str:
     status = state["orchestration_state"].task_status.get("planner", "PENDING")
     if status in {"COMPLETED", "FAILED", "CANCELLED"}:
-        return "recon_node"
+        return "passive_recon_node"
     return END
 
-def recon_transition(state: GraphState) -> str:
-    status = state["orchestration_state"].task_status.get("recon", "PENDING")
+def passive_recon_transition(state: GraphState) -> str:
+    status = state["orchestration_state"].task_status.get("passive_recon", "PENDING")
+    if status in {"COMPLETED", "FAILED", "CANCELLED"}:
+        return "scope_enforcement_node"
+    return END
+
+def scope_enforcement_transition(state: GraphState) -> str:
+    status = state["orchestration_state"].task_status.get("scope_enforcement", "PENDING")
+    if status in {"COMPLETED", "FAILED", "CANCELLED"}:
+        return "active_recon_node"
+    return END
+
+def active_recon_transition(state: GraphState) -> str:
+    status = state["orchestration_state"].task_status.get("active_recon", "PENDING")
     if status in {"COMPLETED", "FAILED", "CANCELLED"}:
         return "js_node"
     return END

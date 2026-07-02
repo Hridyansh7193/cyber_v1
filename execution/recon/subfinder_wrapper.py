@@ -13,7 +13,7 @@ class SubfinderWrapper(ExecutionPlugin):
             name="subfinder",
             version="2.6.6",
             description="Subdomain enumeration via subfinder",
-            capabilities=(Capability.RECON, Capability.DNS),
+            capabilities=(Capability.PASSIVE_RECON, Capability.DNS),
             minimum_version="0.0.1",
             supported_tools=("subfinder",)
         )

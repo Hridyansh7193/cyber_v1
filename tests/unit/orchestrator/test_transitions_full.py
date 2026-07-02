@@ -1,24 +1,24 @@
 import pytest
-from orchestrator.transitions import recon_transition, js_transition, api_transition, vuln_transition, analysis_transition
+from orchestrator.transitions import passive_recon_transition, js_transition, api_transition, vuln_transition, analysis_transition
 from orchestrator.orchestration_state import OrchestrationState
 from orchestrator.graph_state import GraphState
 from langgraph.graph import END
 
-def test_recon_transition():
-    state: GraphState = {"execution_state": None, "orchestration_state": OrchestrationState(task_status={"recon": "COMPLETED"}, errors={})}
-    assert recon_transition(state) == "js_node"
+def test_passive_recon_transition():
+    state: GraphState = {"execution_state": None, "orchestration_state": OrchestrationState(task_status={"passive_recon": "COMPLETED"}, errors={})}
+    assert passive_recon_transition(state) == "scope_enforcement_node"
     
-    state["orchestration_state"].task_status["recon"] = "FAILED"
-    assert recon_transition(state) == "js_node"
+    state["orchestration_state"].task_status["passive_recon"] = "FAILED"
+    assert passive_recon_transition(state) == "scope_enforcement_node"
     
-    state["orchestration_state"].task_status["recon"] = "CANCELLED"
-    assert recon_transition(state) == "js_node"
+    state["orchestration_state"].task_status["passive_recon"] = "CANCELLED"
+    assert passive_recon_transition(state) == "scope_enforcement_node"
     
-    state["orchestration_state"].task_status["recon"] = "PENDING"
-    assert recon_transition(state) == END
+    state["orchestration_state"].task_status["passive_recon"] = "PENDING"
+    assert passive_recon_transition(state) == END
     
-    state["orchestration_state"].task_status["recon"] = "RUNNING"
-    assert recon_transition(state) == END
+    state["orchestration_state"].task_status["passive_recon"] = "RUNNING"
+    assert passive_recon_transition(state) == END
 
 def test_js_transition():
     state: GraphState = {"execution_state": None, "orchestration_state": OrchestrationState(task_status={"js": "COMPLETED"}, errors={})}

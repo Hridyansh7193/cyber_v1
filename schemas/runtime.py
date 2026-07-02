@@ -4,6 +4,7 @@ from enum import Enum
 
 class Capability(str, Enum):
     RECON = "Recon"
+    PASSIVE_RECON = "PassiveRecon"
     DNS = "DNS"
     HTTP = "HTTP"
     JS = "JS"

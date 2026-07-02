@@ -6,7 +6,7 @@ from orchestrator.graph_state import GraphState
 from orchestrator.graph import build_graph
 from orchestrator.checkpoint_manager import CheckpointManager
 from langgraph.graph import END
-from orchestrator.transitions import recon_transition, js_transition
+from orchestrator.transitions import passive_recon_transition, js_transition
 from orchestrator.delta_applier import apply_recon_delta
 from orchestrator.wrapper_result_applier import apply_recon_wrapper_result
 from agents.deltas import ReconDelta
@@ -38,19 +38,19 @@ def test_graph_compilation(mock_config):
     assert graph is not None
 
 def test_transitions():
-    orch_state = OrchestrationState(task_status={"recon": "COMPLETED"}, errors={})
+    orch_state = OrchestrationState(task_status={"passive_recon": "COMPLETED"}, errors={})
     state: GraphState = {"execution_state": None, "orchestration_state": orch_state}
-    assert recon_transition(state) == "js_node"
+    assert passive_recon_transition(state) == "scope_enforcement_node"
     
     # Should transition on FAILED too
-    orch_state = OrchestrationState(task_status={"recon": "FAILED"}, errors={})
+    orch_state = OrchestrationState(task_status={"passive_recon": "FAILED"}, errors={})
     state["orchestration_state"] = orch_state
-    assert recon_transition(state) == "js_node"
+    assert passive_recon_transition(state) == "scope_enforcement_node"
     
     # Should not transition if PENDING
-    orch_state = OrchestrationState(task_status={"recon": "PENDING"}, errors={})
+    orch_state = OrchestrationState(task_status={"passive_recon": "PENDING"}, errors={})
     state["orchestration_state"] = orch_state
-    assert recon_transition(state) == END
+    assert passive_recon_transition(state) == END
 
 def test_wrapper_applier():
     from schemas.state import ExecutionState, TargetState
