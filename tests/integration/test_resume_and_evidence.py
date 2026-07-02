@@ -11,36 +11,42 @@ from services.job_registry import JobRegistry, JobStatus
 from services.persistence_service import PersistenceService
 from storage.database import get_db_session
 
-def test_resume_and_evidence(base_config: BugHunterConfig, mocker, e2e_db):
+@pytest.fixture
+def test_config():
+    return BugHunterConfig(
+        settings={"scan_depth": 1, "max_concurrency": 10, "log_level": "INFO"},
+        llm={"provider": "dummy", "default_model": "dummy", "timeout": 30},
+        tools={"tool_paths": {}, "docker_container_names": {}, "wordlists": {}, "enable_flags": {"recon": True, "js": True, "api": True, "vuln": True}},
+        timeouts={"subfinder_timeout": 1, "nuclei_timeout": 1, "dalfox_timeout": 1, "ffuf_timeout": 1, "global_timeout": 5},
+        reporting={"report_formats": ["json", "markdown"], "output_directories": {}}
+    )
+
+def test_resume_and_evidence(test_config, monkeypatch):
     registry = JobRegistry()
-    adapter = OrchestratorAdapter(registry, base_config)
-    persistence = PersistenceService(session_maker=lambda: get_db_session())
+    adapter = OrchestratorAdapter(registry, test_config)
+    persistence = PersistenceService()
     scan_service = ScanService(adapter, registry, persistence)
     
     domain = "test-resume.com"
     job_id = registry.create_job(domain, {})
     
     # Mock ProcessRunner.run to succeed and return some stdout
-    from schemas.tool_result import ToolResult
-    mock_run = mocker.patch("execution.utils.process_runner.ProcessRunner.run")
-    mock_run.return_value = ToolResult(
-        tool_name="subfinder",
-        plugin_version="1.0",
-        binary_path="/usr/bin/subfinder",
-        command="subfinder -d test-resume.com",
-        working_directory="/tmp",
-        success=True,
-        exit_code=0,
-        stdout="sub1.test-resume.com\nsub2.test-resume.com\n",
-        stderr="",
-        stdout_size=100,
-        execution_time=1.0,
-        metadata_schema_version="1.0",
-        parsed_findings=0,
-        errors=(),
-        parsed_output=(),
-        metadata={}
-    )
+    from execution.utils.process_runner import ProcessResult
+    
+    def mock_run(command, tool_name, cwd=None):
+        return ProcessResult(
+            exit_code=0,
+            stdout="sub1.test-resume.com\nsub2.test-resume.com\n",
+            stderr="",
+            execution_time=1.0,
+            binary_path="/usr/bin/subfinder",
+            command="subfinder -d test-resume.com",
+            cwd="/tmp",
+            error_message=""
+        )
+        
+    import execution.utils.process_runner
+    monkeypatch.setattr(execution.utils.process_runner.ProcessRunner, "run", mock_run)
     
     # We will simulate a partial run by interrupting the graph execution inside adapter.
     # The adapter creates a checkpoint after each node. We can let it run normally,
@@ -53,7 +59,7 @@ def test_resume_and_evidence(base_config: BugHunterConfig, mocker, e2e_db):
     session_dir = workspace.create_session(job_id, domain, "default")
     
     # Run scan synchronously
-    scan_service.run_scan_sync(domain, base_config, metadata={}, job_id=job_id)
+    scan_service.run_scan_sync(domain, test_config, metadata={}, job_id=job_id)
     
     # Check if checkpoint exists
     checkpoint_path = os.path.join(session_dir, "checkpoint.json")
@@ -66,7 +72,7 @@ def test_resume_and_evidence(base_config: BugHunterConfig, mocker, e2e_db):
     
     # Check resume logic: it should load the checkpoint and run again without issues
     # Run scan sync again with is_resume=True
-    scan_service.run_scan_sync(domain, base_config, metadata={}, job_id=job_id, is_resume=True)
+    scan_service.run_scan_sync(domain, test_config, metadata={}, job_id=job_id, is_resume=True)
     
     status = scan_service.get_status(job_id)
     assert status["status"] == "completed"

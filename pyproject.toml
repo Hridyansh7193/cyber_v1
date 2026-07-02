@@ -29,7 +29,7 @@ Issues = "https://github.com/example/bughunter/issues"
 bughunter = "cli.main:main"
 
 [tool.setuptools.dynamic]
-version = {attr = "version.__version__"}
+version = {attr = "cli.version.__version__"}
 
 [tool.setuptools.packages.find]
 include = [

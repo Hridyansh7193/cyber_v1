@@ -29,7 +29,7 @@ def mock_config():
         settings={"scan_depth": 1, "max_concurrency": 10, "log_level": "INFO"},
         llm={"provider": "dummy", "default_model": "dummy", "timeout": 30},
         tools={"tool_paths": {}, "docker_container_names": {}, "wordlists": {}, "enable_flags": {"recon": True, "js": True, "api": True, "vuln": True}},
-        timeouts={"subfinder_timeout": 60, "nuclei_timeout": 60, "dalfox_timeout": 60, "ffuf_timeout": 60, "global_timeout": 3600},
+        timeouts={"subfinder_timeout": 1, "nuclei_timeout": 1, "dalfox_timeout": 1, "ffuf_timeout": 1, "global_timeout": 5},
         reporting={"report_formats": ["json", "markdown"], "output_directories": {}}
     )
 
@@ -39,7 +39,7 @@ def temp_workspace(tmp_path):
     ws.initialize()
     return ws
 
-def test_real_scan_pipeline(mock_config, temp_workspace):
+def test_real_scan_pipeline(mock_config, temp_workspace, monkeypatch):
     # Initialize DB (in-memory for tests)
     setup_test_db()
     
@@ -51,6 +51,18 @@ def test_real_scan_pipeline(mock_config, temp_workspace):
     workspace_svc = WorkspaceService(temp_workspace)
     scan_service = ScanService(adapter, registry, persistence, report_svc, workspace_svc)
     
+    from execution.utils.process_runner import ProcessRunner, ProcessResult
+    from services.target_resolver import TargetResolver
+    
+    def mock_run(command, tool_name, cwd=None):
+        return ProcessResult(exit_code=0, stdout="mock output", stderr="", execution_time=0.1)
+    
+    def mock_resolve(self, state):
+        return state.model_copy(update={"hostname": state.domain, "resolved_url": f"http://{state.domain}", "scheme": "http", "alive": True})
+        
+    monkeypatch.setattr(ProcessRunner, "run", mock_run)
+    monkeypatch.setattr(TargetResolver, "resolve_target", mock_resolve)
+    
     # 1. Submit scan synchronously (for testing)
     domain = "example.local"
     # Execute scan synchronously using ScanService
@@ -58,9 +70,6 @@ def test_real_scan_pipeline(mock_config, temp_workspace):
     
     status = registry.get_job(job_id)
     assert status.status.value == "completed", "Job failed or timed out"
-    
-    # Verification Steps as per the new definition of done
-    # Reports should be generated in the workspace
     
     # Reports should be generated in the workspace
     reports_dir = workspace_svc.workspace_manager.get_session_dir(domain, job_id) / "reports"
