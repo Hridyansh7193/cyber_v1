@@ -48,8 +48,12 @@ class ToolManager:
                     capabilities=[]
                 )
 
+    def get_tools(self) -> Dict[str, ToolInfo]:
+        return self._tools.copy()
+
     def get_tool(self, name: str) -> Optional[ToolInfo]:
         return self._tools.get(name)
 
     def available(self, name: str) -> bool:
         return name in self._tools
+

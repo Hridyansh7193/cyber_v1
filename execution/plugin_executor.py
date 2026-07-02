@@ -35,7 +35,19 @@ class PluginExecutor:
                 tool_info = state.runtime_context.tool_manager.get_tool(tool_name)
                 if not tool_info:
                     logger.warning(f"Tool {tool_name} missing. Skipping {plugin.metadata().name}")
-                    # Telemetry for skipped plugin
+                    results.append(ToolResult(
+                        tool_name=plugin.metadata().name,
+                        plugin_version=plugin.metadata().version,
+                        binary_path=tool_name,
+                        command="",
+                        success=False,
+                        exit_code=-2,
+                        stdout="",
+                        stderr="",
+                        errors=(f"Tool {tool_name} is missing or not installed.",),
+                        error_message="Tool missing",
+                        execution_time=0.0
+                    ))
                     continue
                 binary_path = tool_info.binary_path
                 if tool_info.version:

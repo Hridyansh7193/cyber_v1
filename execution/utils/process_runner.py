@@ -80,10 +80,8 @@ class ProcessRunner:
                 stdout = e.stdout.decode('utf-8', errors='replace') if isinstance(e.stdout, bytes) else (e.stdout or "")
                 stderr = e.stderr.decode('utf-8', errors='replace') if isinstance(e.stderr, bytes) else (e.stderr or "")
                 error_message = f"Process failed with exit code {exit_code}"
-            except (TypeError, ValueError, AttributeError, KeyError):
-                raise
             except Exception as e:
-                # Catch-all to never crash the pipeline (OSError, etc)
+                # Catch-all to never crash the pipeline (OSError, ValueError, etc)
                 exit_code = -2
                 stdout = ""
                 stderr = str(e)

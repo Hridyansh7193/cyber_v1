@@ -30,12 +30,9 @@ def generate_reports(state: ExecutionState, config: BugHunterConfig) -> ReportDe
             tool_paths = {}
             skipped = []
             if state.runtime_context and state.runtime_context.tool_manager:
-                for t_name, t_info in state.runtime_context.tool_manager.tools.items():
-                    if t_info.installed:
-                        tool_versions[t_name] = t_info.version or "unknown"
-                        tool_paths[t_name] = t_info.binary_path
-                    else:
-                        skipped.append(t_name)
+                for t_name, t_info in state.runtime_context.tool_manager.get_tools().items():
+                    tool_versions[t_name] = t_info.version or "unknown"
+                    tool_paths[t_name] = t_info.binary_path
 
             rep = Report(
                 report_id=deterministic_id,
