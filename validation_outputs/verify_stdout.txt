@@ -1,0 +1,17 @@
+Running Verification Scan against scanme.nmap.org...
+2026-07-03 03:36:19,217 - scan_service - INFO - Scan started for target: scanme.nmap.org (Job: b13c6e36-ab5a-4e09-8c16-be7febbccbdb)
+2026-07-03 03:36:30,485 - orchestrator_adapter - INFO - Node 'init_node' completed (Progress: 12.5%)
+2026-07-03 03:36:30,487 - orchestrator_adapter - INFO - Node 'planner_node' completed (Progress: 25.0%)
+2026-07-03 03:36:30,488 - orchestrator_adapter - INFO - Node 'passive_recon_node' completed (Progress: 37.5%)
+2026-07-03 03:36:30,489 - orchestrator_adapter - INFO - Node 'scope_enforcement_node' completed (Progress: 50.0%)
+2026-07-03 03:36:30,489 - plugin_executor - INFO - subfinder started
+2026-07-03 03:36:39,351 - plugin_executor - INFO - subfinder finished in 8.86s (Exit code: 0)
+2026-07-03 03:36:39,352 - plugin_executor - INFO - httpx started
+2026-07-03 03:36:39,606 - process_runner - WARNING - Retry 1/1 for httpx (Exit code: 2)
+2026-07-03 03:36:40,726 - plugin_executor - INFO - httpx finished in 0.12s (Exit code: 2)
+2026-07-03 03:36:40,726 - plugin_executor - INFO - assetfinder started
+2026-07-03 03:36:42,641 - plugin_executor - INFO - assetfinder finished in 1.91s (Exit code: 0)
+2026-07-03 03:36:42,641 - plugin_executor - INFO - gau started
+2026-07-03 03:39:10,944 - plugin_executor - INFO - gau finished in 148.30s (Exit code: 0)
+2026-07-03 03:39:10,948 - orchestrator_adapter - INFO - Node 'active_recon_node' completed (Progress: 62.5%)
+2026-07-03 03:39:10,948 - plugin_executor - INFO - linkfinder started

@@ -1,0 +1,45 @@
+╭───────────────────── Traceback (most recent call last) ──────────────────────╮
+│ /home/akshat/Desktop/project/cyber_v1/cli/decorators.py:21 in wrapper        │
+│                                                                              │
+│   18 │   │   except Exception as e:                                          │
+│   19 │   │   │   exit_code = getattr(e, "exit_code", GENERAL_ERROR)          │
+│   20 │   │   │   success = False                                             │
+│ ❱ 21 │   │   │   raise e                                                     │
+│   22 │   │   finally:                                                        │
+│   23 │   │   │   duration = time.perf_counter() - start_time                 │
+│   24 │   │   │   # Could log duration and exit code to telemetry/archive     │
+│      here                                                                    │
+│                                                                              │
+│ /home/akshat/Desktop/project/cyber_v1/cli/decorators.py:16 in wrapper        │
+│                                                                              │
+│   13 │   │   exit_code = SUCCESS                                             │
+│   14 │   │   success = True                                                  │
+│   15 │   │   try:                                                            │
+│ ❱ 16 │   │   │   result = func(*args, **kwargs)                              │
+│   17 │   │   │   return result                                               │
+│   18 │   │   except Exception as e:                                          │
+│   19 │   │   │   exit_code = getattr(e, "exit_code", GENERAL_ERROR)          │
+│                                                                              │
+│ /home/akshat/Desktop/project/cyber_v1/cli/commands_doctor.py:17 in           │
+│ doctor_cmd                                                                   │
+│                                                                              │
+│    14 │   json_out: bool = typer.Option(False, "--json", help="Output in     │
+│       JSON format")                                                          │
+│    15 ):                                                                     │
+│    16 │   """Diagnose the host machine environment."""                       │
+│ ❱  17 │   from runtime.doctor import Doctor                                  │
+│    18 │   doc = Doctor()                                                     │
+│    19 │   report = doc.diagnose()                                            │
+│    20 │   console.print(f"[bold]BugHunter Doctor[/bold]")                    │
+│                                                                              │
+│ /home/akshat/Desktop/project/cyber_v1/runtime/doctor.py:3 in <module>        │
+│                                                                              │
+│     1 import platform                                                        │
+│     2 import shutil                                                          │
+│ ❱   3 import psutil                                                          │
+│     4 from typing import List                                                │
+│     5 from schemas.runtime import RuntimeReport, EnvironmentStatus,          │
+│       DependencyStatus, PluginStatus, SystemBenchmark, RuntimeCheck          │
+│     6 from execution.plugins.registry import REGISTRY                        │
+╰──────────────────────────────────────────────────────────────────────────────╯
+ModuleNotFoundError: No module named 'psutil'

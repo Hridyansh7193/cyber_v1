@@ -1,0 +1,13 @@
+BugHunter Doctor
+Environment: Linux 6.17.0-35-generic
+Python: 3.12.3
+Go: 1.24.5
+
+Dependencies
+PASS go: go is installed
+PASS git: git is installed
+PASS wordlist:common: Wordlist common is installed
+PASS wordlist:raft-small-words: Wordlist raft-small-words is installed
+PASS wordlist:api: Wordlist api is installed
+
+Summary: 21 Passed, 1 Warnings, 0 Failed

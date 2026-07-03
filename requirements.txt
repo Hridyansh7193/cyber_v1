@@ -54,3 +54,4 @@ fastapi
 uvicorn
 typer
 rich
+psutil

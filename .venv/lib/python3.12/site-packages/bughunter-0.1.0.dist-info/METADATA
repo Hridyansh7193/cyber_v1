@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: bughunter
-Version: 1.0.0
+Version: 0.1.0
 Summary: Production-grade autonomous security scanning platform powered by an intelligent LangGraph engine.
 Author-email: BugHunter Team <security@example.com>
 License: MIT
