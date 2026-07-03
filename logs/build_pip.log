@@ -1,0 +1,64 @@
+--- RUN ATTEMPT 1 ---
+COMMAND: pip install -e .
+CWD: /home/akshat/Desktop/project/cyber_v1
+RUNTIME: 0.44s
+EXIT CODE: 1
+TIMED OUT: False
+--- STDOUT ---
+
+--- STDERR ---
+error: externally-managed-environment
+
+× This environment is externally managed
+╰─> To install Python packages system-wide, try apt install
+    python3-xyz, where xyz is the package you are trying to
+    install.
+    
+    If you wish to install a non-Debian-packaged Python package,
+    create a virtual environment using python3 -m venv path/to/venv.
+    Then use path/to/venv/bin/python and path/to/venv/bin/pip. Make
+    sure you have python3-full installed.
+    
+    If you wish to install a non-Debian packaged Python application,
+    it may be easiest to use pipx install xyz, which will manage a
+    virtual environment for you. Make sure you have pipx installed.
+    
+    See /usr/share/doc/python3.12/README.venv for more information.
+
+note: If you believe this is a mistake, please contact your Python installation or OS distribution provider. You can override this, at the risk of breaking your Python installation or OS, by passing --break-system-packages.
+hint: See PEP 668 for the detailed specification.
+
+
+--- RUN ATTEMPT 1 ---
+COMMAND: pip install -e .
+CWD: /home/akshat/Desktop/project/cyber_v1
+RUNTIME: 63.65s
+EXIT CODE: -1
+TIMED OUT: True
+--- STDOUT ---
+Obtaining file:///home/akshat/Desktop/project/cyber_v1
+  Installing build dependencies: started
+  Installing build dependencies: still running...
+  Installing build dependencies: finished with status 'done'
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Getting requirements to build editable: started
+  Getting requirements to build editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: bughunter
+  Building editable for bughunter (pyproject.toml): started
+  Building editable for bughunter (pyproject.toml): finished with status 'done'
+  Created wheel for bughunter: filename=bughunter-0.1.0-0.editable-py3-none-any.whl size=5365 sha256=5602f50d51f732b10d7d2f85a0bda1ab295641f148bf19d57e3bffd94b5cd86b
+  Stored in directory: /tmp/pip-ephem-wheel-cache-vimrie12/wheels/d3/94/98/d79bf1697028e5fcf20cfe0cfe0c3c5cc08fd32b0b138857b2
+Successfully built bughunter
+Installing collected packages: bughunter
+  Attempting uninstall: bughunter
+    Found existing installation: bughunter 0.1.0
+    Uninstalling bughunter-0.1.0:
+      Successfully uninstalled bughunter-0.1.0
+Successfully installed bughunter-0.1.0
+
+--- STDERR ---
+
+

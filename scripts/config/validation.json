@@ -1,0 +1,49 @@
+{
+    "timeouts": {
+        "default": 30,
+        "scan": 300,
+        "build": 120
+    },
+    "retries": {
+        "default": 0,
+        "flaky": 2
+    },
+    "retry_delay": 2,
+    "cli": [
+        "bughunter --version",
+        "bughunter --help",
+        "bughunter doctor",
+        "bughunter verify",
+        "bughunter plugins",
+        "bughunter jobs",
+        "bughunter workspace list",
+        "bughunter search test",
+        "bughunter report --help",
+        "bughunter planner --help",
+        "bughunter logs --help",
+        "bughunter telemetry --help"
+    ],
+    "tools": [
+        "subfinder",
+        "assetfinder",
+        "httpx",
+        "katana",
+        "gau",
+        "waybackurls",
+        "dnsx",
+        "naabu",
+        "nuclei",
+        "dalfox",
+        "ffuf",
+        "linkfinder",
+        "secretfinder",
+        "subzy",
+        "trufflehog"
+    ],
+    "imports": [
+        "cli",
+        "services",
+        "orchestrator",
+        "execution"
+    ]
+}

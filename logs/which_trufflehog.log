@@ -1,0 +1,36 @@
+--- RUN ATTEMPT 1 ---
+COMMAND: which trufflehog
+CWD: /home/akshat/Desktop/project/cyber_v1
+RUNTIME: 0.00s
+EXIT CODE: 0
+TIMED OUT: False
+--- STDOUT ---
+/usr/local/bin/trufflehog
+
+--- STDERR ---
+
+
+--- RUN ATTEMPT 1 ---
+COMMAND: which trufflehog
+CWD: /home/akshat/Desktop/project/cyber_v1
+RUNTIME: 0.01s
+EXIT CODE: 0
+TIMED OUT: False
+--- STDOUT ---
+/usr/local/bin/trufflehog
+
+--- STDERR ---
+
+
+--- RUN ATTEMPT 1 ---
+COMMAND: which trufflehog
+CWD: /home/akshat/Desktop/project/cyber_v1
+RUNTIME: 0.01s
+EXIT CODE: 0
+TIMED OUT: False
+--- STDOUT ---
+/usr/local/bin/trufflehog
+
+--- STDERR ---
+
+

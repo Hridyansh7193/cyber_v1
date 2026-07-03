@@ -1,0 +1,25 @@
+{
+    "ready": false,
+    "score": 40,
+    "passed": 0,
+    "failed": 1,
+    "warnings": 1,
+    "skipped": 0,
+    "components": {
+        "build": "FAIL",
+        "environment": "UNKNOWN",
+        "tool": "WARNING"
+    },
+    "metadata": {
+        "bughunter_version": "1.0.0",
+        "python_version": "3.12.3",
+        "platform": "Linux-6.17.0-35-generic-x86_64-with-glibc2.39",
+        "git": {
+            "branch": "main",
+            "commit": "a6c35a5b8d7f1c78edae068541051afb4fc420ac",
+            "dirty": "True",
+            "tag": "v1.0.0-rc1"
+        },
+        "validation_time": "2026-07-03T22:19:47.958597Z"
+    }
+}

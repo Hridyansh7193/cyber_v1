@@ -1,0 +1,15 @@
+{
+    "generated": [
+        "build_report.json",
+        "build_report.md",
+        "environment_report.json",
+        "environment_report.md",
+        "tool_report.json",
+        "tool_report.md",
+        "release_summary.md",
+        "release_summary.json",
+        "artifact_manifest.json",
+        "release_checklist.md",
+        "index.html"
+    ]
+}
