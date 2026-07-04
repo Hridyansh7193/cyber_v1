@@ -1,3 +1,5 @@
+import os
+import tempfile
 from schemas import tool_result
 from typing import Tuple, List, Any
 from schemas.tool_result import ToolResult
@@ -92,8 +94,6 @@ class PluginExecutor:
             }
             
             if current_target is not None and plugin.metadata().name in flag_map:
-                import tempfile
-                import os
                 single_flag, list_flag = flag_map[plugin.metadata().name]
                 
                 if isinstance(current_target, (list, tuple, set)):
@@ -187,7 +187,6 @@ class PluginExecutor:
                 # Since WorkspaceService isn't passed here directly, we rely on a standard path format
                 # assuming target and session_id exist
                 target_str = state.target.domain
-                import os
                 evidence_dir = os.path.join("workspaces", target_str, "sessions", state.target.session_id, "evidence")
                 if os.path.exists(evidence_dir):
                     stdout_file = os.path.join(evidence_dir, f"{plugin.metadata().name}_stdout.log")
