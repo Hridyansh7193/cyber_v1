@@ -21,9 +21,8 @@ class FfufPlugin(ExecutionPlugin):
         )
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
-        wordlist = config.get("wordlist", "common.txt")
-        return ("-u", f"{state.target.resolved_url or state.target.domain}/FUZZ", "-json", "-silent")
-
+        wordlist = config.get("wordlist")
+        return ("-u",f"{state.target.resolved_url or state.target.domain}/FUZZ","-w",wordlist,"-json","-silent")
     def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
         return bool(state.target.domain)
 

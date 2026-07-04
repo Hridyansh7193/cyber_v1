@@ -1,3 +1,4 @@
+from schemas import tool_result
 from typing import Tuple, List, Any
 from schemas.tool_result import ToolResult
 from config.schemas import BugHunterConfig
@@ -96,10 +97,29 @@ class PluginExecutor:
                 single_flag, list_flag = flag_map[plugin.metadata().name]
                 
                 if isinstance(current_target, (list, tuple, set)):
+                    current_target = [x for x in current_target if x]
+
+                    if not current_target:
+                        logger.info(f"Skipping {plugin.metadata().name}: no targets available.")
+                        continue
                     if list_flag:
+                        cleaned_targets = []
+                        for item in current_target:
+                            if isinstance(item, str):
+                                cleaned_targets.append(item)
+                            elif isinstance(item, dict):
+                                cleaned_targets.append(
+                                    item.get("host")
+                                    or item.get("url")
+                                    or item.get("endpoint")
+                                    or ""
+                                )
+                            else:
+                                cleaned_targets.append(str(item))
+                        current_target = [x for x in cleaned_targets if x]
                         fd, temp_path = tempfile.mkstemp(text=True)
                         with os.fdopen(fd, 'w') as f:
-                            f.write("\n".join(current_target))
+                            f.write("\n".join(map(str, current_target)))
                         final_command.extend([list_flag, temp_path])
                     else:
                         # Fallback for tools that don't support lists natively (e.g. gau, assetfinder)
@@ -115,14 +135,6 @@ class PluginExecutor:
                     else:
                         final_command.append(str(current_target))
                         
-            # Wordlist handling inside PluginExecutor
-            if plugin.metadata().name == "ffuf" and state.runtime_context and state.runtime_context.wordlist_manager:
-                wordlist_path = state.runtime_context.wordlist_manager.get("common")
-                if wordlist_path:
-                    final_command.extend(["-w", wordlist_path])
-                else:
-                    logger.warning("FFUF missing wordlist. Skipping.")
-                    continue
             # Auth header injection
             if config.auth.headers:
                 supported_auth_tools = {"httpx", "nuclei", "dalfox", "ffuf", "katana"}
@@ -131,12 +143,44 @@ class PluginExecutor:
                         final_command.extend(["-H", header])
             
             # Execute
-            command = plugin.build_command(state, {})
+            command = plugin.build_command(state,
+                {
+                    "tool_manager": state.runtime_context.tool_manager if state.runtime_context else None,
+                    "wordlist_manager": state.runtime_context.wordlist_manager if state.runtime_context else None,
+                    "config": config,
+                },
+            )
             final_command.extend(command)
-            logger.info(f"{plugin.metadata().name} started")
+
+            # Wordlist handling inside PluginExecutor
+            if plugin.metadata().name == "ffuf" and state.runtime_context and state.runtime_context.wordlist_manager:
+                wordlist_path = state.runtime_context.wordlist_manager.get("common")
+                if wordlist_path:
+                    final_command.extend(["-w", wordlist_path])
+                else:
+                    logger.warning("FFUF missing wordlist. Skipping.")
+                    continue
+
+            logger.info("=" * 80)
+            logger.info(f"PLUGIN : {plugin.metadata().name}")
+            logger.info(f"BINARY : {binary_path}")
+            logger.info("COMMAND:")
+            logger.info(" ".join(map(str, final_command)))
+            logger.info(f"CWD    : {os.getcwd()}")
+            logger.info("=" * 80)
             result = ProcessRunner.run(final_command, plugin.metadata().name)
-            logger.info(f"{plugin.metadata().name} finished in {result.execution_time:.2f}s (Exit code: {result.exit_code})")
-            
+
+            if 'temp_path' in locals():
+                try:
+                    os.remove(temp_path)
+                except OSError:
+                    pass
+            logger.info(f"EXIT CODE : {result.exit_code}")
+            logger.info("STDOUT:")
+            logger.info(result.stdout)
+            logger.info("STDERR:")
+            logger.info(result.stderr)
+            logger.info("=" * 80)
             # Evidence writing logic
             if state.target.session_id:
                 # We need to construct the path to evidence dir

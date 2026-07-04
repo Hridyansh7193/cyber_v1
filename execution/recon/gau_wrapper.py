@@ -18,7 +18,7 @@ class GauWrapper(ExecutionPlugin):
         )
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
-        return ("gau", state.target.domain)
+        return ("--json",)
 
     def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
         return bool(state.target.domain)

@@ -4,6 +4,7 @@ import shutil
 import os
 from typing import List, Tuple
 import logging
+import shlex
 from .timeout_manager import TimeoutManager
 
 logger = logging.getLogger("process_runner")
@@ -41,7 +42,7 @@ class ProcessRunner:
         # On Windows, shutil.which handles .exe, .cmd, .bat implicitly.
         binary_path = shutil.which(binary)
         
-        command_str = " ".join(command)
+        command_str = shlex.join(command)
         cwd_str = cwd or os.getcwd()
 
         if not binary_path:
