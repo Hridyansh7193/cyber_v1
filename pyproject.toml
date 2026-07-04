@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bughunter"
-dynamic = ["version"]
+dynamic = ["version", "dependencies"]
 description = "Production-grade autonomous security scanning platform powered by an intelligent LangGraph engine."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -30,6 +30,7 @@ bughunter = "cli.main:main"
 
 [tool.setuptools.dynamic]
 version = {attr = "cli.version.__version__"}
+dependencies = {file = ["requirements.txt"]}
 
 [tool.setuptools.packages.find]
 include = [
