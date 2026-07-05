@@ -90,20 +90,21 @@ def verify_cmd():
     # ScanService requires (adapter, registry, workspace). Let's check ScanService's signature.
     from services.scan_service import ScanService
     
-    # We will initialize it properly with dependencies
-    from cli.dependencies import scan_service as di_scan_service
+    from cli.dependencies import scan_service as di_scan_service, registry as di_registry
     scan_service = di_scan_service
     
     start_time = time.time()
     try:
         job_id = scan_service.run_scan_sync("scanme.nmap.org", config)
-        job = registry.get_job(job_id)
+        job = di_registry.get_job(job_id)
         if job and job.status.value == "completed":
             console.print(f"[green]Verification successful in {time.time() - start_time:.2f}s![/green]")
             raise typer.Exit(code=SUCCESS)
         else:
             console.print(f"[red]Verification failed or timed out. Status: {job.status.value if job else 'Unknown'}[/red]")
             raise typer.Exit(code=INTERNAL_ERROR)
+    except typer.Exit:
+        raise
     except Exception as e:
         console.print(f"[red]Verification encountered an error: {e}[/red]")
         raise typer.Exit(code=INTERNAL_ERROR)
