@@ -70,13 +70,16 @@ class PluginExecutor:
                     current_target = list(state.recon_state.subdomains) if state.recon_state.subdomains else state.target.domain
                 elif plugin.metadata().name in ["katana"]:
                     current_target = list(state.recon_state.alive_hosts) if state.recon_state.alive_hosts else state.target.resolved_url or state.target.domain
-                elif plugin.metadata().name in ["nuclei", "subzy", "ffuf"]:
+                elif plugin.metadata().name in ["nuclei", "subzy"]:
                     # Vuln plugins act on URLs or endpoints
                     urls = set(state.recon_state.urls)
-                    urls.update(state.js_state.endpoints)
-                    urls.update(state.api_state.swagger_urls)
-                    urls.update(state.api_state.graphql_urls)
-                    current_target = list(urls) if urls else state.target.resolved_url or state.target.domain
+                    # Note: JS endpoints might be relative, ideally we'd make them absolute. 
+                    # For now, we only pass valid URLs to avoid breaking tools.
+                    valid_urls = {u for u in urls if u.startswith("http")}
+                    current_target = list(valid_urls) if valid_urls else state.target.resolved_url or state.target.domain
+                elif plugin.metadata().name == "ffuf":
+                    # FFUF should typically fuzz the base domain/URL, not every discovered endpoint
+                    current_target = state.target.resolved_url or state.target.domain
                 elif plugin.metadata().name == "dalfox":
                     # Dalfox should only target discovered parameters to minimize noise
                     current_target = list(state.recon_state.parameters) if state.recon_state.parameters else None
@@ -85,7 +88,7 @@ class PluginExecutor:
                     current_target = state.target.resolved_url or state.target.domain
             
             # If a list was resolved but it is empty, skip execution to prevent hanging tools
-            if isinstance(current_target, (list, tuple, set)) and not current_target:
+            if current_target is None or (isinstance(current_target, (list, tuple, set)) and not current_target):
                 logger.info(f"Skipping {plugin.metadata().name}: no targets available.")
                 continue
                         
@@ -106,6 +109,11 @@ class PluginExecutor:
                 },
                 target=current_target
             )
+            
+            if not cmd_args:
+                logger.info(f"Skipping {plugin.metadata().name}: build_command returned empty arguments.")
+                continue
+                
             final_command.extend(cmd_args)
             
             # Find any temp files created by the plugin

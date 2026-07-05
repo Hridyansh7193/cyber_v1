@@ -29,15 +29,25 @@ class FfufPlugin(BaseExecutionPlugin):
             wordlist_path = wordlist_mgr.get("common")
             
         cmd = ["-json"]
+        
+        # Ensure target has a scheme
+        def format_target(t: Any) -> str:
+            t_str = str(t)
+            if not t_str.startswith("http"):
+                return f"http://{t_str}"
+            return t_str
+            
         if isinstance(target, list):
             import tempfile, os
             fd, temp_path = tempfile.mkstemp(text=True)
             if target:
-                cmd.extend(["-u", f"{str(target[0])}/FUZZ"])
+                base_target = format_target(target[0])
+                cmd.extend(["-u", f"{base_target}/FUZZ"])
             with os.fdopen(fd, 'w') as f:
                 f.write("\n".join(target)) # not used
         else:
-            cmd.extend(["-u", f"{str(target)}/FUZZ"])
+            base_target = format_target(target)
+            cmd.extend(["-u", f"{base_target}/FUZZ"])
 
         if wordlist_path:
             cmd.extend(["-w", wordlist_path])

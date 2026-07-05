@@ -31,12 +31,17 @@ class TrufflehogWrapper(BaseExecutionPlugin):
             fd, temp_path = tempfile.mkstemp(text=True)
             with os.fdopen(fd, 'w') as f:
                 f.write("\n".join(target))
-            # trufflehog doesn't seem to natively take target lists via file? 
-            # If filesystem mode, maybe it can take multiple args, but we'll run on first target for now.
-            if target:
+            # If target list is provided, we can't easily scan all of them via filesystem unless they are paths
+            if target and not str(target[0]).startswith("http"):
                 cmd.append(str(target[0]))
+            else:
+                return tuple([]) # Skip execution if invalid
         else:
-            cmd.append(str(target))
+            target_str = str(target)
+            if target_str.startswith("http"):
+                # Trufflehog filesystem doesn't support URLs, switch to git or skip
+                cmd[0] = "git"
+            cmd.append(target_str)
             
         return tuple(cmd)
 
