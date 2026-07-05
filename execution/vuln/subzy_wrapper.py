@@ -21,7 +21,7 @@ class SubzyPlugin(ExecutionPlugin):
         )
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
-        return ("run", "--hide_fails", "--json")
+        return ("run", "--hide_fails")
 
     def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
         return bool(state.target.domain)

@@ -21,7 +21,7 @@ class DalfoxPlugin(ExecutionPlugin):
         )
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
-        return ("-silent", "--format", "json")
+        return ("--format", "json")
 
     def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
         return bool(state.target.domain)

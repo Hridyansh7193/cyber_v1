@@ -21,7 +21,7 @@ class NucleiPlugin(ExecutionPlugin):
         )
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
-        cmd = ["-silent", "-json"]
+        cmd = ["-silent"]
         
         # Add dynamic tags based on tech stack
         tech_tags = set()
