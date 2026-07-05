@@ -22,9 +22,13 @@ class LinkFinderWrapper(BaseExecutionPlugin):
             # LinkFinder doesn't easily support multiple URLs natively without a loop. We run on the first target if it's a list.
             # Realistically we should loop or use Burp crawler. We'll pick the first for now.
             if target:
-                cmd.extend(["-i", str(target[0])])
+                t = str(target[0])
+                if not t.startswith(("http://", "https://")): t = "https://" + t
+                cmd.extend(["-i", t])
         else:
-            cmd.extend(["-i", str(target)])
+            t = str(target)
+            if not t.startswith(("http://", "https://")): t = "https://" + t
+            cmd.extend(["-i", t])
         cmd.extend(["-o", "cli"])
         return tuple(cmd)
 

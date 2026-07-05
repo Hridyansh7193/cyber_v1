@@ -22,7 +22,6 @@ class TrufflehogWrapper(BaseExecutionPlugin):
         mode = "filesystem"
         
         bughunter_config = config.get("config")
-        # Trufflehog mode doesn't seem to be explicitly in schemas, so fallback to filesystem
         
         cmd = [mode, "--no-update"]
         
@@ -31,16 +30,18 @@ class TrufflehogWrapper(BaseExecutionPlugin):
             fd, temp_path = tempfile.mkstemp(text=True)
             with os.fdopen(fd, 'w') as f:
                 f.write("\n".join(target))
-            # If target list is provided, we can't easily scan all of them via filesystem unless they are paths
             if target and not str(target[0]).startswith("http"):
                 cmd.append(str(target[0]))
             else:
                 return tuple([]) # Skip execution if invalid
         else:
             target_str = str(target)
-            if target_str.startswith("http"):
-                # Trufflehog filesystem doesn't support URLs, switch to git or skip
-                cmd[0] = "git"
+            import re
+            if target_str.startswith("http://") or target_str.startswith("https://"):
+                return tuple([])
+            if re.match(r"^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", target_str):
+                return tuple([])
+            
             cmd.append(target_str)
             
         return tuple(cmd)

@@ -20,9 +20,13 @@ class SecretFinderWrapper(BaseExecutionPlugin):
         cmd = []
         if isinstance(target, list):
             if target:
-                cmd.extend(["-i", str(target[0])])
+                t = str(target[0])
+                if not t.startswith(("http://", "https://")): t = "https://" + t
+                cmd.extend(["-i", t])
         else:
-            cmd.extend(["-i", str(target)])
+            t = str(target)
+            if not t.startswith(("http://", "https://")): t = "https://" + t
+            cmd.extend(["-i", t])
         cmd.extend(["-o", "cli"])
         return tuple(cmd)
 
