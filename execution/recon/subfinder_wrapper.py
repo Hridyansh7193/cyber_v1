@@ -2,12 +2,10 @@ from schemas.state import ExecutionState
 import json
 from typing import Tuple, Any, Mapping, List
 from execution.constants import NEW_SUBDOMAINS
-from execution.plugins.base import ExecutionPlugin, PluginMetadata
+from execution.plugins.base import BaseExecutionPlugin, PluginMetadata
 from schemas.runtime import Capability
-from schemas.tool_result import ToolResult
-from execution.utils.process_runner import ProcessRunner
 
-class SubfinderWrapper(ExecutionPlugin):
+class SubfinderWrapper(BaseExecutionPlugin):
     def metadata(self) -> PluginMetadata:
         return PluginMetadata(
             name="subfinder",
@@ -18,11 +16,17 @@ class SubfinderWrapper(ExecutionPlugin):
             supported_tools=("subfinder",)
         )
 
-    def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
-        return ("-silent", "-json")
-
-    def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
-        return bool(state.target.domain)
+    def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
+        cmd = ["-silent", "-json"]
+        if isinstance(target, list):
+            import tempfile, os
+            fd, temp_path = tempfile.mkstemp(text=True)
+            with os.fdopen(fd, 'w') as f:
+                f.write("\n".join(target))
+            cmd.extend(["-dL", temp_path])
+        else:
+            cmd.extend(["-d", str(target)])
+        return tuple(cmd)
 
     def parse(self, stdout: str, stderr: str) -> List[str]:
         results = []
@@ -38,9 +42,6 @@ class SubfinderWrapper(ExecutionPlugin):
                 if "." in line and " " not in line:
                     results.append(line)
         return list(dict.fromkeys(results))
-
-    def health_check(self) -> bool:
-        return True
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
         return {NEW_SUBDOMAINS: parsed}

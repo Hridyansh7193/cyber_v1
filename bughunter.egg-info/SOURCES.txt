@@ -3,6 +3,7 @@ LICENSE
 MANIFEST.in
 README.md
 pyproject.toml
+requirements.txt
 agents/__init__.py
 agents/analysis_agent.py
 agents/analyzer.py
@@ -29,6 +30,7 @@ bughunter.egg-info/PKG-INFO
 bughunter.egg-info/SOURCES.txt
 bughunter.egg-info/dependency_links.txt
 bughunter.egg-info/entry_points.txt
+bughunter.egg-info/requires.txt
 bughunter.egg-info/top_level.txt
 cli/__init__.py
 cli/commands.py

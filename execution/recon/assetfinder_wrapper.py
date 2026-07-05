@@ -1,12 +1,10 @@
 from schemas.state import ExecutionState
 from typing import Tuple, Any, Mapping, List
 from execution.constants import NEW_SUBDOMAINS
-from execution.plugins.base import ExecutionPlugin, PluginMetadata
+from execution.plugins.base import BaseExecutionPlugin, PluginMetadata
 from schemas.runtime import Capability
-from schemas.tool_result import ToolResult
-from execution.utils.process_runner import ProcessRunner
 
-class AssetfinderWrapper(ExecutionPlugin):
+class AssetfinderWrapper(BaseExecutionPlugin):
     def metadata(self) -> PluginMetadata:
         return PluginMetadata(
             name="assetfinder",
@@ -17,11 +15,14 @@ class AssetfinderWrapper(ExecutionPlugin):
             supported_tools=("assetfinder",)
         )
 
-    def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
-        return ("--subs-only", )
-
-    def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
-        return bool(state.target.domain)
+    def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
+        cmd = ["--subs-only"]
+        if isinstance(target, list):
+            if target:
+                cmd.append(str(target[0]))
+        else:
+            cmd.append(str(target))
+        return tuple(cmd)
 
     def parse(self, stdout: str, stderr: str) -> List[str]:
         results = []
@@ -30,9 +31,6 @@ class AssetfinderWrapper(ExecutionPlugin):
             if line:
                 results.append(line)
         return list(dict.fromkeys(results))
-
-    def health_check(self) -> bool:
-        return True
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
         return {NEW_SUBDOMAINS: parsed}

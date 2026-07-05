@@ -16,7 +16,7 @@ class WordlistManager:
     def detect(self) -> None:
         """Find common wordlists across search paths."""
         common_lists = {
-            "common": "Discovery/Web-Content/common.txt",
+            "common": str(Path.home() / "SecLists" / "Discovery" / "Web-Content" / "common.txt"),
             "raft-small-words": "Discovery/Web-Content/raft-small-words.txt",
             "raft-large-words": "Discovery/Web-Content/raft-large-words.txt",
             "api": "Discovery/Web-Content/api/api-endpoints.txt",
@@ -24,6 +24,10 @@ class WordlistManager:
         }
 
         for name, rel_path in common_lists.items():
+            if Path(rel_path).is_absolute():
+                self._wordlists[name] = rel_path
+                continue
+
             for base_path in self._search_paths:
                 full_path = base_path / rel_path
                 if full_path.exists() and full_path.is_file():

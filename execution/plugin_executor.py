@@ -56,7 +56,10 @@ class PluginExecutor:
                 if tool_info.version:
                     tool_version = tool_info.version
                     
-            final_command = [binary_path]
+            if binary_path.endswith('.py'):
+                final_command = ["python3", binary_path]
+            else:
+                final_command = [binary_path]
             
             # Auto-extract target from state if not provided
             current_target = target
@@ -81,63 +84,10 @@ class PluginExecutor:
                     # Generic fallback
                     current_target = state.target.resolved_url or state.target.domain
             
-            # Map plugin to its (single_target_flag, list_target_flag)
-            flag_map = {
-                "httpx": ("-u", "-l"),
-                "nuclei": ("-u", "-l"),
-                "katana": ("-u", "-list"),
-                "subfinder": ("-d", "-dL"),
-                "dalfox": ("url", "file"),
-                "gau": (None, None),
-                "assetfinder": (None, None),
-                "subzy": ("--target", "--targets")
-            }
-            
-            if plugin.metadata().name in flag_map:
-                if current_target is None:
-                    logger.info(f"Skipping {plugin.metadata().name}: no targets available.")
-                    continue
-                    
-                single_flag, list_flag = flag_map[plugin.metadata().name]
-                
-                if isinstance(current_target, (list, tuple, set)):
-                    current_target = [x for x in current_target if x]
-
-                    if not current_target:
-                        logger.info(f"Skipping {plugin.metadata().name}: no targets available.")
-                        continue
-                    if list_flag:
-                        cleaned_targets = []
-                        for item in current_target:
-                            if isinstance(item, str):
-                                cleaned_targets.append(item)
-                            elif isinstance(item, dict):
-                                cleaned_targets.append(
-                                    item.get("host")
-                                    or item.get("url")
-                                    or item.get("endpoint")
-                                    or ""
-                                )
-                            else:
-                                cleaned_targets.append(str(item))
-                        current_target = [x for x in cleaned_targets if x]
-                        fd, temp_path = tempfile.mkstemp(text=True)
-                        with os.fdopen(fd, 'w') as f:
-                            f.write("\n".join(map(str, current_target)))
-                        final_command.extend([list_flag, temp_path])
-                    else:
-                        # Fallback for tools that don't support lists natively (e.g. gau, assetfinder)
-                        # but we still want to run them. We would need a wrapper loop, but for now we just use the first item.
-                        if current_target:
-                            if single_flag:
-                                final_command.extend([single_flag, str(current_target[0])])
-                            else:
-                                final_command.append(str(current_target[0]))
-                else:
-                    if single_flag:
-                        final_command.extend([single_flag, str(current_target)])
-                    else:
-                        final_command.append(str(current_target))
+            # If a list was resolved but it is empty, skip execution to prevent hanging tools
+            if isinstance(current_target, (list, tuple, set)) and not current_target:
+                logger.info(f"Skipping {plugin.metadata().name}: no targets available.")
+                continue
                         
             # Auth header injection
             if config.auth.headers:
@@ -146,24 +96,24 @@ class PluginExecutor:
                     for header in config.auth.headers:
                         final_command.extend(["-H", header])
             
+            temp_path = None
             # Execute
-            command = plugin.build_command(state,
+            cmd_args = plugin.build_command(state,
                 {
                     "tool_manager": state.runtime_context.tool_manager if state.runtime_context else None,
                     "wordlist_manager": state.runtime_context.wordlist_manager if state.runtime_context else None,
                     "config": config,
                 },
+                target=current_target
             )
-            final_command.extend(command)
-
-            # Wordlist handling inside PluginExecutor
-            if plugin.metadata().name == "ffuf" and state.runtime_context and state.runtime_context.wordlist_manager:
-                wordlist_path = state.runtime_context.wordlist_manager.get("common")
-                if wordlist_path:
-                    final_command.extend(["-w", wordlist_path])
-                else:
-                    logger.warning("FFUF missing wordlist. Skipping.")
-                    continue
+            final_command.extend(cmd_args)
+            
+            # Find any temp files created by the plugin
+            for arg in cmd_args:
+                if isinstance(arg, str) and (arg.startswith(tempfile.gettempdir()) or "/tmp" in arg):
+                    if os.path.exists(arg):
+                        temp_path = arg
+                        break
 
             logger.info("=" * 80)
             logger.info(f"PLUGIN : {plugin.metadata().name}")
@@ -174,7 +124,7 @@ class PluginExecutor:
             logger.info("=" * 80)
             result = ProcessRunner.run(final_command, plugin.metadata().name)
 
-            if 'temp_path' in locals():
+            if temp_path:
                 try:
                     os.remove(temp_path)
                 except OSError:

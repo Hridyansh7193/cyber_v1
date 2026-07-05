@@ -1,0 +1,11 @@
+{
+  "session_id": "858039af-60c8-45c0-aab0-941c69d3b7b1",
+  "target": "test-resume.com",
+  "profile": "default",
+  "started_at": "2026-07-05T21:38:31.251257",
+  "completed_at": null,
+  "status": "running",
+  "report_path": null,
+  "checkpoint_id": null,
+  "runtime_ms": null
+}

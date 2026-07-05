@@ -1,16 +1,11 @@
 from schemas.state import ExecutionState
-import tempfile
-import os
-import re
 import json
-from typing import List, Tuple, Any, Mapping, Dict
-from execution.plugins.base import ExecutionPlugin, PluginMetadata
+from typing import List, Tuple, Any, Mapping
+from execution.plugins.base import BaseExecutionPlugin, PluginMetadata
 from execution.constants import NEW_SECRETS
 from schemas.runtime import Capability
-from schemas.tool_result import ToolResult
-from execution.utils.process_runner import ProcessRunner
 
-class SecretFinderWrapper(ExecutionPlugin):
+class SecretFinderWrapper(BaseExecutionPlugin):
     def metadata(self) -> PluginMetadata:
         return PluginMetadata(
             name="secretfinder",
@@ -21,11 +16,15 @@ class SecretFinderWrapper(ExecutionPlugin):
             supported_tools=("secretfinder",)
         )
 
-    def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
-        return ("-i", state.target.resolved_url or state.target.domain, "-o", "cli")
-
-    def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
-        return bool(state.target.domain)
+    def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
+        cmd = []
+        if isinstance(target, list):
+            if target:
+                cmd.extend(["-i", str(target[0])])
+        else:
+            cmd.extend(["-i", str(target)])
+        cmd.extend(["-o", "cli"])
+        return tuple(cmd)
 
     def parse(self, stdout: str, stderr: str) -> List[str]:
         results = []
@@ -35,9 +34,5 @@ class SecretFinderWrapper(ExecutionPlugin):
                 results.append(line)
         return list(dict.fromkeys(results))
 
-    def health_check(self) -> bool:
-        return True
-
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
         return {NEW_SECRETS: parsed}
-

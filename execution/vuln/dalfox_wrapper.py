@@ -1,15 +1,11 @@
 from schemas.state import ExecutionState
-import tempfile
-import os
 import json
-from typing import List, Tuple, Any, Mapping, Dict
+from typing import List, Tuple, Any, Mapping
 from execution.constants import NEW_DALFOX
-from execution.plugins.base import ExecutionPlugin, PluginMetadata
+from execution.plugins.base import BaseExecutionPlugin, PluginMetadata
 from schemas.runtime import Capability
-from schemas.tool_result import ToolResult
-from execution.utils.process_runner import ProcessRunner
 
-class DalfoxPlugin(ExecutionPlugin):
+class DalfoxPlugin(BaseExecutionPlugin):
     def metadata(self) -> PluginMetadata:
         return PluginMetadata(
             name="dalfox",
@@ -20,11 +16,19 @@ class DalfoxPlugin(ExecutionPlugin):
             supported_tools=("dalfox",)
         )
 
-    def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
-        return ("--format", "json")
-
-    def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
-        return bool(state.target.domain)
+    def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
+        cmd = []
+        if isinstance(target, list):
+            import tempfile, os
+            fd, temp_path = tempfile.mkstemp(text=True)
+            with os.fdopen(fd, 'w') as f:
+                f.write("\n".join(target))
+            cmd.extend(["file", temp_path])
+        else:
+            cmd.extend(["url", str(target)])
+            
+        cmd.extend(["--format", "json"])
+        return tuple(cmd)
 
     def parse(self, stdout: str, stderr: str) -> List[Mapping[str, Any]]:
         results = []
@@ -37,9 +41,6 @@ class DalfoxPlugin(ExecutionPlugin):
             except json.JSONDecodeError:
                 pass
         return results
-
-    def health_check(self) -> bool:
-        return True
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
         return {NEW_DALFOX: parsed}

@@ -21,7 +21,18 @@ def test_config():
         reporting={"report_formats": ["json", "markdown"], "output_directories": {}}
     )
 
-def test_resume_and_evidence(test_config, monkeypatch):
+def test_resume_and_evidence(test_config, monkeypatch, tmp_path):
+    import storage.models as models
+    from storage.database import get_engine, override_db
+    
+    db_path = tmp_path / "integration_bughunter.db"
+    db_url = f"sqlite:///{db_path}"
+    override_db(db_url)
+    
+    # Create tables
+    engine = get_engine()
+    models.Base.metadata.create_all(engine)
+
     registry = JobRegistry()
     adapter = OrchestratorAdapter(registry, test_config)
     persistence = PersistenceService()

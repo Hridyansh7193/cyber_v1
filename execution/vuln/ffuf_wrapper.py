@@ -1,15 +1,11 @@
 from schemas.state import ExecutionState
-import tempfile
-import os
 import json
-from typing import List, Tuple, Any, Mapping, Dict
+from typing import List, Tuple, Any, Mapping
 from execution.constants import NEW_FUZZ_RESULTS
-from execution.plugins.base import ExecutionPlugin, PluginMetadata
+from execution.plugins.base import BaseExecutionPlugin, PluginMetadata
 from schemas.runtime import Capability
-from schemas.tool_result import ToolResult
-from execution.utils.process_runner import ProcessRunner
 
-class FfufPlugin(ExecutionPlugin):
+class FfufPlugin(BaseExecutionPlugin):
     def metadata(self) -> PluginMetadata:
         return PluginMetadata(
             name="ffuf",
@@ -20,14 +16,32 @@ class FfufPlugin(ExecutionPlugin):
             supported_tools=("ffuf",)
         )
 
-    def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
-        wordlist = config.get("wordlist")
-        cmd = ["-u", f"{state.target.resolved_url or state.target.domain}/FUZZ", "-json"]
-        if wordlist:
-            cmd.extend(["-w", wordlist])
+    def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
+        # PluginExecutor passes config with 'wordlist_manager'
+        wordlist_mgr = config.get("wordlist_manager")
+        wordlist_path = None
+        
+        bughunter_config = config.get("config")
+        if bughunter_config and hasattr(bughunter_config, "tools") and getattr(bughunter_config.tools, "wordlists", None):
+            wordlist_path = bughunter_config.tools.wordlists.get("common")
+        
+        if not wordlist_path and wordlist_mgr:
+            wordlist_path = wordlist_mgr.get("common")
+            
+        cmd = ["-json"]
+        if isinstance(target, list):
+            import tempfile, os
+            fd, temp_path = tempfile.mkstemp(text=True)
+            if target:
+                cmd.extend(["-u", f"{str(target[0])}/FUZZ"])
+            with os.fdopen(fd, 'w') as f:
+                f.write("\n".join(target)) # not used
+        else:
+            cmd.extend(["-u", f"{str(target)}/FUZZ"])
+
+        if wordlist_path:
+            cmd.extend(["-w", wordlist_path])
         return tuple(cmd)
-    def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
-        return bool(state.target.domain)
 
     def parse(self, stdout: str, stderr: str) -> List[Mapping[str, Any]]:
         results = []
@@ -44,9 +58,6 @@ class FfufPlugin(ExecutionPlugin):
             except json.JSONDecodeError:
                 pass
         return results
-
-    def health_check(self) -> bool:
-        return True
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
         return {NEW_FUZZ_RESULTS: parsed}

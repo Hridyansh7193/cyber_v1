@@ -17,6 +17,18 @@ class ToolManager:
         if bin_name in ("python", "python3"):
             return shutil.which(bin_name)
             
+        # Hardcode explicit Python script paths for custom wrappers
+        custom_scripts = {
+            "linkfinder.py": os.path.expanduser("~/tools/LinkFinder/linkfinder.py"),
+            "SecretFinder.py": os.path.expanduser("~/tools/SecretFinder/SecretFinder.py"),
+            "swagger_discovery.py": os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "execution", "api", "swagger_discovery.py")),
+            "graphql_discovery.py": os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "execution", "api", "graphql_discovery.py")),
+        }
+        
+        if bin_name in custom_scripts:
+            # We don't verify if it exists yet because installer creates it, just return the desired path
+            return custom_scripts[bin_name]
+
         # Filter out virtual environment paths to avoid resolving python packages (like httpx)
         # instead of actual system binaries (like ProjectDiscovery's httpx).
         path_env = os.environ.get("PATH", "")
@@ -39,12 +51,12 @@ class ToolManager:
             "katana": ["katana"],
             "assetfinder": ["assetfinder"],
             "gau": ["gau"],
-            "linkfinder": ["linkfinder", "linkfinder.py"],
-            "secretfinder": ["secretfinder", "secretfinder.py"],
+            "linkfinder": ["linkfinder.py", "linkfinder"],
+            "secretfinder": ["SecretFinder.py", "secretfinder.py", "secretfinder"],
             "nuclei": ["nuclei"],
             "dalfox": ["dalfox"],
-            "swagger_discover": ["swagger_discover", "swagger_discover.py"],
-            "graphql_discover": ["graphql_discover", "graphql_discover.py"],
+            "swagger_discover": ["swagger_discovery.py", "swagger_discover", "swagger_discover.py"],
+            "graphql_discover": ["graphql_discovery.py", "graphql_discover", "graphql_discover.py"],
             "trufflehog": ["trufflehog"],
             "ffuf": ["ffuf"],
             "subzy": ["subzy"]

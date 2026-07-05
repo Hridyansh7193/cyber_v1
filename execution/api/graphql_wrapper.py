@@ -1,13 +1,11 @@
 from schemas.state import ExecutionState
 import json
-from typing import Tuple, Any, Mapping, List, Dict
+from typing import Tuple, Any, Mapping, List
 from execution.constants import NEW_GRAPHQL
-from execution.plugins.base import ExecutionPlugin, PluginMetadata
+from execution.plugins.base import BaseExecutionPlugin, PluginMetadata
 from schemas.runtime import Capability
-from schemas.tool_result import ToolResult
-from execution.utils.process_runner import ProcessRunner
 
-class GraphQLPlugin(ExecutionPlugin):
+class GraphQLPlugin(BaseExecutionPlugin):
     def metadata(self) -> PluginMetadata:
         return PluginMetadata(
             name="graphql_discovery",
@@ -18,11 +16,14 @@ class GraphQLPlugin(ExecutionPlugin):
             supported_tools=("graphql_discover",)
         )
 
-    def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
-        return ("-u", state.target.resolved_url or state.target.domain)
-
-    def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
-        return bool(state.target.domain)
+    def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
+        cmd = []
+        if isinstance(target, list):
+            if target:
+                cmd.extend(["-u", str(target[0])])
+        else:
+            cmd.extend(["-u", str(target)])
+        return tuple(cmd)
 
     def parse(self, stdout: str, stderr: str) -> List[Any]:
         results = []
@@ -35,9 +36,6 @@ class GraphQLPlugin(ExecutionPlugin):
             except json.JSONDecodeError:
                 results.append(line)
         return results
-
-    def health_check(self) -> bool:
-        return True
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
         graphql_urls = []

@@ -34,7 +34,7 @@ class PluginParser(ABC):
 
 class PluginRunner(ABC):
     @abstractmethod
-    def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
+    def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
         pass
         
     @abstractmethod
@@ -45,3 +45,15 @@ class ExecutionPlugin(PluginValidator, PluginParser, PluginRunner, ABC):
     @abstractmethod
     def metadata(self) -> PluginMetadata:
         pass
+
+class BaseExecutionPlugin(ExecutionPlugin, ABC):
+    """Standardized base execution plugin that handles boilerplate validation and health checks."""
+    def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
+        return bool(state.target.domain)
+
+    def health_check(self) -> bool:
+        return True
+    
+    def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
+        """Override this in specific plugins to map to constants."""
+        return {"new_findings": parsed}
