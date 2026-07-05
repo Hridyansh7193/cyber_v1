@@ -93,7 +93,11 @@ class PluginExecutor:
                 "subzy": ("--target", "--targets")
             }
             
-            if current_target is not None and plugin.metadata().name in flag_map:
+            if plugin.metadata().name in flag_map:
+                if current_target is None:
+                    logger.info(f"Skipping {plugin.metadata().name}: no targets available.")
+                    continue
+                    
                 single_flag, list_flag = flag_map[plugin.metadata().name]
                 
                 if isinstance(current_target, (list, tuple, set)):

@@ -24,7 +24,7 @@ class TrufflehogWrapper(ExecutionPlugin):
         # Target here could be a repo or a file path
         # Assuming config specifies type: {"mode": "git" | "filesystem"}
         mode = config.get("mode", "filesystem")
-        return (mode,)
+        return (mode, "--no-update")
 
     def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
         return bool(state.target.domain)

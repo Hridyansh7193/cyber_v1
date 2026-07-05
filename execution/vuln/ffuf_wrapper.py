@@ -22,7 +22,7 @@ class FfufPlugin(ExecutionPlugin):
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
         wordlist = config.get("wordlist")
-        cmd = ["-u", f"{state.target.resolved_url or state.target.domain}/FUZZ", "-json", "-silent"]
+        cmd = ["-u", f"{state.target.resolved_url or state.target.domain}/FUZZ", "-json"]
         if wordlist:
             cmd.extend(["-w", wordlist])
         return tuple(cmd)
