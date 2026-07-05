@@ -4,3 +4,4 @@ include CHANGELOG.md
 recursive-include config *.yaml *.json
 recursive-include schemas *.py
 recursive-include templates *
+recursive-include reporting/templates *.j2
