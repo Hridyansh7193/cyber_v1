@@ -81,8 +81,8 @@ class PluginExecutor:
                     # FFUF should typically fuzz the base domain/URL, not every discovered endpoint
                     current_target = list(state.recon_state.alive_hosts)[0] if state.recon_state.alive_hosts else state.target.resolved_url or state.target.domain
                 elif plugin.metadata().name == "dalfox":
-                    # Dalfox should only target discovered parameters to minimize noise
-                    current_target = list(state.recon_state.parameters) if state.recon_state.parameters else None
+                    # Dalfox should target discovered parameters or URLs to minimize noise
+                    current_target = list(state.recon_state.parameters) if state.recon_state.parameters else (list(state.recon_state.urls) if state.recon_state.urls else None)
                 else:
                     # Generic fallback (e.g. linkfinder, secretfinder)
                     if state.recon_state.alive_hosts:

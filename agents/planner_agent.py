@@ -11,7 +11,7 @@ def plan(state: ExecutionState, config: BugHunterConfig) -> IntelligenceDelta:
     
     # Simple logic to determine which plugins to run based on config.
     # In a real scenario, this would consult the profile and target state.
-    recon_plugins = ("subfinder", "httpx", "assetfinder", "gau")
+    recon_plugins = ("subfinder", "httpx", "assetfinder", "katana", "gau")
     js_plugins = ("linkfinder", "secretfinder", "trufflehog")
     api_plugins = ("swagger", "graphql")
     vuln_plugins = ("nuclei", "dalfox", "subzy", "ffuf")
