@@ -62,3 +62,9 @@ class ExecutionState(BaseModel):
     @field_serializer('metadata')
     def serialize_metadata(self, v: Mapping[str, Any], _info):
         return dict(v)
+
+    def model_dump_json(self, *args, **kwargs):
+        if 'exclude' not in kwargs:
+            kwargs['exclude'] = set()
+        kwargs['exclude'].add('runtime_context')
+        return super().model_dump_json(*args, **kwargs)
