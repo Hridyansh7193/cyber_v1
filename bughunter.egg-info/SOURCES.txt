@@ -76,7 +76,9 @@ execution/constants.py
 execution/plugin_executor.py
 execution/wrappers.py
 execution/api/__init__.py
+execution/api/graphql_discovery.py
 execution/api/graphql_wrapper.py
+execution/api/swagger_discovery.py
 execution/api/swagger_wrapper.py
 execution/discovery/arjun_wrapper.py
 execution/js/__init__.py
@@ -135,6 +137,7 @@ reporting/__init__.py
 reporting/json_renderer.py
 reporting/markdown_renderer.py
 reporting/templates/__init__.py
+reporting/templates/report.md.j2
 runtime/__init__.py
 runtime/doctor.py
 runtime/installer.py

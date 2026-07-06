@@ -76,16 +76,19 @@ class PluginExecutor:
                     # Note: JS endpoints might be relative, ideally we'd make them absolute. 
                     # For now, we only pass valid URLs to avoid breaking tools.
                     valid_urls = {u for u in urls if u.startswith("http")}
-                    current_target = list(valid_urls) if valid_urls else state.target.resolved_url or state.target.domain
+                    current_target = list(valid_urls) if valid_urls else list(state.recon_state.alive_hosts) if state.recon_state.alive_hosts else state.target.resolved_url or state.target.domain
                 elif plugin.metadata().name == "ffuf":
                     # FFUF should typically fuzz the base domain/URL, not every discovered endpoint
-                    current_target = state.target.resolved_url or state.target.domain
+                    current_target = list(state.recon_state.alive_hosts)[0] if state.recon_state.alive_hosts else state.target.resolved_url or state.target.domain
                 elif plugin.metadata().name == "dalfox":
                     # Dalfox should only target discovered parameters to minimize noise
                     current_target = list(state.recon_state.parameters) if state.recon_state.parameters else None
                 else:
-                    # Generic fallback
-                    current_target = state.target.resolved_url or state.target.domain
+                    # Generic fallback (e.g. linkfinder, secretfinder)
+                    if state.recon_state.alive_hosts:
+                        current_target = list(state.recon_state.alive_hosts)[0]
+                    else:
+                        current_target = state.target.resolved_url or state.target.domain
             
             # If a list was resolved but it is empty, skip execution to prevent hanging tools
             if current_target is None or (isinstance(current_target, (list, tuple, set)) and not current_target):
