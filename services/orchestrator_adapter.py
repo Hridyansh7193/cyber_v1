@@ -59,7 +59,12 @@ class OrchestratorAdapter:
                     elif hasattr(node_result, "execution_state"):
                         final_state = node_result.execution_state
                         
-                    progress = min(100.0, ((i + 1) / len(stages)) * 100.0)
+                    if node_name in stages:
+                        stage_idx = stages.index(node_name)
+                        progress = min(100.0, ((stage_idx + 1) / len(stages)) * 100.0)
+                    else:
+                        progress = min(100.0, ((i + 1) / len(stages)) * 100.0)
+                        
                     self._job_registry.update_progress(job_id, node_name, progress)
                     logger.info(f"Node '{node_name}' completed (Progress: {progress:.1f}%)")
                     
