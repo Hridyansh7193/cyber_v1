@@ -64,6 +64,9 @@ class ScanService:
         if self._persistence_service and not is_resume:
             self._persistence_service.create_session(job_id, domain)
             
+        if self._workspace_service and not is_resume:
+            self._workspace_service.workspace_manager.create_session(job_id, domain, "default")
+            
         # If resuming, load state from checkpoint
         resume_state = None
         if is_resume:
