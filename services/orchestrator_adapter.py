@@ -36,7 +36,12 @@ class OrchestratorAdapter:
             "orchestration_state": initial_state
         }
         
-        stages = ["init_node", "planner_node", "recon_node", "js_node", "api_node", "vulnerability_node", "analysis_node", "report_node"]
+        stages = [
+            "init_node", "planner_node", "passive_recon_node", 
+            "scope_enforcement_node", "active_recon_node", 
+            "js_node", "api_node", "parameter_node", 
+            "vulnerability_node", "analysis_node", "report_node"
+        ]
         final_state = initial_exec_state
         
         try:
