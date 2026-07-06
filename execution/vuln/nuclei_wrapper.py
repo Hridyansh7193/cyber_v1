@@ -25,17 +25,15 @@ class NucleiPlugin(BaseExecutionPlugin):
             for tech in tech_list:
                 tech_tags.add(tech.lower().replace(" ", "-"))
         
-        # Also always run severe vulnerabilities and common CVEs
-        tags = ["cve", "high", "critical", "auth-bypass", "takeover"]
+        # Run generic vulnerabilities by default if no tech stack is detected, to ensure we catch basic vulns like SQLi and XSS on custom apps
+        tags = ["cve", "high", "critical", "auth-bypass", "takeover", "xss", "sqli", "lfi", "rce", "misconfig", "generic"]
         if tech_tags:
-            # We don't want to run all tags of every tech, just the tech name if it exists as a tag.
-            # Usually nuclei handles this well.
             tags.extend(list(tech_tags))
             
         cmd.extend(["-tags", ",".join(tags)])
         
-        # Optional: Add severity filter
-        cmd.extend(["-severity", "high,critical,medium"])
+        # Optional: Add severity filter (allow low and info so they show up)
+        cmd.extend(["-severity", "critical,high,medium,low,info"])
 
         if isinstance(target, list):
             import tempfile, os
