@@ -28,7 +28,7 @@ class FfufPlugin(BaseExecutionPlugin):
         if not wordlist_path and wordlist_mgr:
             wordlist_path = wordlist_mgr.get("common")
             
-        cmd = ["-json", "-t", "50", "-maxtime", "300"]
+        cmd = ["-json", "-t", "50", "-maxtime", "300", "-s"]
         
         # Ensure target has a scheme
         def format_target(t: Any) -> str:
