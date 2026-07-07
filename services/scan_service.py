@@ -60,6 +60,8 @@ class ScanService:
             wordlist_manager=wordlist_manager,
             target_resolver=target_resolver
         )
+        runtime_context.trace.job_id = job_id
+        runtime_context.trace.target = domain
         
         if self._persistence_service and not is_resume:
             self._persistence_service.create_session(job_id, domain)
@@ -113,6 +115,17 @@ class ScanService:
             if self._workspace_service and rendered_reports:
                 self._workspace_service.save_reports(domain, job_id, rendered_reports)
                 logger.debug("Workspace output written.")
+                
+            # 4. Save trace report
+            if final_state.runtime_context and hasattr(final_state.runtime_context, "trace"):
+                final_state.runtime_context.trace.finished_at = __import__('datetime').datetime.utcnow()
+                trace_path = __import__('os').path.join("workspaces", domain, "sessions", job_id, "trace.json")
+                try:
+                    with open(trace_path, "w", encoding="utf-8") as f:
+                        f.write(final_state.runtime_context.trace.model_dump_json(indent=2))
+                    logger.info(f"Trace report saved to {trace_path}")
+                except Exception as e:
+                    logger.error(f"Failed to save trace report: {e}")
         else:
             if self._persistence_service:
                 self._persistence_service.update_session(job_id, "failed")

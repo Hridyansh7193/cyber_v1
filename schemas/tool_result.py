@@ -15,6 +15,7 @@ class ToolResult(BaseModel):
     stderr: str
     stdout_size: int = 0
     parsed_findings: int = 0
+    received_count: int = 1
     errors: Tuple[str, ...] = Field(default_factory=tuple)
     error_message: Optional[str] = None
     execution_time: float = Field(ge=0.0)

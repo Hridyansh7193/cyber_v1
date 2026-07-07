@@ -4,6 +4,33 @@ from schemas.telemetry import ExecutionTelemetry
 from execution.constants import *
 from typing import Tuple, List, Mapping, Any
 
+def _append_trace(state: ExecutionState, stage: str, tool_res: ToolResult, stored_count: int):
+    if state.runtime_context and hasattr(state.runtime_context, "trace"):
+        from schemas.trace import TraceEvent
+        from datetime import datetime
+        import os
+        
+        workspace_file = ""
+        if state.target.session_id:
+            workspace_file = os.path.join("workspaces", state.target.domain, "sessions", state.target.session_id, "telemetry", tool_res.tool_name, "execution.json")
+            
+        trace = TraceEvent(
+            stage=stage,
+            plugin=tool_res.tool_name,
+            received=getattr(tool_res, 'received_count', 1),
+            stdout_lines=len(tool_res.stdout.splitlines()) if tool_res.stdout else 0,
+            parsed=tool_res.parsed_findings,
+            stored=stored_count,
+            runtime=tool_res.execution_time,
+            success=tool_res.success,
+            exit_code=tool_res.exit_code,
+            errors=list(tool_res.errors),
+            warnings=[],
+            workspace_file=workspace_file,
+            timestamp=datetime.utcnow()
+        )
+        state.runtime_context.trace.trace.append(trace)
+
 def _extract_telemetry(wrapper_out: Tuple[ToolResult, ...]) -> Tuple[ExecutionTelemetry, ...]:
     return tuple(
         ExecutionTelemetry(
@@ -49,6 +76,9 @@ def apply_recon_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolRes
                 
         # Merge waf detected
         merged_waf.update(output.get("waf_detected", {}))
+        
+        stored_count = sum(len(v) for k, v in output.items() if isinstance(v, (list, tuple)) and k != "tech_stack" and k != "waf_detected")
+        _append_trace(state, "recon", tool_res, stored_count)
 
     merged_subs = tuple(dict.fromkeys(new_subdomains))
     merged_hosts = tuple(dict.fromkeys(new_hosts))
@@ -82,6 +112,9 @@ def apply_js_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResult
         secrets = output.get(NEW_SECRETS, [])
         if secrets:
             new_secrets.extend(secrets)
+            
+        stored_count = sum(len(v) for k, v in output.items() if isinstance(v, (list, tuple)))
+        _append_trace(state, "js", tool_res, stored_count)
 
     merged_files = tuple(dict.fromkeys(new_js_files))
     merged_endpoints = tuple(dict.fromkeys(new_endpoints))
@@ -120,6 +153,9 @@ def apply_api_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResul
         new_graphql.extend(output.get(NEW_GRAPHQL, []))
         new_endpoints.extend(output.get("new_endpoints", []))
         new_schemas.extend(output.get("new_schemas", []))
+        
+        stored_count = sum(len(v) for k, v in output.items() if isinstance(v, (list, tuple)))
+        _append_trace(state, "api", tool_res, stored_count)
 
     merged_swagger = tuple(dict.fromkeys(new_swagger))
     merged_graphql = tuple(dict.fromkeys(new_graphql))
@@ -155,6 +191,8 @@ def apply_api_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResul
 def apply_vuln_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResult, ...]) -> ExecutionState:
     new_nuclei = list(state.vuln_state.nuclei_results)
     new_dalfox = list(state.vuln_state.dalfox_results)
+    new_takeovers = list(state.vuln_state.takeovers)
+    new_fuzz_results = list(state.vuln_state.fuzz_results)
     new_findings = list(state.findings)
     new_logs = list(state.logs) + list(_extract_telemetry(wrapper_out))
     
@@ -202,11 +240,21 @@ def apply_vuln_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResu
                     source_tool="dalfox"
                 )
                 new_findings.append(finding)
+                
+        # Parse takeovers and fuzz results
+        takeovers_out = output.get(NEW_TAKEOVERS, [])
+        new_takeovers.extend(takeovers_out)
+        fuzz_out = output.get(NEW_FUZZ_RESULTS, [])
+        new_fuzz_results.extend(fuzz_out)
+        
+        stored_count = sum(len(v) for k, v in output.items() if isinstance(v, (list, tuple)))
+        _append_trace(state, "vuln", tool_res, stored_count)
     
     new_vuln = VulnerabilityState(
         nuclei_results=tuple(new_nuclei),
         dalfox_results=tuple(new_dalfox),
-        takeovers=state.vuln_state.takeovers
+        takeovers=tuple(new_takeovers),
+        fuzz_results=tuple(new_fuzz_results)
     )
     
     # Deduplicate findings by id
@@ -228,7 +276,9 @@ def apply_parameter_wrapper_result(state: ExecutionState, wrapper_out: Tuple[Too
     
     for tool_res in wrapper_out:
         output = tool_res.metadata or {}
-        new_params.extend(output.get("new_fuzz_results", []))
+        new_params.extend(output.get(NEW_PARAMETERS, []))
+        stored_count = sum(len(v) for k, v in output.items() if isinstance(v, (list, tuple)))
+        _append_trace(state, "parameter", tool_res, stored_count)
 
     merged_params = tuple(dict.fromkeys(new_params))
     

@@ -40,7 +40,27 @@ class ToolManager:
             clean_paths.append(go_bin)
             
         clean_path_env = os.pathsep.join(clean_paths)
+        clean_path_env = os.pathsep.join(clean_paths)
         return shutil.which(bin_name, path=clean_path_env)
+
+    def _detect_version(self, path: str, tool_name: str) -> Optional[str]:
+        import subprocess
+        import re
+        
+        for flag in ["-version", "--version"]:
+            cmd = [path, flag]
+            if path.endswith(".py"):
+                cmd = ["python3", path, flag]
+            try:
+                res = subprocess.run(cmd, capture_output=True, text=True, timeout=2)
+                out = res.stdout + res.stderr
+                if out:
+                    m = re.search(r"v?(\d+\.\d+\.\d+(?:-\w+)?)", out)
+                    if m:
+                        return m.group(1)
+            except Exception:
+                pass
+        return None
 
     def detect(self) -> None:
         """Detect all supported tools in the environment."""
@@ -71,10 +91,11 @@ class ToolManager:
                     break
             
             if path:
+                version = self._detect_version(path, tool_name)
                 self._tools[tool_name] = ToolInfo(
                     name=tool_name,
                     binary_path=path,
-                    version=None,
+                    version=version,
                     capabilities=[]
                 )
 

@@ -19,12 +19,19 @@ def generate_reports(state: ExecutionState, config: BugHunterConfig) -> ReportDe
             deterministic_id = uuid.uuid5(uuid.NAMESPACE_URL, f"{target_id}:{fmt_str}")
             # Create typed report instances, no writing to disk
             from schemas.report import DiscoveredAssets
+            fuzz_res = list(state.recon_state.parameters)
+            fuzz_res.extend(str(f.get("url", f)) if isinstance(f, dict) else str(f) for f in state.vuln_state.fuzz_results)
+            
             assets = DiscoveredAssets(
                 subdomains=state.recon_state.subdomains,
                 hosts=state.recon_state.alive_hosts,
                 urls=state.recon_state.urls,
                 javascript=state.js_state.js_files,
-                apis=tuple(list(state.api_state.swagger_urls) + list(state.api_state.graphql_urls))
+                apis=tuple(list(state.api_state.swagger_urls) + list(state.api_state.graphql_urls)),
+                secrets=tuple(s.get("secret", str(s)) if isinstance(s, dict) else str(s) for s in state.js_state.secrets),
+                technologies=tuple(set(tech for techs in state.recon_state.tech_stack.values() for tech in techs)),
+                takeovers=tuple(t.get("domain", str(t)) if isinstance(t, dict) else str(t) for t in state.vuln_state.takeovers),
+                fuzz_results=tuple(fuzz_res)
             )
             tool_versions = {}
             tool_paths = {}

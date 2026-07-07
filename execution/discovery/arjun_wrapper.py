@@ -4,6 +4,7 @@ import re
 from typing import List, Tuple, Any, Mapping
 from execution.plugins.base import ExecutionPlugin, PluginMetadata
 from schemas.runtime import Capability
+from execution.constants import NEW_PARAMETERS
 
 class ArjunPlugin(ExecutionPlugin):
     def metadata(self) -> PluginMetadata:
@@ -52,7 +53,7 @@ class ArjunPlugin(ExecutionPlugin):
             url = res.get("url")
             for p in res.get("parameters", []):
                 params_discovered.append(f"{url}?{p}=")
-        return {"new_fuzz_results": params_discovered}
+        return {NEW_PARAMETERS: params_discovered}
 
     def health_check(self) -> bool:
         return True

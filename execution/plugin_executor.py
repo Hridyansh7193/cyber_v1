@@ -94,6 +94,8 @@ class PluginExecutor:
             if current_target is None or (isinstance(current_target, (list, tuple, set)) and not current_target):
                 logger.info(f"Skipping {plugin.metadata().name}: no targets available.")
                 continue
+                
+            received_count = len(current_target) if isinstance(current_target, (list, tuple, set)) else 1
                         
             # Auth header injection
             if config.auth.headers:
@@ -146,25 +148,43 @@ class PluginExecutor:
             logger.info("STDERR:")
             logger.info(result.stderr)
             logger.info("=" * 80)
-            # Evidence writing logic
+            # Evidence & Telemetry writing logic
             if state.target.session_id:
-                # We need to construct the path to evidence dir
-                # Since WorkspaceService isn't passed here directly, we rely on a standard path format
-                # assuming target and session_id exist
                 target_str = state.target.domain
+                
+                # Standard evidence log appending
                 evidence_dir = os.path.join("workspaces", target_str, "sessions", state.target.session_id, "evidence")
-                if os.path.exists(evidence_dir):
-                    stdout_file = os.path.join(evidence_dir, f"{plugin.metadata().name}_stdout.log")
-                    stderr_file = os.path.join(evidence_dir, f"{plugin.metadata().name}_stderr.log")
-                    try:
-                        if result.stdout:
-                            with open(stdout_file, "a", encoding="utf-8") as f:
-                                f.write(result.stdout + "\n")
-                        if result.stderr:
-                            with open(stderr_file, "a", encoding="utf-8") as f:
-                                f.write(result.stderr + "\n")
-                    except Exception as e:
-                        logger.error(f"Failed to write evidence for {plugin.metadata().name}: {e}")
+                os.makedirs(evidence_dir, exist_ok=True)
+                stdout_file = os.path.join(evidence_dir, f"{plugin.metadata().name}_stdout.log")
+                stderr_file = os.path.join(evidence_dir, f"{plugin.metadata().name}_stderr.log")
+                try:
+                    if result.stdout:
+                        with open(stdout_file, "a", encoding="utf-8") as f:
+                            f.write(result.stdout + "\n")
+                    if result.stderr:
+                        with open(stderr_file, "a", encoding="utf-8") as f:
+                            f.write(result.stderr + "\n")
+                except Exception as e:
+                    logger.error(f"Failed to write evidence for {plugin.metadata().name}: {e}")
+                    
+                # Full telemetry directory logging
+                telemetry_dir = os.path.join("workspaces", target_str, "sessions", state.target.session_id, "telemetry", plugin.metadata().name)
+                os.makedirs(telemetry_dir, exist_ok=True)
+                import json
+                try:
+                    with open(os.path.join(telemetry_dir, "stdout.txt"), "w", encoding="utf-8") as f:
+                        f.write(result.stdout)
+                    with open(os.path.join(telemetry_dir, "stderr.txt"), "w", encoding="utf-8") as f:
+                        f.write(result.stderr)
+                    with open(os.path.join(telemetry_dir, "execution.json"), "w", encoding="utf-8") as f:
+                        json.dump({
+                            "command": result.command,
+                            "arguments": final_command,
+                            "exit_code": result.exit_code,
+                            "runtime": result.execution_time
+                        }, f, indent=2)
+                except Exception as e:
+                    logger.error(f"Failed to write telemetry for {plugin.metadata().name}: {e}")
             
             parsed = []
             errors = []
@@ -179,17 +199,38 @@ class PluginExecutor:
             if result.error_message:
                 errors.append(result.error_message)
                 
+            if state.target.session_id:
+                target_str = state.target.domain
+                telemetry_dir = os.path.join("workspaces", target_str, "sessions", state.target.session_id, "telemetry", plugin.metadata().name)
+                try:
+                    with open(os.path.join(telemetry_dir, "parsed.json"), "w", encoding="utf-8") as f:
+                        # Pydantic models might be in parsed, serialize cautiously
+                        import json
+                        def default_serializer(obj):
+                            if hasattr(obj, "model_dump"): return obj.model_dump()
+                            if hasattr(obj, "__dict__"): return obj.__dict__
+                            return str(obj)
+                        json.dump(parsed, f, indent=2, default=default_serializer)
+                except Exception as e:
+                    logger.error(f"Failed to serialize parsed.json: {e}")
+                
             metadata = {}
             if result.exit_code == 0 and not errors:
                 try:
                     metadata = plugin.build_metadata(parsed)
-                    valid_keys = {"new_subdomains", "new_hosts", "new_urls", "new_js_files", "new_endpoints", "new_secrets", "new_swagger", "new_graphql", "new_nuclei", "new_dalfox", "new_takeovers", "new_fuzz_results", "new_findings", "tech_stack", "waf_detected", "new_schemas"}
+                    valid_keys = {"new_subdomains", "new_hosts", "new_urls", "new_js_files", "new_endpoints", "new_secrets", "new_swagger", "new_graphql", "new_nuclei", "new_dalfox", "new_takeovers", "new_fuzz_results", "new_findings", "tech_stack", "waf_detected", "new_schemas", "new_parameters"}
                     invalid_keys = [k for k in metadata.keys() if k not in valid_keys]
                     if invalid_keys:
                         errors.append(f"Invalid metadata keys returned by plugin: {invalid_keys}")
                         metadata = {}
                 except Exception as e:
                     errors.append(f"Metadata build error: {str(e)}")
+
+            parsed_tuple = tuple(parsed) if isinstance(parsed, (list, tuple)) else ((parsed,) if parsed else ())
+            parsed_findings = len(parsed_tuple)
+            
+            if result.stdout_size > 0 and parsed_findings == 0 and not errors:
+                errors.append("Stdout was not empty but 0 objects were parsed.")
 
             success = result.success and len(errors) == 0
                 
@@ -204,11 +245,12 @@ class PluginExecutor:
                 stdout=result.stdout,
                 stderr=result.stderr,
                 stdout_size=result.stdout_size,
-                parsed_findings=len(parsed) if isinstance(parsed, list) else 0,
+                parsed_findings=parsed_findings,
+                received_count=received_count,
                 errors=tuple(errors),
                 error_message=result.error_message if result.error_message else None,
                 execution_time=result.execution_time,
-                parsed_output=tuple(parsed) if isinstance(parsed, list) else (parsed,),
+                parsed_output=parsed_tuple,
                 metadata_schema_version=METADATA_SCHEMA_VERSION,
                 metadata=metadata
             )

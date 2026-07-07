@@ -14,6 +14,7 @@ NEW_DALFOX = "new_dalfox"
 NEW_TAKEOVERS = "new_takeovers"
 NEW_FUZZ_RESULTS = "new_fuzz_results"
 NEW_SECRETS = "new_secrets"
+NEW_PARAMETERS = "new_parameters"
 
 class ToolMetadata(TypedDict, total=False):
     new_subdomains: List[str]

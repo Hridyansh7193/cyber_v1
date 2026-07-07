@@ -42,6 +42,7 @@ class VulnerabilityState(BaseModel):
     nuclei_results: Tuple[Mapping[str, Any], ...] = Field(default=())
     dalfox_results: Tuple[Mapping[str, Any], ...] = Field(default=())
     takeovers: Tuple[Mapping[str, Any], ...] = Field(default=())
+    fuzz_results: Tuple[Mapping[str, Any], ...] = Field(default=())
 
 class ExecutionState(BaseModel):
     model_config = ConfigDict(frozen=True)
