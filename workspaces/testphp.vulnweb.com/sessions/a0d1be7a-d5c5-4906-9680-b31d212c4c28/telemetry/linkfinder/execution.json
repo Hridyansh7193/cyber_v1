@@ -1,0 +1,13 @@
+{
+  "command": "python3 'C:\\Users\\hridy/tools/LinkFinder/linkfinder.py' -i http://testphp.vulnweb.com -o cli",
+  "arguments": [
+    "C:\\Users\\hridy\\AppData\\Local\\Microsoft\\WindowsApps\\python3.EXE",
+    "C:\\Users\\hridy/tools/LinkFinder/linkfinder.py",
+    "-i",
+    "http://testphp.vulnweb.com",
+    "-o",
+    "cli"
+  ],
+  "exit_code": 2,
+  "runtime": 0.11496257781982422
+}

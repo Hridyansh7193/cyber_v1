@@ -21,11 +21,13 @@ class SecretFinderWrapper(BaseExecutionPlugin):
         if isinstance(target, list):
             if target:
                 t = str(target[0])
-                if not t.startswith(("http://", "https://")): t = "https://" + t
+                if not t.startswith(("http://", "https://")):
+                    t = "https://" + t if ":443" in t else "http://" + t
                 cmd.extend(["-i", t])
         else:
             t = str(target)
-            if not t.startswith(("http://", "https://")): t = "https://" + t
+            if not t.startswith(("http://", "https://")):
+                t = "https://" + t if ":443" in t else "http://" + t
             cmd.extend(["-i", t])
         cmd.extend(["-o", "cli"])
         return tuple(cmd)

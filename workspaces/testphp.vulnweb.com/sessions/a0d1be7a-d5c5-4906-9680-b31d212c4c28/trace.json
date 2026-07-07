@@ -1,0 +1,248 @@
+{
+  "job_id": "a0d1be7a-d5c5-4906-9680-b31d212c4c28",
+  "target": "testphp.vulnweb.com",
+  "started_at": "2026-07-07T21:22:16.509918",
+  "finished_at": "2026-07-07T21:22:23.083169",
+  "planner_profile": "default",
+  "bughunter_version": "1.0.0",
+  "trace": [
+    {
+      "stage": "recon",
+      "plugin": "subfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool subfinder is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\testphp.vulnweb.com\\sessions\\a0d1be7a-d5c5-4906-9680-b31d212c4c28\\telemetry\\subfinder\\execution.json",
+      "timestamp": "2026-07-07T21:22:18.026850"
+    },
+    {
+      "stage": "recon",
+      "plugin": "httpx",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.23460769653320312,
+      "success": false,
+      "exit_code": 2,
+      "errors": [
+        "Execution failed with exit code 2"
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\testphp.vulnweb.com\\sessions\\a0d1be7a-d5c5-4906-9680-b31d212c4c28\\telemetry\\httpx\\execution.json",
+      "timestamp": "2026-07-07T21:22:18.026850"
+    },
+    {
+      "stage": "recon",
+      "plugin": "assetfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool assetfinder is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\testphp.vulnweb.com\\sessions\\a0d1be7a-d5c5-4906-9680-b31d212c4c28\\telemetry\\assetfinder\\execution.json",
+      "timestamp": "2026-07-07T21:22:18.027370"
+    },
+    {
+      "stage": "recon",
+      "plugin": "katana",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool katana is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\testphp.vulnweb.com\\sessions\\a0d1be7a-d5c5-4906-9680-b31d212c4c28\\telemetry\\katana\\execution.json",
+      "timestamp": "2026-07-07T21:22:18.027370"
+    },
+    {
+      "stage": "recon",
+      "plugin": "gau",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool gau is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\testphp.vulnweb.com\\sessions\\a0d1be7a-d5c5-4906-9680-b31d212c4c28\\telemetry\\gau\\execution.json",
+      "timestamp": "2026-07-07T21:22:18.027370"
+    },
+    {
+      "stage": "js",
+      "plugin": "linkfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.11496257781982422,
+      "success": false,
+      "exit_code": 2,
+      "errors": [
+        "Execution failed with exit code 2"
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\testphp.vulnweb.com\\sessions\\a0d1be7a-d5c5-4906-9680-b31d212c4c28\\telemetry\\linkfinder\\execution.json",
+      "timestamp": "2026-07-07T21:22:20.471422"
+    },
+    {
+      "stage": "js",
+      "plugin": "secretfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.10733771324157715,
+      "success": false,
+      "exit_code": 2,
+      "errors": [
+        "Execution failed with exit code 2"
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\testphp.vulnweb.com\\sessions\\a0d1be7a-d5c5-4906-9680-b31d212c4c28\\telemetry\\secretfinder\\execution.json",
+      "timestamp": "2026-07-07T21:22:20.471422"
+    },
+    {
+      "stage": "js",
+      "plugin": "trufflehog",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool trufflehog is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\testphp.vulnweb.com\\sessions\\a0d1be7a-d5c5-4906-9680-b31d212c4c28\\telemetry\\trufflehog\\execution.json",
+      "timestamp": "2026-07-07T21:22:20.471422"
+    },
+    {
+      "stage": "api",
+      "plugin": "swagger",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.12902331352233887,
+      "success": false,
+      "exit_code": 1,
+      "errors": [
+        "Execution failed with exit code 1"
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\testphp.vulnweb.com\\sessions\\a0d1be7a-d5c5-4906-9680-b31d212c4c28\\telemetry\\swagger\\execution.json",
+      "timestamp": "2026-07-07T21:22:22.992541"
+    },
+    {
+      "stage": "api",
+      "plugin": "graphql_discovery",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.12327075004577637,
+      "success": false,
+      "exit_code": 1,
+      "errors": [
+        "Execution failed with exit code 1"
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\testphp.vulnweb.com\\sessions\\a0d1be7a-d5c5-4906-9680-b31d212c4c28\\telemetry\\graphql_discovery\\execution.json",
+      "timestamp": "2026-07-07T21:22:22.992541"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "nuclei",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool nuclei is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\testphp.vulnweb.com\\sessions\\a0d1be7a-d5c5-4906-9680-b31d212c4c28\\telemetry\\nuclei\\execution.json",
+      "timestamp": "2026-07-07T21:22:22.996224"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "dalfox",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool dalfox is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\testphp.vulnweb.com\\sessions\\a0d1be7a-d5c5-4906-9680-b31d212c4c28\\telemetry\\dalfox\\execution.json",
+      "timestamp": "2026-07-07T21:22:22.996224"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "subzy",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool subzy is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\testphp.vulnweb.com\\sessions\\a0d1be7a-d5c5-4906-9680-b31d212c4c28\\telemetry\\subzy\\execution.json",
+      "timestamp": "2026-07-07T21:22:22.996224"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "ffuf",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool ffuf is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\testphp.vulnweb.com\\sessions\\a0d1be7a-d5c5-4906-9680-b31d212c4c28\\telemetry\\ffuf\\execution.json",
+      "timestamp": "2026-07-07T21:22:22.996224"
+    }
+  ]
+}

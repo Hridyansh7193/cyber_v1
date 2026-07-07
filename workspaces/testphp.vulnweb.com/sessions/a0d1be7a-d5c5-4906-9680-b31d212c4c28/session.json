@@ -1,0 +1,11 @@
+{
+  "session_id": "a0d1be7a-d5c5-4906-9680-b31d212c4c28",
+  "target": "testphp.vulnweb.com",
+  "profile": "default",
+  "started_at": "2026-07-07T21:22:16.528021",
+  "completed_at": null,
+  "status": "running",
+  "report_path": null,
+  "checkpoint_id": null,
+  "runtime_ms": null
+}
