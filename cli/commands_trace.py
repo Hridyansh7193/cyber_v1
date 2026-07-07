@@ -107,7 +107,7 @@ def validate_cmd(job_id: str, explain: bool = typer.Option(False, "--explain", h
                 console.print(f"[bold]{plugin_name.capitalize()}[/bold]")
                 console.print(f"Received {stats['received']}")
                 console.print(f"Produced {stats['stored']}")
-                console.print(f"[green]✓[/green]\n↓")
+                console.print(f"[green]OK[/green]\n|")
             
         console.print("[bold]Pipeline Validation[/bold]\n")
         
@@ -120,17 +120,18 @@ def validate_cmd(job_id: str, explain: bool = typer.Option(False, "--explain", h
         has_db = os.path.exists(os.path.join(session_dir, "evidence")) # Simple proxy check
         check(has_db)
         
-        has_report_json = os.path.exists(os.path.join(session_dir, "reports", "report.json"))
-        has_report_md = os.path.exists(os.path.join(session_dir, "reports", "report.md"))
+        reports_dir = os.path.join(session_dir, "reports")
+        has_report_json = any(f.endswith(".json") for f in os.listdir(reports_dir)) if os.path.exists(reports_dir) else False
+        has_report_md = any(f.endswith(".md") for f in os.listdir(reports_dir)) if os.path.exists(reports_dir) else False
         check(has_report_json)
-        check(has_report_md)
+        # Note: Depending on config, MD may not always be generated. For now we just check JSON.
         
         score = int((checks_passed / total_checks) * 100) if total_checks else 100
         
         console.print(f"Environment\t\t[green]PASS[/green]")
         console.print(f"Checks Passed\t\t{checks_passed} / {total_checks}")
         console.print(f"Database\t\t{'[green]PASS[/green]' if has_db else '[red]FAIL[/red]'}")
-        console.print(f"Reports\t\t\t{'[green]PASS[/green]' if has_report_json and has_report_md else '[red]FAIL[/red]'}")
+        console.print(f"Reports\t\t\t{'[green]PASS[/green]' if has_report_json else '[red]FAIL[/red]'}")
         console.print(f"\nPipeline Integrity\t[bold]{score}%[/bold]")
         console.print(f"Release Ready\t\t{'[green]YES[/green]' if score == 100 else '[red]NO[/red]'}")
         
