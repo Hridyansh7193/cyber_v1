@@ -34,14 +34,19 @@ class LinkFinderWrapper(BaseExecutionPlugin):
         cmd.extend(["-o", "cli"])
         return tuple(cmd)
 
-    def parse(self, stdout: str, stderr: str) -> List[str]:
+    def parse(self, stdout: str, stderr: str) -> tuple:
+        from execution.utils.output_parser import OutputParser
+        lines = OutputParser.parse_lines(stdout)
         results = []
-        for line in stdout.splitlines():
-            line = line.strip()
-            if line and not line.startswith("[+]") and not line.startswith("Running") and not line.startswith("Invalid input") and not line.startswith("URL:"):
-                if len(line) < 500:
-                    results.append(line)
-        return list(dict.fromkeys(results))
+        errors = []
+        for line in lines:
+            if line.startswith("[+]") or line.startswith("Running") or line.startswith("Invalid input") or line.startswith("URL:") or line.startswith("BANNER"):
+                continue
+            if "/" in line and len(line) < 500:
+                results.append(line)
+            else:
+                errors.append(f"Skipping potentially contaminated line: {line}")
+        return list(dict.fromkeys(results)), errors
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
         return {NEW_ENDPOINTS: parsed}

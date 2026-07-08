@@ -24,13 +24,17 @@ class AssetfinderWrapper(BaseExecutionPlugin):
             cmd.append(str(target))
         return tuple(cmd)
 
-    def parse(self, stdout: str, stderr: str) -> List[str]:
+    def parse(self, stdout: str, stderr: str) -> tuple:
+        from execution.utils.output_parser import OutputParser
+        lines = OutputParser.parse_lines(stdout)
         results = []
-        for line in stdout.splitlines():
-            line = line.strip()
-            if line:
+        errors = []
+        for line in lines:
+            if "." in line and " " not in line and not line.startswith("BANNER"):
                 results.append(line)
-        return list(dict.fromkeys(results))
+            else:
+                errors.append(f"Invalid subdomain format: {line}")
+        return list(dict.fromkeys(results)), errors
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
         return {NEW_SUBDOMAINS: parsed}

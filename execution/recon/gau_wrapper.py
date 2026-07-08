@@ -25,13 +25,14 @@ class GauWrapper(BaseExecutionPlugin):
             cmd.append(str(target))
         return tuple(cmd)
 
-    def parse(self, stdout: str, stderr: str) -> List[str]:
+    def parse(self, stdout: str, stderr: str) -> tuple:
+        from execution.utils.output_parser import OutputParser
+        parsed_json, errors = OutputParser.parse_json(stdout)
         results = []
-        for line in stdout.splitlines():
-            line = line.strip()
-            if line:
-                results.append(line)
-        return list(dict.fromkeys(results))
+        for data in parsed_json:
+            if "url" in data:
+                results.append(data["url"])
+        return list(dict.fromkeys(results)), errors
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
         return {NEW_URLS: parsed}

@@ -190,7 +190,12 @@ class PluginExecutor:
             errors = []
             if result.exit_code == 0:
                 try:
-                    parsed = plugin.parse(result.stdout, result.stderr)
+                    parsed_result = plugin.parse(result.stdout, result.stderr)
+                    if isinstance(parsed_result, tuple) and len(parsed_result) == 2 and isinstance(parsed_result[1], list):
+                        parsed, parse_errors = parsed_result
+                        errors.extend(parse_errors)
+                    else:
+                        parsed = parsed_result
                 except Exception as e:
                     errors.append(f"Parse error: {str(e)}")
             else:

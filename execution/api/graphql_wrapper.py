@@ -25,17 +25,10 @@ class GraphQLPlugin(BaseExecutionPlugin):
             cmd.extend(["-u", str(target)])
         return tuple(cmd)
 
-    def parse(self, stdout: str, stderr: str) -> List[Any]:
-        results = []
-        for line in stdout.splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                results.append(json.loads(line))
-            except json.JSONDecodeError:
-                results.append(line)
-        return results
+    def parse(self, stdout: str, stderr: str) -> tuple:
+        from execution.utils.output_parser import OutputParser
+        parsed_json, errors = OutputParser.parse_json(stdout)
+        return parsed_json, errors
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
         graphql_urls = []

@@ -16,24 +16,24 @@ def test_subfinder_fixture():
 
 def test_httpx_fixture():
     content = (FIXTURES_DIR / "httpx.json").read_text(encoding="utf-8")
-    items = OutputParser.parse_json(content)
+    items, _ = OutputParser.parse_json(content)
     assert len(items) == 2
     assert items[0]["request"]["endpoint"] == "http://api.example.com"
 
 def test_katana_fixture():
     content = (FIXTURES_DIR / "katana.json").read_text(encoding="utf-8")
-    items = OutputParser.parse_json(content)
+    items, _ = OutputParser.parse_json(content)
     assert len(items) == 2
     assert items[1]["response"]["status_code"] == 401
 
 def test_nuclei_fixture():
     content = (FIXTURES_DIR / "nuclei.json").read_text(encoding="utf-8")
-    items = OutputParser.parse_json(content)
+    items, _ = OutputParser.parse_json(content)
     assert len(items) == 2
     assert items[0]["template-id"] == "cve-2021-44228"
 
 def test_trufflehog_fixture():
     content = (FIXTURES_DIR / "trufflehog.json").read_text(encoding="utf-8")
-    items = OutputParser.parse_json(content)
+    items, _ = OutputParser.parse_json(content)
     assert len(items) == 2
     assert items[0]["DetectorName"] == "AWS"

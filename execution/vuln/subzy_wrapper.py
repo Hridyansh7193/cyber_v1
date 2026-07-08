@@ -28,15 +28,19 @@ class SubzyPlugin(BaseExecutionPlugin):
             cmd.extend(["--target", str(target)])
         return tuple(cmd)
 
-    def parse(self, stdout: str, stderr: str) -> List[Mapping[str, Any]]:
+    def parse(self, stdout: str, stderr: str) -> tuple:
         results = []
+        errors = []
         try:
-            results = json.loads(stdout)
-            if not isinstance(results, list):
-                results = [results]
-        except json.JSONDecodeError:
-            pass
-        return results
+            parsed = json.loads(stdout)
+            if isinstance(parsed, list):
+                results.extend(parsed)
+            else:
+                results.append(parsed)
+        except json.JSONDecodeError as e:
+            if stdout.strip():
+                errors.append(f"JSONDecodeError: {str(e)} on stdout: {stdout[:50]}")
+        return results, errors
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
         return {NEW_TAKEOVERS: parsed}

@@ -118,7 +118,8 @@ class ScanService:
                 
             # 4. Save trace report
             if final_state.runtime_context and hasattr(final_state.runtime_context, "trace"):
-                final_state.runtime_context.trace.finished_at = __import__('datetime').datetime.utcnow()
+                import datetime
+                final_state.runtime_context.trace.finished_at = datetime.datetime.now(datetime.timezone.utc)
                 trace_path = __import__('os').path.join("workspaces", domain, "sessions", job_id, "trace.json")
                 try:
                     with open(trace_path, "w", encoding="utf-8") as f:

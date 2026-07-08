@@ -28,17 +28,10 @@ class KatanaPlugin(BaseExecutionPlugin):
             cmd.extend(["-u", str(target)])
         return tuple(cmd)
 
-    def parse(self, stdout: str, stderr: str) -> List[Mapping[str, Any]]:
-        results = []
-        for line in stdout.splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                results.append(json.loads(line))
-            except json.JSONDecodeError:
-                pass
-        return results
+    def parse(self, stdout: str, stderr: str) -> tuple:
+        from execution.utils.output_parser import OutputParser
+        parsed_json, errors = OutputParser.parse_json(stdout)
+        return parsed_json, errors
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
         urls = [x.get("url", x.get("host", str(x))) if isinstance(x, dict) else str(x) for x in parsed]

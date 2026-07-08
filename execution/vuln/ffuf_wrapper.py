@@ -53,21 +53,16 @@ class FfufPlugin(BaseExecutionPlugin):
             cmd.extend(["-w", wordlist_path])
         return tuple(cmd)
 
-    def parse(self, stdout: str, stderr: str) -> List[Mapping[str, Any]]:
+    def parse(self, stdout: str, stderr: str) -> tuple:
+        from execution.utils.output_parser import OutputParser
+        parsed_json, errors = OutputParser.parse_json(stdout)
         results = []
-        for line in stdout.splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                data = json.loads(line)
-                if "results" in data:
-                    results.extend(data["results"])
-                else:
-                    results.append(data)
-            except json.JSONDecodeError:
-                pass
-        return results
+        for data in parsed_json:
+            if "results" in data:
+                results.extend(data["results"])
+            else:
+                results.append(data)
+        return results, errors
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
         return {NEW_FUZZ_RESULTS: parsed}

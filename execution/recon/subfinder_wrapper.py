@@ -28,20 +28,14 @@ class SubfinderWrapper(BaseExecutionPlugin):
             cmd.extend(["-d", str(target)])
         return tuple(cmd)
 
-    def parse(self, stdout: str, stderr: str) -> List[str]:
+    def parse(self, stdout: str, stderr: str) -> tuple:
+        from execution.utils.output_parser import OutputParser
+        parsed_json, errors = OutputParser.parse_json(stdout)
         results = []
-        for line in stdout.splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                data = json.loads(line)
-                if "host" in data:
-                    results.append(data["host"])
-            except json.JSONDecodeError:
-                if "." in line and " " not in line:
-                    results.append(line)
-        return list(dict.fromkeys(results))
+        for data in parsed_json:
+            if "host" in data:
+                results.append(data["host"])
+        return list(dict.fromkeys(results)), errors
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
         return {NEW_SUBDOMAINS: parsed}

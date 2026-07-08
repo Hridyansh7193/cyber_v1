@@ -7,7 +7,7 @@ from typing import Tuple, List, Mapping, Any
 def _append_trace(state: ExecutionState, stage: str, tool_res: ToolResult, stored_count: int):
     if state.runtime_context and hasattr(state.runtime_context, "trace"):
         from schemas.trace import TraceEvent
-        from datetime import datetime
+        from datetime import datetime, timezone
         import os
         
         workspace_file = ""
@@ -27,7 +27,7 @@ def _append_trace(state: ExecutionState, stage: str, tool_res: ToolResult, store
             errors=list(tool_res.errors),
             warnings=[],
             workspace_file=workspace_file,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.now(timezone.utc)
         )
         state.runtime_context.trace.trace.append(trace)
 
