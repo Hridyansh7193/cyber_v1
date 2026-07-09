@@ -1,0 +1,11 @@
+{
+  "session_id": "66743ca1-e5ab-42a4-9a6b-9de8b9b7ca79",
+  "target": "scanme.nmap.org",
+  "profile": "default",
+  "started_at": "2026-07-09T22:30:38.814184",
+  "completed_at": null,
+  "status": "running",
+  "report_path": null,
+  "checkpoint_id": null,
+  "runtime_ms": null
+}

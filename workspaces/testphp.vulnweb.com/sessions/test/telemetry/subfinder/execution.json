@@ -1,0 +1,8 @@
+{
+  "command": "subfinder -silent -json -d testphp.vulnweb.com",
+  "arguments": [
+    "subfinder"
+  ],
+  "exit_code": 0,
+  "runtime": 0.01
+}

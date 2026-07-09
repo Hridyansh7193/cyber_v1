@@ -21,8 +21,9 @@ class OutputParser:
                 results.append(json.loads(line))
             except json.JSONDecodeError as e:
                 # If it's a valid string (no spaces, could be a domain/endpoint), keep it.
-                if " " not in line and len(line) < 500:
-                    results.append(line)
+                sanitized = OutputParser.sanitize_target(line)
+                if sanitized:
+                    results.append(sanitized)
                 else:
                     errors.append(f"JSONDecodeError: {str(e)} on line: {line[:50]}")
                 
@@ -35,5 +36,26 @@ class OutputParser:
         """
         if not raw_output or not raw_output.strip():
             return []
-            
-        return [line.strip() for line in raw_output.strip().split('\n') if line.strip()]
+        parsed = []
+        for line in raw_output.strip().split('\n'):
+            sanitized = OutputParser.sanitize_target(line)
+            if sanitized:
+                parsed.append(sanitized)
+        return parsed
+
+    @staticmethod
+    def sanitize_target(target: str) -> str:
+        """
+        Validates target quality. Drops malformed strings, headers, and html tags.
+        Returns the sanitized string, or empty string if invalid.
+        """
+        target = target.strip()
+        if not target:
+            return ""
+        if " " in target or "<" in target or ">" in target or '"' in target or "'" in target:
+            return ""
+        if len(target) > 2000:
+            return ""
+        if target.startswith("HTTP/") or target.startswith("Content-Type:"):
+            return ""
+        return target

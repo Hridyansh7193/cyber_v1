@@ -1,0 +1,8 @@
+{
+  "command": "katana -silent -json -u http://testphp.vulnweb.com",
+  "arguments": [
+    "katana"
+  ],
+  "exit_code": 0,
+  "runtime": 0.01
+}

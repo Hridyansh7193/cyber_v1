@@ -11,7 +11,7 @@ def scope_enforcement_node(state: NodeResult, config: BugHunterConfig) -> NodeRe
     
     # 1. Setup scope manager
     target = state.execution_state.target
-    in_scope = list(target.scope) if target.scope else [f"*.{target.domain}"]
+    in_scope = list(target.scope) if target.scope else [target.domain, f"*.{target.domain}"]
     out_of_scope = list(target.out_of_scope) if target.out_of_scope else []
     
     scope_manager = ScopeManager(in_scope=in_scope, out_of_scope=out_of_scope)

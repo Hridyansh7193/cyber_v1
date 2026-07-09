@@ -1,0 +1,8 @@
+{
+  "command": "httpx -silent -json -title -tech-detect -rt -u testphp.vulnweb.com",
+  "arguments": [
+    "httpx"
+  ],
+  "exit_code": 0,
+  "runtime": 0.01
+}

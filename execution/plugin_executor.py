@@ -8,6 +8,7 @@ from execution.plugins.registry import REGISTRY
 from execution.plugins.base import ExecutionPlugin
 from execution.utils.process_runner import ProcessRunner
 from execution.constants import METADATA_SCHEMA_VERSION, ToolMetadata
+import time
 from utils.logger import get_logger
 
 logger = get_logger("plugin_executor")
@@ -88,10 +89,23 @@ class PluginExecutor:
                     # JS plugins need JS files
                     current_target = sorted(list(state.js_state.js_files)) if state.js_state.js_files else None
                 elif plugin.metadata().name in ["swagger_discovery", "graphql_discovery", "swagger", "graphql"]:
-                    # API plugins need endpoints or urls
                     endpoints = sorted(list(state.js_state.endpoints)) if hasattr(state, 'js_state') else []
-                    urls = sorted(list(state.recon_state.urls)) if hasattr(state, 'recon_state') else []
-                    current_target = endpoints + urls if (endpoints or urls) else None
+                    raw_urls = sorted(list(state.recon_state.urls)) if hasattr(state, 'recon_state') else []
+                    
+                    # Target Eligibility Matrix: Filter out static assets and HTML for API tools
+                    filtered_urls = []
+                    static_exts = (".css", ".js", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".woff", ".woff2", ".ttf", ".eot", ".ico", ".html", ".htm")
+                    for u in raw_urls:
+                        u_lower = u.lower()
+                        if u_lower.endswith(static_exts):
+                            continue
+                        # If it's a php/asp page without parameters, it's unlikely to be an API endpoint worth fuzzing for graphql/swagger directly
+                        # We allow it if it has API keywords or query parameters just in case
+                        if u_lower.endswith((".php", ".asp", ".aspx", ".jsp")) and "?" not in u_lower and not any(kw in u_lower for kw in ["api", "graphql", "swagger", "rest", "json"]):
+                            continue
+                        filtered_urls.append(u)
+                        
+                    current_target = endpoints + filtered_urls if (endpoints or filtered_urls) else None
                 else:
                     # Generic fallback
                     if state.recon_state.alive_hosts:
@@ -104,7 +118,9 @@ class PluginExecutor:
                 logger.info(f"Skipping {plugin.metadata().name}: no targets available.")
                 continue
                 
-            received_count = len(current_target) if isinstance(current_target, (list, tuple, set)) else 1
+            original_target_list = current_target if isinstance(current_target, (list, tuple, set)) else [current_target]
+            received_count = len(original_target_list)
+            unique_targets = len(set(original_target_list))
                         
             # Auth header injection
             if config.auth.headers:
@@ -167,14 +183,24 @@ class PluginExecutor:
             merged_time = 0.0
             last_cmd = ""
             
-            for cmd in final_commands:
-                logger.info("=" * 80)
-                logger.info(f"PLUGIN : {plugin.metadata().name}")
-                logger.info(f"BINARY : {binary_path}")
-                logger.info("COMMAND:")
-                logger.info(" ".join(map(str, cmd)))
-                logger.info(f"CWD    : {os.getcwd()}")
-                logger.info("=" * 80)
+            total_commands = len(final_commands)
+            plugin_start_time = time.time()
+            
+            # Phase 0 Instrumentation Logging (PRE-EXECUTION)
+            logger.info("=" * 80)
+            logger.info(f"Plugin: {plugin.metadata().name}")
+            logger.info(f"Received Targets : {received_count}")
+            logger.info(f"Unique Targets   : {unique_targets}")
+            logger.info(f"Executed Targets : {total_commands}")
+            logger.info("=" * 80)
+            
+            for idx, cmd in enumerate(final_commands, 1):
+                cmd_start_time = time.time()
+                elapsed_total = int(cmd_start_time - plugin_start_time)
+                
+                # Phase 0.5 Progress Update
+                logger.info(f"[{plugin.metadata().name.upper()}] Target {idx} / {total_commands} | Elapsed: {elapsed_total}s")
+                
                 result = ProcessRunner.run(cmd, plugin.metadata().name, timeout=timeout_override)
                 merged_stdout += result.stdout + "\n"
                 if result.stderr:
@@ -183,6 +209,14 @@ class PluginExecutor:
                 merged_time += result.execution_time
                 sanitized_cmd = [arg if not (isinstance(arg, str) and (arg.startswith(tempfile.gettempdir()) or "/tmp" in arg)) else "/tmp/target_list" for arg in cmd]
                 last_cmd = " ".join(map(str, sanitized_cmd))
+            
+            avg_time = merged_time / total_commands if total_commands > 0 else 0
+            # Phase 0 Instrumentation Logging (POST-EXECUTION)
+            logger.info("=" * 80)
+            logger.info(f"Plugin: {plugin.metadata().name} - FINISHED")
+            logger.info(f"Runtime          : {merged_time:.2f} sec")
+            logger.info(f"Average          : {avg_time:.2f} sec")
+            logger.info("=" * 80)
             
             from execution.utils.process_runner import ProcessResult
             result = ProcessResult(exit_code=merged_exit, stdout=merged_stdout, stderr=merged_stderr, execution_time=merged_time, binary_path=binary_path, command=last_cmd, cwd=os.getcwd(), error_message="")

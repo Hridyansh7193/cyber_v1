@@ -1,0 +1,8 @@
+{
+  "command": "C:\\Python314\\Scripts\\httpx.EXE -silent -json -title -tech-detect -rt -u testphp.vulnweb.com",
+  "arguments": [
+    "C:\\Python314\\Scripts\\httpx.EXE"
+  ],
+  "exit_code": 2,
+  "runtime": 0.251680850982666
+}
