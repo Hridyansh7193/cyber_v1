@@ -26,16 +26,34 @@ def doctor_cmd(
         color = "green" if dep.status == "PASS" else "red"
         console.print(f"[{color}]{dep.status}[/{color}] {dep.tool}: {dep.message}")
         
-    if plugins:
-        console.print("\n[bold]Plugins[/bold]")
-        for plugin in report.plugins:
-            color = "green" if plugin.status == "PASS" else ("yellow" if plugin.status == "WARNING" else "red")
-            console.print(f"[{color}]{plugin.status}[/{color}] {plugin.plugin}: {plugin.message}")
-            
     if json_out:
         OutputFormatter.render(report, format="json")
     else:
-        console.print(f"\nSummary: {report.summary_pass} Passed, {report.summary_warn} Warnings, {report.summary_fail} Failed")
+        from rich.table import Table
+        
+        # Plugin Capability Self-Test
+        table = Table("Plugin", "Status")
+        
+        operational_count = 0
+        total_plugins = len(report.plugins)
+        
+        for plugin in report.plugins:
+            color = "green" if plugin.status == "PASS" else "red"
+            msg = plugin.message if plugin.status != "PASS" else "OK"
+            if plugin.message == "Internal":
+                msg = "Internal"
+                color = "blue"
+                
+            table.add_row(plugin.plugin, f"[{color}]{msg}[/{color}]")
+            
+            if plugin.status == "PASS":
+                operational_count += 1
+                
+        console.print(table)
+        
+        console.print("\n[bold]Overall[/bold]")
+        console.print(f"{operational_count} / {total_plugins} operational")
+        console.print(f"{total_plugins - operational_count} unavailable\n")
         
     raise typer.Exit(code=SUCCESS)
 

@@ -86,25 +86,33 @@ class PluginExecutor:
                     # Dalfox should target discovered parameters or URLs to minimize noise
                     current_target = sorted(list(state.recon_state.parameters)) if state.recon_state.parameters else (sorted(list(state.recon_state.urls)) if state.recon_state.urls else None)
                 elif plugin.metadata().name in ["linkfinder", "secretfinder", "trufflehog"]:
-                    # JS plugins need JS files
-                    current_target = sorted(list(state.js_state.js_files)) if state.js_state.js_files else None
+                    # JS plugins need JS files. Extract JS files directly from recon_state.urls if js_files is empty
+                    js_files = sorted(list(state.js_state.js_files)) if state.js_state.js_files else []
+                    if not js_files and hasattr(state, 'recon_state'):
+                        raw_urls = state.recon_state.urls
+                        js_files = sorted([u for u in raw_urls if u.split('?')[0].lower().endswith('.js')])
+                    current_target = js_files if js_files else None
                 elif plugin.metadata().name in ["swagger_discovery", "graphql_discovery", "swagger", "graphql"]:
                     endpoints = sorted(list(state.js_state.endpoints)) if hasattr(state, 'js_state') else []
                     raw_urls = sorted(list(state.recon_state.urls)) if hasattr(state, 'recon_state') else []
                     
-                    # Target Eligibility Matrix: Filter out static assets and HTML for API tools
+                    # Target Eligibility Matrix: Strictly additive filtering for API candidates
                     filtered_urls = []
-                    static_exts = (".css", ".js", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".woff", ".woff2", ".ttf", ".eot", ".ico", ".html", ".htm")
+                    api_keywords = ["api", "graphql", "swagger", "rest", "json", "v1", "v2", "v3", "gql"]
+                    static_exts = (".css", ".js", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".woff", ".woff2", ".ttf", ".eot", ".ico", ".html", ".htm", ".php", ".asp", ".aspx", ".jsp")
+                    
                     for u in raw_urls:
                         u_lower = u.lower()
-                        if u_lower.endswith(static_exts):
-                            continue
-                        # If it's a php/asp page without parameters, it's unlikely to be an API endpoint worth fuzzing for graphql/swagger directly
-                        # We allow it if it has API keywords or query parameters just in case
-                        if u_lower.endswith((".php", ".asp", ".aspx", ".jsp")) and "?" not in u_lower and not any(kw in u_lower for kw in ["api", "graphql", "swagger", "rest", "json"]):
-                            continue
-                        filtered_urls.append(u)
+                        path_part = u_lower.split("?")[0]
                         
+                        # Exclude static assets and traditional web pages unless they explicitly contain API keywords
+                        if any(path_part.endswith(ext) for ext in static_exts) and not any(kw in u_lower for kw in api_keywords):
+                            continue
+                            
+                        # Strict inclusion: Only allow if it contains an API keyword in the path
+                        if any(kw in path_part for kw in api_keywords):
+                            filtered_urls.append(u)
+                            
                     current_target = endpoints + filtered_urls if (endpoints or filtered_urls) else None
                 else:
                     # Generic fallback

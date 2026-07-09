@@ -94,26 +94,80 @@ class Doctor:
             plugin = REGISTRY.get_plugin(name)
             meta = plugin.metadata()
             
+            # 1. Internal Plugins
+            if name in ("graphql_discovery", "swagger"):
+                statuses.append(PluginStatus(
+                    plugin=name,
+                    capabilities=list(meta.capabilities),
+                    version="Internal",
+                    status="PASS",
+                    message="Internal"
+                ))
+                continue
+                
             tool_name = meta.supported_tools[0]
             tool_info = tm.get_tool(tool_name)
             
-            if tool_info and tool_name == "nuclei":
-                # Auto-update templates
+            if not tool_info:
+                statuses.append(PluginStatus(
+                    plugin=name,
+                    capabilities=list(meta.capabilities),
+                    version=meta.version,
+                    status="FAIL",
+                    message="Missing Binary"
+                ))
+                continue
+                
+            status_val = "PASS"
+            message_val = "OK"
+            
+            # 2. HTTPX Wrong Binary check
+            if name == "httpx":
                 import subprocess
                 try:
-                    subprocess.run([tool_info.binary_path, "-update-templates"], capture_output=True, timeout=30)
+                    # check if the binary supports -silent (which ProjectDiscovery's does, Python's usually doesn't or fails)
+                    res = subprocess.run([tool_info.binary_path, "-version"], capture_output=True, text=True, timeout=2)
+                    if "projectdiscovery" not in (res.stdout + res.stderr).lower():
+                        status_val = "FAIL"
+                        message_val = "WRONG BINARY"
                 except Exception:
-                    pass
+                    status_val = "FAIL"
+                    message_val = "Execution Error"
+                    
+            # 3. Nuclei Templates Check
+            elif name == "nuclei":
+                import os
+                import subprocess
+                templates_dir = os.path.expanduser("~/nuclei-templates")
+                if not os.path.exists(templates_dir) or not os.listdir(templates_dir):
+                    # Try to update/download
+                    try:
+                        subprocess.run([tool_info.binary_path, "-update-templates"], capture_output=True, timeout=30)
+                    except Exception:
+                        pass
+                
+                # Check again
+                if not os.path.exists(templates_dir) or not os.listdir(templates_dir):
+                    status_val = "FAIL"
+                    message_val = "Templates Missing"
+                    
+            # 4. Dependency check for scripts
+            elif name in ("linkfinder", "secretfinder"):
+                try:
+                    import jsbeautifier
+                    import requests
+                except ImportError:
+                    status_val = "FAIL"
+                    message_val = "Missing Dependency"
 
-            status = "PASS" if tool_info else "WARNING"
-            
             statuses.append(PluginStatus(
                 plugin=name,
                 capabilities=list(meta.capabilities),
                 version=meta.version,
-                status=status,
-                message=f"Binary {tool_name} found at {tool_info.binary_path}" if tool_info else f"Binary {tool_name} missing"
+                status=status_val,
+                message=message_val
             ))
+            
         return statuses
 
     def _benchmark(self) -> SystemBenchmark:

@@ -1,0 +1,8 @@
+{
+  "command": "linkfinder -i http://testphp.vulnweb.com/assets/app.js -o cli",
+  "arguments": [
+    "linkfinder"
+  ],
+  "exit_code": -3,
+  "runtime": 0.0
+}
