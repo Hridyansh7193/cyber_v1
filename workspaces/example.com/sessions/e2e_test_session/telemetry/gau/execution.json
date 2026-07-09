@@ -1,0 +1,8 @@
+{
+  "command": "gau --json example.com",
+  "arguments": [
+    "gau"
+  ],
+  "exit_code": 0,
+  "runtime": 1.0
+}

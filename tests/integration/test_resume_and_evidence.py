@@ -44,7 +44,7 @@ def test_resume_and_evidence(test_config, monkeypatch, tmp_path):
     # Mock ProcessRunner.run to succeed and return some stdout
     from execution.utils.process_runner import ProcessResult
     
-    def mock_run(command, tool_name, cwd=None):
+    def mock_run(command, tool_name, cwd=None, timeout=None):
         return ProcessResult(
             exit_code=0,
             stdout="sub1.test-resume.com\nsub2.test-resume.com\n",

@@ -15,7 +15,7 @@ def fixtures_dir():
 
 @pytest.fixture
 def mock_subprocess_run(fixtures_dir):
-    def side_effect(command, tool_name, cwd=None):
+    def side_effect(command, tool_name, cwd=None, timeout=None):
         # Determine the tool from the command
         cmd_str = " ".join(command)
         stdout_data = ""

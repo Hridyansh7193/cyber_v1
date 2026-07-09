@@ -26,8 +26,10 @@ class ToolManager:
         }
         
         if bin_name in custom_scripts:
-            # We don't verify if it exists yet because installer creates it, just return the desired path
-            return custom_scripts[bin_name]
+            # Verify if it exists before returning it
+            if os.path.exists(custom_scripts[bin_name]):
+                return custom_scripts[bin_name]
+            return None
 
         # Filter out virtual environment paths to avoid resolving python packages (like httpx)
         # instead of actual system binaries (like ProjectDiscovery's httpx).

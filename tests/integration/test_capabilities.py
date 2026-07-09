@@ -12,7 +12,7 @@ from execution.utils.process_runner import ProcessResult
 def test_plugin_executor_recon(mock_run):
     mock_run.return_value = ProcessResult(
         exit_code=0,
-        stdout="sub1.example.com",
+        stdout='{"host": "sub1.example.com"}',
         stderr="",
         execution_time=1.0,
         command="subfinder -d example.com",
@@ -41,7 +41,7 @@ def test_plugin_executor_recon(mock_run):
 def test_plugin_executor_js(mock_run):
     mock_run.return_value = ProcessResult(
         exit_code=0,
-        stdout="endpoint1.js",
+        stdout="http://example.com/endpoint1.js",
         stderr="",
         execution_time=1.0,
         command="linkfinder -i example.com",
@@ -58,13 +58,14 @@ def test_plugin_executor_js(mock_run):
     )
     
     target = TargetState(session_id="test", domain="example.com", start_time=datetime.now(timezone.utc))
-    state = ExecutionState(target=target)
+    from schemas.state import JSState
+    state = ExecutionState(target=target, js_state=JSState(js_files=("http://example.com/app.js",)))
     results = PluginExecutor.execute_plugins(("linkfinder",), config, state)
     
     assert len(results) == 1
     assert results[0].success
     assert results[0].tool_name == "linkfinder"
-    assert "endpoint1.js" in results[0].metadata["new_endpoints"]
+    assert "http://example.com/endpoint1.js" in results[0].metadata["new_endpoints"]
 
 @patch("execution.utils.process_runner.ProcessRunner.run")
 def test_plugin_executor_vuln(mock_run):

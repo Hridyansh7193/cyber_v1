@@ -1,0 +1,8 @@
+{
+  "command": "ffuf -json -t 50 -maxtime 300 -s -u https://example.com/FUZZ",
+  "arguments": [
+    "ffuf"
+  ],
+  "exit_code": 0,
+  "runtime": 1.0
+}

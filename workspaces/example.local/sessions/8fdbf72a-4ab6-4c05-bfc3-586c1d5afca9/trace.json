@@ -1,0 +1,248 @@
+{
+  "job_id": "8fdbf72a-4ab6-4c05-bfc3-586c1d5afca9",
+  "target": "example.local",
+  "started_at": "2026-07-08T23:01:46.594743",
+  "finished_at": "2026-07-08T23:01:46.757938Z",
+  "planner_profile": "default",
+  "bughunter_version": "1.0.0",
+  "trace": [
+    {
+      "stage": "recon",
+      "plugin": "subfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool subfinder is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\8fdbf72a-4ab6-4c05-bfc3-586c1d5afca9\\telemetry\\subfinder\\execution.json",
+      "timestamp": "2026-07-08T23:01:46.620329Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "httpx",
+      "received": 1,
+      "stdout_lines": 1,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.1,
+      "success": false,
+      "exit_code": 0,
+      "errors": [
+        "JSONDecodeError: Expecting value: line 1 column 1 (char 0) on line: mock output"
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\8fdbf72a-4ab6-4c05-bfc3-586c1d5afca9\\telemetry\\httpx\\execution.json",
+      "timestamp": "2026-07-08T23:01:46.620329Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "assetfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool assetfinder is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\8fdbf72a-4ab6-4c05-bfc3-586c1d5afca9\\telemetry\\assetfinder\\execution.json",
+      "timestamp": "2026-07-08T23:01:46.620329Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "katana",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool katana is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\8fdbf72a-4ab6-4c05-bfc3-586c1d5afca9\\telemetry\\katana\\execution.json",
+      "timestamp": "2026-07-08T23:01:46.620329Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "gau",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool gau is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\8fdbf72a-4ab6-4c05-bfc3-586c1d5afca9\\telemetry\\gau\\execution.json",
+      "timestamp": "2026-07-08T23:01:46.620329Z"
+    },
+    {
+      "stage": "js",
+      "plugin": "linkfinder",
+      "received": 1,
+      "stdout_lines": 1,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.1,
+      "success": false,
+      "exit_code": 0,
+      "errors": [
+        "Skipping potentially contaminated line: mock output"
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\8fdbf72a-4ab6-4c05-bfc3-586c1d5afca9\\telemetry\\linkfinder\\execution.json",
+      "timestamp": "2026-07-08T23:01:46.634748Z"
+    },
+    {
+      "stage": "js",
+      "plugin": "secretfinder",
+      "received": 1,
+      "stdout_lines": 1,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.1,
+      "success": false,
+      "exit_code": 0,
+      "errors": [
+        "Stdout was not empty but 0 objects were parsed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\8fdbf72a-4ab6-4c05-bfc3-586c1d5afca9\\telemetry\\secretfinder\\execution.json",
+      "timestamp": "2026-07-08T23:01:46.634748Z"
+    },
+    {
+      "stage": "js",
+      "plugin": "trufflehog",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool trufflehog is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\8fdbf72a-4ab6-4c05-bfc3-586c1d5afca9\\telemetry\\trufflehog\\execution.json",
+      "timestamp": "2026-07-08T23:01:46.634748Z"
+    },
+    {
+      "stage": "api",
+      "plugin": "swagger",
+      "received": 1,
+      "stdout_lines": 1,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.1,
+      "success": false,
+      "exit_code": 0,
+      "errors": [
+        "JSONDecodeError: Expecting value: line 1 column 1 (char 0) on line: mock output"
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\8fdbf72a-4ab6-4c05-bfc3-586c1d5afca9\\telemetry\\swagger\\execution.json",
+      "timestamp": "2026-07-08T23:01:46.648386Z"
+    },
+    {
+      "stage": "api",
+      "plugin": "graphql_discovery",
+      "received": 1,
+      "stdout_lines": 1,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.1,
+      "success": false,
+      "exit_code": 0,
+      "errors": [
+        "JSONDecodeError: Expecting value: line 1 column 1 (char 0) on line: mock output"
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\8fdbf72a-4ab6-4c05-bfc3-586c1d5afca9\\telemetry\\graphql_discovery\\execution.json",
+      "timestamp": "2026-07-08T23:01:46.648386Z"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "nuclei",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool nuclei is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\8fdbf72a-4ab6-4c05-bfc3-586c1d5afca9\\telemetry\\nuclei\\execution.json",
+      "timestamp": "2026-07-08T23:01:46.654856Z"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "dalfox",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool dalfox is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\8fdbf72a-4ab6-4c05-bfc3-586c1d5afca9\\telemetry\\dalfox\\execution.json",
+      "timestamp": "2026-07-08T23:01:46.655379Z"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "subzy",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool subzy is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\8fdbf72a-4ab6-4c05-bfc3-586c1d5afca9\\telemetry\\subzy\\execution.json",
+      "timestamp": "2026-07-08T23:01:46.655379Z"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "ffuf",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool ffuf is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\8fdbf72a-4ab6-4c05-bfc3-586c1d5afca9\\telemetry\\ffuf\\execution.json",
+      "timestamp": "2026-07-08T23:01:46.655379Z"
+    }
+  ]
+}

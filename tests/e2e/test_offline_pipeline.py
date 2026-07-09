@@ -58,7 +58,7 @@ def test_offline_pipeline_simple(mock_run, mock_config):
     mock_run.side_effect = _mock_process_runner("simple_target")
     
     registry = JobRegistry()
-    adapter = OrchestratorAdapter(registry)
+    adapter = OrchestratorAdapter(registry, mock_config)
     # Instantiate properly (omitted detailed setup for brevity, assuming standard instantiation works)
     # The actual implementation of test offline pipeline would instantiate ScanService
     # and call submit_scan.

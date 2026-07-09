@@ -7,7 +7,7 @@ name = "bughunter"
 dynamic = ["version", "dependencies"]
 description = "Production-grade autonomous security scanning platform powered by an intelligent LangGraph engine."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [
     { name = "BugHunter Team", email = "security@example.com" }

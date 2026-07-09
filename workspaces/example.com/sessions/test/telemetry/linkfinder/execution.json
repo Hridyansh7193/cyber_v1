@@ -1,0 +1,8 @@
+{
+  "command": "linkfinder -i http://example.com/app.js -o cli",
+  "arguments": [
+    "linkfinder"
+  ],
+  "exit_code": 0,
+  "runtime": 1.0
+}

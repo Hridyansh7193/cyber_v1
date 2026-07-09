@@ -32,11 +32,17 @@ class SubzyPlugin(BaseExecutionPlugin):
         results = []
         errors = []
         try:
-            parsed = json.loads(stdout)
-            if isinstance(parsed, list):
-                results.extend(parsed)
+            start_idx = stdout.find('[')
+            end_idx = stdout.rfind(']')
+            if start_idx != -1 and end_idx != -1 and end_idx >= start_idx:
+                json_str = stdout[start_idx:end_idx+1]
+                parsed = json.loads(json_str)
+                if isinstance(parsed, list):
+                    results.extend(parsed)
+                else:
+                    results.append(parsed)
             else:
-                results.append(parsed)
+                errors.append(f"No JSON array found in stdout: {stdout[:50]}")
         except json.JSONDecodeError as e:
             if stdout.strip():
                 errors.append(f"JSONDecodeError: {str(e)} on stdout: {stdout[:50]}")

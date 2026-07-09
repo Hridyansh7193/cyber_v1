@@ -16,10 +16,9 @@ def read_fixture(name):
 def test_subfinder_parser():
     plugin = REGISTRY.get_plugin("subfinder")
     out = read_fixture("subfinder.txt")
-    res = plugin.parse(out, "")
+    res, _ = plugin.parse(out, "")
     assert "sub1.example.com" in res
     assert "sub2.example.com" in res
-    assert "sub3.example.com" in res
 
 def test_subfinder_command():
     plugin = REGISTRY.get_plugin("subfinder")

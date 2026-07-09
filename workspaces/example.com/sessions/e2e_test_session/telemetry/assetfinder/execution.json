@@ -1,0 +1,8 @@
+{
+  "command": "assetfinder --subs-only example.com",
+  "arguments": [
+    "assetfinder"
+  ],
+  "exit_code": 0,
+  "runtime": 1.0
+}

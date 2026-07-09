@@ -1,0 +1,8 @@
+{
+  "command": "subzy run --hide_fails --targets /tmp/target_list",
+  "arguments": [
+    "subzy"
+  ],
+  "exit_code": 0,
+  "runtime": 1.0
+}

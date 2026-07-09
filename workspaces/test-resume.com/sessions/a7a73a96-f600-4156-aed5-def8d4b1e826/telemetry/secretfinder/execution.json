@@ -1,0 +1,13 @@
+{
+  "command": "subfinder -d test-resume.com",
+  "arguments": [
+    "python3",
+    "C:\\Users\\hridy/tools/SecretFinder/SecretFinder.py",
+    "-i",
+    "http://test-resume.com",
+    "-o",
+    "cli"
+  ],
+  "exit_code": 0,
+  "runtime": 1.0
+}

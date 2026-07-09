@@ -57,7 +57,8 @@ class PluginExecutor:
                     tool_version = tool_info.version
                     
             if binary_path.endswith('.py'):
-                final_command = ["python3", binary_path]
+                import sys
+                final_command = [sys.executable, binary_path]
             else:
                 final_command = [binary_path]
             
@@ -82,11 +83,19 @@ class PluginExecutor:
                     current_target = list(state.recon_state.alive_hosts)[0] if state.recon_state.alive_hosts else state.target.resolved_url or state.target.domain
                 elif plugin.metadata().name == "dalfox":
                     # Dalfox should target discovered parameters or URLs to minimize noise
-                    current_target = list(state.recon_state.parameters) if state.recon_state.parameters else (list(state.recon_state.urls) if state.recon_state.urls else None)
+                    current_target = sorted(list(state.recon_state.parameters)) if state.recon_state.parameters else (sorted(list(state.recon_state.urls)) if state.recon_state.urls else None)
+                elif plugin.metadata().name in ["linkfinder", "secretfinder", "trufflehog"]:
+                    # JS plugins need JS files
+                    current_target = sorted(list(state.js_state.js_files)) if state.js_state.js_files else None
+                elif plugin.metadata().name in ["swagger_discovery", "graphql_discovery", "swagger", "graphql"]:
+                    # API plugins need endpoints or urls
+                    endpoints = sorted(list(state.js_state.endpoints)) if hasattr(state, 'js_state') else []
+                    urls = sorted(list(state.recon_state.urls)) if hasattr(state, 'recon_state') else []
+                    current_target = endpoints + urls if (endpoints or urls) else None
                 else:
-                    # Generic fallback (e.g. linkfinder, secretfinder)
+                    # Generic fallback
                     if state.recon_state.alive_hosts:
-                        current_target = list(state.recon_state.alive_hosts)[0]
+                        current_target = sorted(list(state.recon_state.alive_hosts))[0]
                     else:
                         current_target = state.target.resolved_url or state.target.domain
             
@@ -104,38 +113,79 @@ class PluginExecutor:
                     for header in config.auth.headers:
                         final_command.extend(["-H", header])
             
-            temp_path = None
-            # Execute
-            cmd_args = plugin.build_command(state,
-                {
-                    "tool_manager": state.runtime_context.tool_manager if state.runtime_context else None,
-                    "wordlist_manager": state.runtime_context.wordlist_manager if state.runtime_context else None,
-                    "config": config,
-                },
-                target=current_target
-            )
+            # For tools that can natively handle a list of targets (like nuclei with -l), pass the list.
+            # Otherwise, iterate.
+            native_multi = {"nuclei", "dalfox", "httpx", "subzy", "katana"}
             
-            if not cmd_args:
+            final_commands = []
+            temp_path = None
+            
+            timeout_override = None
+            if hasattr(config, "timeouts"):
+                plugin_name = plugin.metadata().name
+                if hasattr(config.timeouts, f"{plugin_name}_timeout"):
+                    timeout_override = getattr(config.timeouts, f"{plugin_name}_timeout")
+                elif hasattr(config.timeouts, "global_timeout"):
+                    timeout_override = getattr(config.timeouts, "global_timeout")
+            
+            if isinstance(current_target, list) and plugin.metadata().name not in native_multi:
+                for t in current_target:
+                    cmd_args = plugin.build_command(state,
+                        {
+                            "tool_manager": state.runtime_context.tool_manager if state.runtime_context else None,
+                            "wordlist_manager": state.runtime_context.wordlist_manager if state.runtime_context else None,
+                            "config": config,
+                        },
+                        target=t
+                    )
+                    if cmd_args:
+                        final_commands.append(list(final_command) + list(cmd_args))
+            else:
+                cmd_args = plugin.build_command(state,
+                    {
+                        "tool_manager": state.runtime_context.tool_manager if state.runtime_context else None,
+                        "wordlist_manager": state.runtime_context.wordlist_manager if state.runtime_context else None,
+                        "config": config,
+                    },
+                    target=current_target
+                )
+                if cmd_args:
+                    final_commands.append(list(final_command) + list(cmd_args))
+                    for arg in cmd_args:
+                        if isinstance(arg, str) and (arg.startswith(tempfile.gettempdir()) or "/tmp" in arg):
+                            if os.path.exists(arg):
+                                temp_path = arg
+                                break
+            
+            if not final_commands:
                 logger.info(f"Skipping {plugin.metadata().name}: build_command returned empty arguments.")
                 continue
-                
-            final_command.extend(cmd_args)
-            
-            # Find any temp files created by the plugin
-            for arg in cmd_args:
-                if isinstance(arg, str) and (arg.startswith(tempfile.gettempdir()) or "/tmp" in arg):
-                    if os.path.exists(arg):
-                        temp_path = arg
-                        break
 
-            logger.info("=" * 80)
-            logger.info(f"PLUGIN : {plugin.metadata().name}")
-            logger.info(f"BINARY : {binary_path}")
-            logger.info("COMMAND:")
-            logger.info(" ".join(map(str, final_command)))
-            logger.info(f"CWD    : {os.getcwd()}")
-            logger.info("=" * 80)
-            result = ProcessRunner.run(final_command, plugin.metadata().name)
+            merged_stdout = ""
+            merged_stderr = ""
+            merged_exit = 0
+            merged_time = 0.0
+            last_cmd = ""
+            
+            for cmd in final_commands:
+                logger.info("=" * 80)
+                logger.info(f"PLUGIN : {plugin.metadata().name}")
+                logger.info(f"BINARY : {binary_path}")
+                logger.info("COMMAND:")
+                logger.info(" ".join(map(str, cmd)))
+                logger.info(f"CWD    : {os.getcwd()}")
+                logger.info("=" * 80)
+                result = ProcessRunner.run(cmd, plugin.metadata().name, timeout=timeout_override)
+                merged_stdout += result.stdout + "\n"
+                if result.stderr:
+                    merged_stderr += result.stderr + "\n"
+                merged_exit = result.exit_code if result.exit_code != 0 else merged_exit
+                merged_time += result.execution_time
+                sanitized_cmd = [arg if not (isinstance(arg, str) and (arg.startswith(tempfile.gettempdir()) or "/tmp" in arg)) else "/tmp/target_list" for arg in cmd]
+                last_cmd = " ".join(map(str, sanitized_cmd))
+            
+            from execution.utils.process_runner import ProcessResult
+            result = ProcessResult(exit_code=merged_exit, stdout=merged_stdout, stderr=merged_stderr, execution_time=merged_time, binary_path=binary_path, command=last_cmd, cwd=os.getcwd(), error_message="")
 
             if temp_path:
                 try:

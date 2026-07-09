@@ -33,8 +33,10 @@ class SubfinderWrapper(BaseExecutionPlugin):
         parsed_json, errors = OutputParser.parse_json(stdout)
         results = []
         for data in parsed_json:
-            if "host" in data:
+            if isinstance(data, dict) and "host" in data:
                 results.append(data["host"])
+            elif isinstance(data, str) and "." in data and " " not in data:
+                results.append(data)
         return list(dict.fromkeys(results)), errors
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:

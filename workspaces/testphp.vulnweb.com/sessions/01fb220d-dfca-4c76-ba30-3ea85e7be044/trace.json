@@ -1,0 +1,9 @@
+{
+  "job_id": "01fb220d-dfca-4c76-ba30-3ea85e7be044",
+  "target": "testphp.vulnweb.com",
+  "started_at": "2026-07-08T23:25:43.046723",
+  "finished_at": "2026-07-08T23:25:43.110815Z",
+  "planner_profile": "default",
+  "bughunter_version": "1.0.0",
+  "trace": []
+}

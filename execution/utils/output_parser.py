@@ -20,7 +20,11 @@ class OutputParser:
             try:
                 results.append(json.loads(line))
             except json.JSONDecodeError as e:
-                errors.append(f"JSONDecodeError: {str(e)} on line: {line[:50]}")
+                # If it's a valid string (no spaces, could be a domain/endpoint), keep it.
+                if " " not in line and len(line) < 500:
+                    results.append(line)
+                else:
+                    errors.append(f"JSONDecodeError: {str(e)} on line: {line[:50]}")
                 
         return results, errors
 

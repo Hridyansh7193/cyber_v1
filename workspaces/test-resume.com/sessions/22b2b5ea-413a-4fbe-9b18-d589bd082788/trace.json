@@ -1,0 +1,212 @@
+{
+  "job_id": "22b2b5ea-413a-4fbe-9b18-d589bd082788",
+  "target": "test-resume.com",
+  "started_at": "2026-07-09T12:35:21.064883",
+  "finished_at": "2026-07-09T12:35:21.620236Z",
+  "planner_profile": "default",
+  "bughunter_version": "1.0.0",
+  "trace": [
+    {
+      "stage": "recon",
+      "plugin": "subfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool subfinder is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\22b2b5ea-413a-4fbe-9b18-d589bd082788\\telemetry\\subfinder\\execution.json",
+      "timestamp": "2026-07-09T12:35:21.107625Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "httpx",
+      "received": 1,
+      "stdout_lines": 3,
+      "parsed": 2,
+      "stored": 2,
+      "runtime": 1.0,
+      "success": true,
+      "exit_code": 0,
+      "errors": [],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\22b2b5ea-413a-4fbe-9b18-d589bd082788\\telemetry\\httpx\\execution.json",
+      "timestamp": "2026-07-09T12:35:21.107625Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "assetfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool assetfinder is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\22b2b5ea-413a-4fbe-9b18-d589bd082788\\telemetry\\assetfinder\\execution.json",
+      "timestamp": "2026-07-09T12:35:21.107625Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "katana",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool katana is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\22b2b5ea-413a-4fbe-9b18-d589bd082788\\telemetry\\katana\\execution.json",
+      "timestamp": "2026-07-09T12:35:21.107625Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "gau",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool gau is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\22b2b5ea-413a-4fbe-9b18-d589bd082788\\telemetry\\gau\\execution.json",
+      "timestamp": "2026-07-09T12:35:21.107625Z"
+    },
+    {
+      "stage": "js",
+      "plugin": "linkfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool linkfinder is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\22b2b5ea-413a-4fbe-9b18-d589bd082788\\telemetry\\linkfinder\\execution.json",
+      "timestamp": "2026-07-09T12:35:21.120098Z"
+    },
+    {
+      "stage": "js",
+      "plugin": "secretfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool secretfinder is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\22b2b5ea-413a-4fbe-9b18-d589bd082788\\telemetry\\secretfinder\\execution.json",
+      "timestamp": "2026-07-09T12:35:21.120098Z"
+    },
+    {
+      "stage": "js",
+      "plugin": "trufflehog",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool trufflehog is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\22b2b5ea-413a-4fbe-9b18-d589bd082788\\telemetry\\trufflehog\\execution.json",
+      "timestamp": "2026-07-09T12:35:21.120098Z"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "nuclei",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool nuclei is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\22b2b5ea-413a-4fbe-9b18-d589bd082788\\telemetry\\nuclei\\execution.json",
+      "timestamp": "2026-07-09T12:35:21.160506Z"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "dalfox",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool dalfox is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\22b2b5ea-413a-4fbe-9b18-d589bd082788\\telemetry\\dalfox\\execution.json",
+      "timestamp": "2026-07-09T12:35:21.160506Z"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "subzy",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool subzy is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\22b2b5ea-413a-4fbe-9b18-d589bd082788\\telemetry\\subzy\\execution.json",
+      "timestamp": "2026-07-09T12:35:21.160506Z"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "ffuf",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool ffuf is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\22b2b5ea-413a-4fbe-9b18-d589bd082788\\telemetry\\ffuf\\execution.json",
+      "timestamp": "2026-07-09T12:35:21.160506Z"
+    }
+  ]
+}

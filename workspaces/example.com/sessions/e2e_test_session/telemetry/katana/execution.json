@@ -1,0 +1,8 @@
+{
+  "command": "katana -silent -json -u example.com",
+  "arguments": [
+    "katana"
+  ],
+  "exit_code": 0,
+  "runtime": 1.0
+}

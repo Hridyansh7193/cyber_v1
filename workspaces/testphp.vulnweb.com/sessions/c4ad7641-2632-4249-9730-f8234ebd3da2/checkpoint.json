@@ -1,0 +1,44 @@
+{
+  "target": {
+    "domain": "testphp.vulnweb.com",
+    "scope": [],
+    "session_id": "c4ad7641-2632-4249-9730-f8234ebd3da2",
+    "start_time": "2026-07-08T23:18:23.907220Z"
+  },
+  "task_queue": [],
+  "recon_state": {
+    "subdomains": [],
+    "alive_hosts": [],
+    "urls": [],
+    "parameters": []
+  },
+  "js_state": {
+    "js_files": [],
+    "endpoints": [],
+    "secrets": []
+  },
+  "api_state": {
+    "swagger_urls": [],
+    "graphql_urls": []
+  },
+  "vuln_state": {
+    "nuclei_results": [],
+    "dalfox_results": [],
+    "takeovers": []
+  },
+  "findings": [],
+  "reports": [
+    {
+      "report_id": "b1778e6c-4e20-537a-b117-300da6acae5e",
+      "session_id": "c4ad7641-2632-4249-9730-f8234ebd3da2",
+      "report_path": "reports/report.json",
+      "report_format": "json",
+      "created_at": "2026-07-08T23:18:23.907220Z",
+      "timestamp": "2026-07-08T23:18:23.907220Z",
+      "findings": [],
+      "total_findings": 0
+    }
+  ],
+  "logs": [],
+  "metadata": {}
+}

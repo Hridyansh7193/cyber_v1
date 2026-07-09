@@ -1,0 +1,8 @@
+{
+  "command": "nuclei -silent -tags cve,high,critical,auth-bypass,takeover,xss,sqli,lfi,rce,misconfig,generic -severity critical,high,medium,low,info -u example.com",
+  "arguments": [
+    "nuclei"
+  ],
+  "exit_code": 0,
+  "runtime": 1.0
+}

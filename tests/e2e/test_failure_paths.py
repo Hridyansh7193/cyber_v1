@@ -55,7 +55,7 @@ def test_failure_path_oserror(e2e_db, base_config, deterministic_target):
 
 def test_failure_path_malformed_json(e2e_db, fixtures_dir, base_config, deterministic_target):
     # Return malformed JSON for a tool
-    def side_effect(command, tool_name, cwd=None):
+    def side_effect(command, tool_name, cwd=None, timeout=None):
         return (0, "not_a_json_object", "", 1.0)
 
     with patch("execution.utils.process_runner.ProcessRunner.run", side_effect=side_effect):

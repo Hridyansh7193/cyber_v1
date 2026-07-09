@@ -1,0 +1,13 @@
+{
+  "command": "",
+  "arguments": [
+    "python3",
+    "C:\\Users\\hridy/tools/SecretFinder/SecretFinder.py",
+    "-i",
+    "http://example.local",
+    "-o",
+    "cli"
+  ],
+  "exit_code": 0,
+  "runtime": 0.1
+}

@@ -1,0 +1,15 @@
+{
+  "command": "",
+  "arguments": [
+    "C:\\Python314\\Scripts\\httpx.EXE",
+    "-silent",
+    "-json",
+    "-title",
+    "-tech-detect",
+    "-rt",
+    "-u",
+    "example.local"
+  ],
+  "exit_code": 0,
+  "runtime": 0.1
+}

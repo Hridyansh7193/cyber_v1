@@ -1,0 +1,8 @@
+{
+  "command": "graphql_discover -u {'request': {'endpoint': 'https://example.com/api/v1/users', 'method': 'GET'}}",
+  "arguments": [
+    "graphql_discover"
+  ],
+  "exit_code": 0,
+  "runtime": 2.0
+}

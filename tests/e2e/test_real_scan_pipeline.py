@@ -54,7 +54,7 @@ def test_real_scan_pipeline(mock_config, temp_workspace, monkeypatch):
     from execution.utils.process_runner import ProcessRunner, ProcessResult
     from services.target_resolver import TargetResolver
     
-    def mock_run(command, tool_name, cwd=None):
+    def mock_run(command, tool_name, cwd=None, timeout=None):
         return ProcessResult(exit_code=0, stdout="mock output", stderr="", execution_time=0.1)
     
     def mock_resolve(self, state):

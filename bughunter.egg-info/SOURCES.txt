@@ -44,6 +44,7 @@ cli/commands_planner.py
 cli/commands_profile.py
 cli/commands_report.py
 cli/commands_search.py
+cli/commands_trace.py
 cli/commands_workspace.py
 cli/decorators.py
 cli/dependencies.py
@@ -167,6 +168,7 @@ schemas/task.py
 schemas/telemetry.py
 schemas/tool_metrics.py
 schemas/tool_result.py
+schemas/trace.py
 services/__init__.py
 services/analytics_service.py
 services/job_registry.py

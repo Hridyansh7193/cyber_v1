@@ -1,0 +1,252 @@
+{
+  "job_id": "05e77fc0-400a-49ab-8ff6-d1b58f113d0b",
+  "target": "test-resume.com",
+  "started_at": "2026-07-08T23:01:54.476316",
+  "finished_at": "2026-07-08T23:01:54.736442Z",
+  "planner_profile": "default",
+  "bughunter_version": "1.0.0",
+  "trace": [
+    {
+      "stage": "recon",
+      "plugin": "subfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool subfinder is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\05e77fc0-400a-49ab-8ff6-d1b58f113d0b\\telemetry\\subfinder\\execution.json",
+      "timestamp": "2026-07-08T23:01:54.495895Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "httpx",
+      "received": 1,
+      "stdout_lines": 2,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 1.0,
+      "success": false,
+      "exit_code": 0,
+      "errors": [
+        "JSONDecodeError: Expecting value: line 1 column 1 (char 0) on line: sub1.test-resume.com",
+        "JSONDecodeError: Expecting value: line 1 column 1 (char 0) on line: sub2.test-resume.com"
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\05e77fc0-400a-49ab-8ff6-d1b58f113d0b\\telemetry\\httpx\\execution.json",
+      "timestamp": "2026-07-08T23:01:54.495895Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "assetfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool assetfinder is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\05e77fc0-400a-49ab-8ff6-d1b58f113d0b\\telemetry\\assetfinder\\execution.json",
+      "timestamp": "2026-07-08T23:01:54.495895Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "katana",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool katana is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\05e77fc0-400a-49ab-8ff6-d1b58f113d0b\\telemetry\\katana\\execution.json",
+      "timestamp": "2026-07-08T23:01:54.495895Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "gau",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool gau is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\05e77fc0-400a-49ab-8ff6-d1b58f113d0b\\telemetry\\gau\\execution.json",
+      "timestamp": "2026-07-08T23:01:54.495895Z"
+    },
+    {
+      "stage": "js",
+      "plugin": "linkfinder",
+      "received": 1,
+      "stdout_lines": 2,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 1.0,
+      "success": false,
+      "exit_code": 0,
+      "errors": [
+        "Skipping potentially contaminated line: sub1.test-resume.com",
+        "Skipping potentially contaminated line: sub2.test-resume.com"
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\05e77fc0-400a-49ab-8ff6-d1b58f113d0b\\telemetry\\linkfinder\\execution.json",
+      "timestamp": "2026-07-08T23:01:54.508287Z"
+    },
+    {
+      "stage": "js",
+      "plugin": "secretfinder",
+      "received": 1,
+      "stdout_lines": 2,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 1.0,
+      "success": false,
+      "exit_code": 0,
+      "errors": [
+        "Stdout was not empty but 0 objects were parsed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\05e77fc0-400a-49ab-8ff6-d1b58f113d0b\\telemetry\\secretfinder\\execution.json",
+      "timestamp": "2026-07-08T23:01:54.508287Z"
+    },
+    {
+      "stage": "js",
+      "plugin": "trufflehog",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool trufflehog is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\05e77fc0-400a-49ab-8ff6-d1b58f113d0b\\telemetry\\trufflehog\\execution.json",
+      "timestamp": "2026-07-08T23:01:54.508287Z"
+    },
+    {
+      "stage": "api",
+      "plugin": "swagger",
+      "received": 1,
+      "stdout_lines": 2,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 1.0,
+      "success": false,
+      "exit_code": 0,
+      "errors": [
+        "JSONDecodeError: Expecting value: line 1 column 1 (char 0) on line: sub1.test-resume.com",
+        "JSONDecodeError: Expecting value: line 1 column 1 (char 0) on line: sub2.test-resume.com"
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\05e77fc0-400a-49ab-8ff6-d1b58f113d0b\\telemetry\\swagger\\execution.json",
+      "timestamp": "2026-07-08T23:01:54.523349Z"
+    },
+    {
+      "stage": "api",
+      "plugin": "graphql_discovery",
+      "received": 1,
+      "stdout_lines": 2,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 1.0,
+      "success": false,
+      "exit_code": 0,
+      "errors": [
+        "JSONDecodeError: Expecting value: line 1 column 1 (char 0) on line: sub1.test-resume.com",
+        "JSONDecodeError: Expecting value: line 1 column 1 (char 0) on line: sub2.test-resume.com"
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\05e77fc0-400a-49ab-8ff6-d1b58f113d0b\\telemetry\\graphql_discovery\\execution.json",
+      "timestamp": "2026-07-08T23:01:54.523349Z"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "nuclei",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool nuclei is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\05e77fc0-400a-49ab-8ff6-d1b58f113d0b\\telemetry\\nuclei\\execution.json",
+      "timestamp": "2026-07-08T23:01:54.536764Z"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "dalfox",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool dalfox is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\05e77fc0-400a-49ab-8ff6-d1b58f113d0b\\telemetry\\dalfox\\execution.json",
+      "timestamp": "2026-07-08T23:01:54.536764Z"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "subzy",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool subzy is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\05e77fc0-400a-49ab-8ff6-d1b58f113d0b\\telemetry\\subzy\\execution.json",
+      "timestamp": "2026-07-08T23:01:54.536764Z"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "ffuf",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool ffuf is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\05e77fc0-400a-49ab-8ff6-d1b58f113d0b\\telemetry\\ffuf\\execution.json",
+      "timestamp": "2026-07-08T23:01:54.536764Z"
+    }
+  ]
+}

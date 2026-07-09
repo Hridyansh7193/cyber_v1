@@ -1,0 +1,11 @@
+{
+  "command": "subfinder -d test-resume.com",
+  "arguments": [
+    "python3",
+    "C:\\Users\\hridy\\Desktop\\cyber\\execution\\api\\graphql_discovery.py",
+    "-u",
+    "test-resume.com"
+  ],
+  "exit_code": 0,
+  "runtime": 1.0
+}

@@ -4,8 +4,8 @@ import json
 
 def test_golden_dataset_subfinder():
     plugin = REGISTRY.get_plugin("subfinder")
-    stdout = "sub1.example.com\nsub2.example.com\n"
-    parsed = plugin.parse(stdout, "")
+    stdout = '{"host": "sub1.example.com"}\n{"host": "sub2.example.com"}\n'
+    parsed, _ = plugin.parse(stdout, "")
     assert isinstance(parsed, list)
     assert len(parsed) == 2
     assert "sub1.example.com" in parsed
@@ -24,7 +24,7 @@ def test_golden_dataset_nuclei():
         "matched-at": "http://test.com"
     })
     stdout = f"{mock_json1}\n{mock_json2}\n"
-    parsed = plugin.parse(stdout, "")
+    parsed, _ = plugin.parse(stdout, "")
     assert len(parsed) == 2
     assert parsed[0]["template"] == "test-template"
     assert parsed[1]["matched-at"] == "http://test.com"
@@ -37,7 +37,7 @@ def test_golden_dataset_httpx():
         "title": "Example Domain"
     })
     stdout = f"{mock_json}\n"
-    parsed = plugin.parse(stdout, "")
+    parsed, _ = plugin.parse(stdout, "")
     assert len(parsed) == 1
     assert parsed[0]["url"] == "http://example.com"
     assert parsed[0]["status_code"] == 200
@@ -49,7 +49,7 @@ def test_golden_dataset_dalfox():
         "poc": "http://example.com/?q=<script>alert(1)</script>"
     })
     stdout = f"{mock_json}\n"
-    parsed = plugin.parse(stdout, "")
+    parsed, _ = plugin.parse(stdout, "")
     assert len(parsed) == 1
     assert parsed[0]["type"] == "XSS"
 
@@ -63,6 +63,6 @@ def test_golden_dataset_trufflehog():
         "Raw": "AKIAIOSFODNN7EXAMPLE"
     })
     stdout = f"{mock_json}\n"
-    parsed = plugin.parse(stdout, "")
+    parsed, _ = plugin.parse(stdout, "")
     assert len(parsed) == 1
     assert parsed[0]["DetectorName"] == "AWS"

@@ -32,11 +32,12 @@ class ProcessResult:
 
 class ProcessRunner:
     @staticmethod
-    def run(command: List[str], tool_name: str, cwd: str = None) -> ProcessResult:
+    def run(command: List[str], tool_name: str, cwd: str = None, timeout: int = None) -> ProcessResult:
         """
         Executes a subprocess with retries, timeout, and explicit path resolution.
         """
-        timeout = TimeoutManager.get_timeout(tool_name)
+        if timeout is None:
+            timeout = TimeoutManager.get_timeout(tool_name)
         
         binary = command[0]
         # On Windows, shutil.which handles .exe, .cmd, .bat implicitly.
@@ -94,7 +95,7 @@ class ProcessRunner:
             # We retry on unexpected internal failures or sometimes exit_code != 0 if desired, 
             # but usually we only retry if it was a system failure.
             # The spec says "retry policy (1 retry)". Let's retry if exit_code < 0 or if there's a crash.
-            if exit_code == 0 or attempt == max_retries:
+            if exit_code in (0, 1, 2) or attempt == max_retries:
                 break
                 
             logger.warning(f"Retry {attempt + 1}/{max_retries} for {tool_name} (Exit code: {exit_code})")

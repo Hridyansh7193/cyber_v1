@@ -1,0 +1,12 @@
+{
+  "command": "",
+  "arguments": [
+    "secretfinder",
+    "-i",
+    "https://example.com",
+    "-o",
+    "cli"
+  ],
+  "exit_code": 0,
+  "runtime": 1.0
+}
