@@ -3,6 +3,7 @@ import threading
 import datetime
 from typing import Any, Optional
 from orchestrator.graph import build_graph
+from orchestrator.lifecycle_monitor import get_monitor, NodeTransition
 from schemas.state import ExecutionState
 from schemas.target import TargetState
 from schemas.runtime_context import RuntimeContext
@@ -12,6 +13,7 @@ from services.job_registry import JobRegistry, JobStatus
 from utils.logger import get_logger
 
 logger = get_logger("orchestrator_adapter")
+monitor = get_monitor()
 
 
 def _now_iso() -> str:
@@ -84,33 +86,56 @@ class OrchestratorAdapter:
             "vulnerability_node", "analysis_node", "report_node"
         ]
         final_state = initial_exec_state
+        node_transitions: dict[str, NodeTransition] = {}
         
         try:
-            for i, output in enumerate(self._app.stream(graph_state_input, config=config_run)):
+            # Start watchdog to detect stalled nodes
+            monitor.start_watchdog()
+            monitor.scan_start(job_id, target.domain)
+            
+            # Stream graph execution with comprehensive tracking
+            stream_iter = self._app.stream(graph_state_input, config=config_run)
+            last_node_name = None
+            
+            for i, output in enumerate(stream_iter):
                 job = self._job_registry.get_job(job_id)
                 if job and job.status == JobStatus.CANCELLED:
                     logger.info(f"[LIFECYCLE] SCAN_CANCELLED | job={job_id} | ts={_now_iso()}")
+                    # Mark current node as cancelled
+                    if last_node_name and last_node_name in node_transitions:
+                        monitor.node_exit(
+                            node_transitions[last_node_name],
+                            status="CANCELLED"
+                        )
                     return None
                     
                 if output:
                     node_name = list(output.keys())[0]
-                    node_result = output[node_name]
                     
+                    # Log node entry on first appearance
+                    if node_name not in node_transitions:
+                        transition = monitor.node_enter(job_id, node_name)
+                        node_transitions[node_name] = transition
+                        last_node_name = node_name
+                    
+                    # Extract execution state from output
+                    node_result = output[node_name]
                     if isinstance(node_result, dict) and "execution_state" in node_result:
                         final_state = node_result["execution_state"]
                     elif hasattr(node_result, "execution_state"):
                         final_state = node_result.execution_state
-                        
+                    
+                    # Calculate and update progress
                     if node_name in stages:
                         stage_idx = stages.index(node_name)
                         progress = min(100.0, ((stage_idx + 1) / len(stages)) * 100.0)
                     else:
                         progress = min(100.0, ((i + 1) / len(stages)) * 100.0)
-                        
+                    
                     self._job_registry.update_progress(job_id, node_name, progress)
                     
                     logger.info(
-                        f"[LIFECYCLE] NODE_COMPLETE | job={job_id} | node={node_name} "
+                        f"[LIFECYCLE] NODE_STREAM_OUTPUT | job={job_id} | node={node_name} "
                         f"| progress={progress:.1f}% | ts={_now_iso()}"
                     )
                     
@@ -121,31 +146,84 @@ class OrchestratorAdapter:
                             checkpoint_path = os.path.join(session_dir, "checkpoint.json")
                             with open(checkpoint_path, "w", encoding="utf-8") as f:
                                 f.write(final_state.model_dump_json(indent=2))
-                    except Exception as e:
-                        logger.warning(f"Failed to create checkpoint: {e}")
+                    except Exception as cp_err:
+                        logger.warning(f"Failed to create checkpoint: {cp_err}")
             
+            # Stream completed - mark last node as successful
+            if last_node_name and last_node_name in node_transitions:
+                monitor.node_exit(
+                    node_transitions[last_node_name],
+                    status="SUCCESS"
+                )
+            
+            # Mark all tracked nodes as complete
             self._job_registry.update_progress(job_id, "completed", 100.0)
             self._job_registry.update_status(job_id, JobStatus.COMPLETED)
             
+            monitor.scan_complete(
+                job_id,
+                "COMPLETED",
+                findings_count=len(final_state.findings) if final_state else 0
+            )
+            
             logger.info(
                 f"[LIFECYCLE] SCAN_COMPLETE | job={job_id} | pid={pid} | tid={tid} "
-                f"| findings={len(final_state.findings)} | reports={len(final_state.reports)} "
+                f"| findings={len(final_state.findings) if final_state else 0} "
+                f"| reports={len(final_state.reports) if final_state else 0} "
                 f"| ts={_now_iso()}"
             )
             return final_state
             
+        except StopIteration:
+            # Normal end of stream iteration
+            if last_node_name and last_node_name in node_transitions:
+                monitor.node_exit(
+                    node_transitions[last_node_name],
+                    status="SUCCESS"
+                )
+            
+            self._job_registry.update_progress(job_id, "completed", 100.0)
+            self._job_registry.update_status(job_id, JobStatus.COMPLETED)
+            monitor.scan_complete(job_id, "COMPLETED")
+            
+            logger.info(
+                f"[LIFECYCLE] SCAN_COMPLETE (StopIteration) | job={job_id} | ts={_now_iso()}"
+            )
+            return final_state
+            
         except Exception as e:
+            # Mark current node as failed if applicable
+            if last_node_name and last_node_name in node_transitions:
+                monitor.node_exit(
+                    node_transitions[last_node_name],
+                    status="FAILED",
+                    error=str(e)
+                )
+            
+            error_msg = f"{type(e).__name__}: {str(e)}"
             logger.error(
-                f"[LIFECYCLE] SCAN_FAILED | job={job_id} | error={type(e).__name__}: {e} "
+                f"[LIFECYCLE] SCAN_FAILED | job={job_id} | error={error_msg} "
                 f"| pid={pid} | tid={tid} | ts={_now_iso()}",
                 exc_info=True
             )
-            self._job_registry.update_status(job_id, JobStatus.FAILED, str(e))
+            
+            # Dump diagnostic info
+            diagnostics = monitor.dump_diagnostics(job_id)
+            logger.error(f"[LIFECYCLE] DIAGNOSTICS:\n{diagnostics}")
+            
+            self._job_registry.update_status(job_id, JobStatus.FAILED, error_msg)
+            monitor.scan_failed(job_id, error_msg)
             return None
             
         except BaseException as be:
             # Catches KeyboardInterrupt, SystemExit, MemoryError, etc.
-            # These would otherwise leave the job in RUNNING state forever.
+            if last_node_name and last_node_name in node_transitions:
+                monitor.node_exit(
+                    node_transitions[last_node_name],
+                    status="ABORTED",
+                    error=type(be).__name__
+                )
+            
             logger.critical(
                 f"[LIFECYCLE] SCAN_ABORTED | job={job_id} | signal={type(be).__name__} "
                 f"| pid={pid} | tid={tid} | ts={_now_iso()}"
@@ -155,6 +233,10 @@ class OrchestratorAdapter:
             except Exception:
                 pass  # Registry may be unavailable during interpreter shutdown
             raise  # Re-raise so the thread/process teardown proceeds normally
+            
+        finally:
+            # Always stop the watchdog
+            monitor.stop_watchdog()
 
     def cancel(self, job_id: str) -> bool:
         job = self._job_registry.get_job(job_id)
