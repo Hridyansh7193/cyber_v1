@@ -2,7 +2,6 @@ from execution.plugins.registry import REGISTRY
 from schemas.state import ExecutionState
 from schemas.target import TargetState
 from datetime import datetime, timezone
-import pytest
 
 def test_subzy_command():
     plugin = REGISTRY.get_plugin("subzy")

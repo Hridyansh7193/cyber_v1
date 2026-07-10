@@ -107,7 +107,7 @@ def validate_cmd(job_id: str, explain: bool = typer.Option(False, "--explain", h
                 console.print(f"[bold]{plugin_name.capitalize()}[/bold]")
                 console.print(f"Received {stats['received']}")
                 console.print(f"Produced {stats['stored']}")
-                console.print(f"[green]OK[/green]\n|")
+                console.print("[green]OK[/green]\n|")
             
         console.print("[bold]Pipeline Validation[/bold]\n")
         
@@ -128,7 +128,7 @@ def validate_cmd(job_id: str, explain: bool = typer.Option(False, "--explain", h
         
         score = int((checks_passed / total_checks) * 100) if total_checks else 100
         
-        console.print(f"Environment\t\t[green]PASS[/green]")
+        console.print("Environment\t\t[green]PASS[/green]")
         console.print(f"Checks Passed\t\t{checks_passed} / {total_checks}")
         console.print(f"Database\t\t{'[green]PASS[/green]' if has_db else '[red]FAIL[/red]'}")
         console.print(f"Reports\t\t\t{'[green]PASS[/green]' if has_report_json else '[red]FAIL[/red]'}")

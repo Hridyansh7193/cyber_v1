@@ -1,5 +1,3 @@
-import pytest
-import os
 from pathlib import Path
 from runtime.installer import Installer
 

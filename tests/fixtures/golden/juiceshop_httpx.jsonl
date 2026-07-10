@@ -1,0 +1,3 @@
+{"url": "http://shop.juice-shop.local", "status_code": 200, "title": "OWASP Juice Shop", "tech": ["Express", "Node.js", "Angular"]}
+{"url": "http://api.juice-shop.local", "status_code": 200, "title": "Juice Shop REST API", "tech": ["Express", "Node.js"]}
+{"url": "http://admin.juice-shop.local", "status_code": 403, "title": "Forbidden"}

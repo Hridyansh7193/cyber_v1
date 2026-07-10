@@ -1,9 +1,7 @@
 from fastapi.testclient import TestClient
 from api.server import app
-from api.dependencies import get_scan_service, get_report_service
+from api.dependencies import get_scan_service
 from services.scan_service import ScanService
-from services.report_service import ReportService
-from schemas.report import ReportFormat, Report
 from schemas.generated_report import GeneratedReport
 from unittest.mock import Mock
 import uuid

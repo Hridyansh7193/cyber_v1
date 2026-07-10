@@ -5,7 +5,7 @@ from rich.table import Table
 from typing import List
 from cli.output_formatter import OutputFormatter
 from cli.decorators import timed_cli_command
-from cli.exit_codes import SUCCESS, INTERNAL_ERROR
+from cli.exit_codes import SUCCESS
 from config.loader import load_config
 from services.scan_service import ScanService
 from services.job_registry import JobRegistry

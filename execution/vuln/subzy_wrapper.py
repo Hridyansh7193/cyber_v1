@@ -1,6 +1,6 @@
 from schemas.state import ExecutionState
 import json
-from typing import List, Tuple, Any, Mapping
+from typing import Tuple, Any, Mapping
 from execution.constants import NEW_TAKEOVERS
 from execution.plugins.base import BaseExecutionPlugin, PluginMetadata
 from schemas.runtime import Capability
@@ -40,7 +40,8 @@ class SubzyPlugin(BaseExecutionPlugin):
                 cmd.append(f)
 
         if isinstance(target, list):
-            import tempfile, os
+            import tempfile
+            import os
             fd, temp_path = tempfile.mkstemp(text=True)
             with os.fdopen(fd, 'w') as f:
                 f.write("\n".join(target))

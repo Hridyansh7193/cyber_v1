@@ -2,7 +2,6 @@ import time
 import tracemalloc
 from schemas.report import Report, ReportFormat
 from schemas.finding import Finding
-from schemas.generated_report import GeneratedReport
 from reporting.json_renderer import generate_json
 from uuid import uuid4
 

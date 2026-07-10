@@ -40,7 +40,7 @@ def generate_burpxml(report: Report) -> GeneratedReport:
         issue_detail.text = "<![CDATA[" + (finding.evidence or "") + "]]>"
         
     xml_str = ET.tostring(issues, encoding='utf-8')
-    parsed_xml = minidom.parseString(xml_str)
+    parsed_xml = minidom.parseString(xml_str)  # nosec B318 - parsing our own generated XML
     content = parsed_xml.toprettyxml(indent="  ")
     
     filename = "report.xml"

@@ -22,7 +22,6 @@ def test_checkpoint_resume(e2e_db, mock_subprocess_run, base_config, determinist
     
     wrapper_calls = {"recon": 0, "js": 0, "api": 0, "vuln": 0}
     
-    from execution.plugin_executor import PluginExecutor
     
     def count_recon(*args, **kwargs):
         wrapper_calls["recon"] += 1

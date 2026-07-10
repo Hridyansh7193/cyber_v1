@@ -1,17 +1,10 @@
 import pytest
-import os
-import json
-from pathlib import Path
-from schemas.state import ExecutionState
-from schemas.target import TargetState
-from schemas.tool_result import ToolResult
-from orchestrator.graph import build_graph
 from config.schemas import BugHunterConfig
 from services.job_registry import JobRegistry
 from services.orchestrator_adapter import OrchestratorAdapter
 from services.scan_service import ScanService
 from runtime.workspace import WorkspaceManager
-from storage.database import init_db, get_engine
+from storage.database import init_db
 from storage.models import Base
 
 def setup_test_db():

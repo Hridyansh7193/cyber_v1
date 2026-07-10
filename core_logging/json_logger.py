@@ -1,7 +1,6 @@
 import logging
 import json
 from datetime import datetime, timezone
-from typing import Any, Dict
 from .masking import mask_sensitive_data
 
 class JSONFormatter(logging.Formatter):

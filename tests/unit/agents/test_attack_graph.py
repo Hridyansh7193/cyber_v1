@@ -3,7 +3,6 @@ from config.schemas import BugHunterConfig, SettingsConfig, LLMConfig, ToolsConf
 from schemas.target import TargetState
 from schemas.finding import Finding
 from agents.attack_graph_agent import generate_graph
-import uuid
 from datetime import datetime, timezone
 
 def test_attack_graph_agent():

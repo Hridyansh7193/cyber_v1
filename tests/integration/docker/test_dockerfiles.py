@@ -1,4 +1,3 @@
-import pytest
 from pathlib import Path
 
 # Paths relative to the repository root

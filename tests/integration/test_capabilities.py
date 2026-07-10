@@ -1,8 +1,6 @@
-import pytest
 from unittest.mock import patch
 from execution.plugin_executor import PluginExecutor
 from config.schemas import BugHunterConfig
-from schemas.tool_result import ToolResult
 from schemas.state import ExecutionState
 from schemas.target import TargetState
 from datetime import datetime, timezone

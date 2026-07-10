@@ -1,6 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
-from typing import Dict, Any, List
-from schemas.tool_metrics import ToolMetrics
+from fastapi import APIRouter, Depends
 from api.dependencies import get_analytics_service
 from services.analytics_service import AnalyticsService
 

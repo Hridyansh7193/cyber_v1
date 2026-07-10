@@ -1,14 +1,12 @@
-import pytest
 from datetime import datetime, timezone
 import uuid
-from schemas.state import ExecutionState, TargetState, ReconState, JSState, APIState, VulnerabilityState
-from agents.deltas import ReconDelta, JSDelta, APIDelta, VulnerabilityDelta, FindingDelta, TaskQueueDelta, ReportDelta
-from schemas.finding import Finding, Severity, Confidence
-from schemas.task import Task, TaskPriority
-from schemas.report import Report, ReportFormat, DiscoveredAssets
+from schemas.state import ExecutionState, TargetState
+from agents.deltas import ReconDelta, JSDelta, APIDelta, VulnerabilityDelta, FindingDelta, ReportDelta
+from schemas.finding import Finding
+from schemas.report import Report, ReportFormat
 from orchestrator.delta_applier import (
     apply_recon_delta, apply_js_delta, apply_api_delta, 
-    apply_vulnerability_delta, apply_finding_delta, apply_report_delta, apply_task_queue_delta
+    apply_vulnerability_delta, apply_finding_delta, apply_report_delta
 )
 
 def test_apply_recon_delta():

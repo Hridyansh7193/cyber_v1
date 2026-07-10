@@ -2,7 +2,6 @@ from execution.plugins.registry import REGISTRY
 from schemas.state import ExecutionState
 from schemas.target import TargetState
 from datetime import datetime, timezone
-import pytest
 import os
 
 def read_fixture(name):

@@ -1,12 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import JSONResponse, PlainTextResponse, Response
-from typing import Dict, Any
+from fastapi.responses import PlainTextResponse, Response
 from api.models import ScanRequest, ScanResponse, StatusResponse, CancelResponse
-from api.dependencies import get_scan_service, get_report_service, get_default_config
+from api.dependencies import get_scan_service, get_default_config
 from services.scan_service import ScanService
-from services.report_service import ReportService
 from config.schemas import BugHunterConfig
-import json
 
 router = APIRouter()
 
@@ -33,7 +30,7 @@ def start_scan(
         return ScanResponse(job_id=job_id, message="Scan submitted successfully")
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
+    except Exception:
         # Top-level exception catch to prevent traceback leakage via FastAPI HTTP response.
         # Original error is logged.
         import logging

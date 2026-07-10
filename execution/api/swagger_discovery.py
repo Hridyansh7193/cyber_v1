@@ -20,7 +20,7 @@ def main():
     
     for path in paths:
         try:
-            r = requests.get(target.rstrip("/") + path, timeout=5, verify=False)
+            r = requests.get(target.rstrip("/") + path, timeout=5, verify=False)  # nosec B501 - intentional for bug bounty targets
             if r.status_code == 200 and ("swagger" in r.text.lower() or "openapi" in r.text.lower() or "paths" in r.text.lower()):
                 print(json.dumps({"url": args.url, "endpoint": path, "schema": "2.0"}))
                 sys.exit(0)

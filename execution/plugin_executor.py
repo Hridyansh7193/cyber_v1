@@ -2,14 +2,13 @@ import os
 import json
 import tempfile
 import concurrent.futures
-from schemas import tool_result
 from typing import Tuple, List, Any
 from schemas.tool_result import ToolResult
 from config.schemas import BugHunterConfig
 from execution.plugins.registry import REGISTRY
 from execution.plugins.base import ExecutionPlugin
 from execution.utils.process_runner import ProcessRunner
-from execution.constants import METADATA_SCHEMA_VERSION, ToolMetadata
+from execution.constants import METADATA_SCHEMA_VERSION
 import time
 from utils.logger import get_logger
 

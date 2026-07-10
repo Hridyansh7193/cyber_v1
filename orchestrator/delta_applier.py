@@ -1,7 +1,6 @@
-from schemas.state import ExecutionState, ReconState, JSState, APIState, VulnerabilityState
+from schemas.state import ExecutionState, ReconState, JSState, APIState
 from agents.deltas import ReconDelta, JSDelta, APIDelta, VulnerabilityDelta, FindingDelta, TaskQueueDelta, ReportDelta, IntelligenceDelta
 from schemas.finding import Finding
-import uuid
 
 def apply_recon_delta(state: ExecutionState, delta: ReconDelta) -> ExecutionState:
     merged_tech = dict(state.recon_state.tech_stack)
@@ -67,7 +66,6 @@ def apply_finding_delta(state: ExecutionState, delta: FindingDelta) -> Execution
     return state.model_copy(deep=True, update={"findings": tuple(existing_findings.values())})
 
 def apply_task_queue_delta(state: ExecutionState, delta: TaskQueueDelta) -> ExecutionState:
-    from schemas.task import Task
     merged = list(state.task_queue)
     # Just append new tasks for now (simple logic)
     merged.extend(delta.task_queue)

@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import patch
-import copy
 
 from orchestrator.graph import build_graph
 from schemas.state import ExecutionState
@@ -28,7 +27,6 @@ def test_checkpoint_with_intelligence(e2e_db, mock_subprocess_run, base_config, 
     
     # We will let the graph run until report_node.
     # We mock generate_reports to crash on the first run.
-    from agents.reporter_agent import generate_reports
     
     def crash_report(state, config):
         raise ValueError("Simulated Report Crash")

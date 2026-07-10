@@ -1,4 +1,3 @@
-import json
 from schemas.report import Report
 from schemas.generated_report import GeneratedReport
 

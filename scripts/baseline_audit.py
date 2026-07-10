@@ -1,13 +1,10 @@
 import os
 import sys
-import json
-from pathlib import Path
 
 # Add project root to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from execution.plugins.registry import REGISTRY
-from execution.plugins.base import PluginParser
 from orchestrator.wrapper_result_applier import (
     apply_recon_wrapper_result, apply_js_wrapper_result, 
     apply_api_wrapper_result, apply_vuln_wrapper_result,

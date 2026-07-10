@@ -3,7 +3,6 @@ from config.schemas import BugHunterConfig, SettingsConfig, LLMConfig, ToolsConf
 from schemas.target import TargetState
 from schemas.finding import Finding
 from agents.correlation_agent import correlate
-import uuid
 from datetime import datetime, timezone
 
 def test_correlation_agent():

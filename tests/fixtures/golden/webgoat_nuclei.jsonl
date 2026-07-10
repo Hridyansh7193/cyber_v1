@@ -1,0 +1,2 @@
+{"template": "cves/2021/CVE-2021-41773", "type": "http", "host": "http://webgoat.local", "matched-at": "http://webgoat.local/WebGoat/SqlInjection/attack5a", "severity": "high", "info": {"name": "SQL Injection - WebGoat", "description": "SQL injection via attack endpoint."}}
+{"template": "token/jwt-none-algorithm", "type": "http", "host": "http://webgoat.local", "matched-at": "http://webgoat.local/WebGoat/JWT/decode", "severity": "critical", "info": {"name": "JWT None Algorithm", "description": "JWT accepts none algorithm."}}

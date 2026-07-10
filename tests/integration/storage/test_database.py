@@ -1,4 +1,4 @@
-from storage.database import get_engine, init_db, override_db
+from storage.database import get_engine, override_db
 import pytest
 from sqlalchemy import text
 from storage.models import Base

@@ -1,6 +1,5 @@
 from schemas.state import ExecutionState
-import json
-from typing import List, Tuple, Any, Mapping
+from typing import Tuple, Any, Mapping
 from execution.constants import NEW_NUCLEI
 from execution.plugins.base import BaseExecutionPlugin, PluginMetadata
 from schemas.runtime import Capability
@@ -70,7 +69,8 @@ class NucleiPlugin(BaseExecutionPlugin):
             cmd.extend(["-c", "50", "-rl", "150"])
 
         if isinstance(target, list):
-            import tempfile, os
+            import tempfile
+            import os
             fd, temp_path = tempfile.mkstemp(text=True)
             with os.fdopen(fd, 'w') as f:
                 f.write("\n".join(target))

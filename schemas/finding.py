@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, ConfigDict, model_validator
 from enum import Enum
-from typing import Tuple, Any
+from typing import Tuple
 import hashlib
 
 class Severity(str, Enum):

@@ -1,10 +1,8 @@
 import pytest
-from pathlib import Path
 import hashlib
 from orchestrator.graph import build_graph
 from schemas.state import ExecutionState
 from orchestrator.orchestration_state import OrchestrationState
-from config.schemas import BugHunterConfig
 
 @pytest.mark.skip(reason="Needs update for Milestone 3 TaskQueue orchestration logic")
 def test_pipeline_determinism(e2e_db, mock_subprocess_run, base_config, deterministic_target, tmp_path):

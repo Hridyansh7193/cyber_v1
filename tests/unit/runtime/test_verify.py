@@ -1,4 +1,3 @@
-import pytest
 from runtime.verify import Verifier
 
 def test_verifier_run():

@@ -1,10 +1,9 @@
 import os
-import importlib.resources
-from jinja2 import Environment
+from jinja2 import Environment, select_autoescape
 from schemas.report import Report
 from schemas.generated_report import GeneratedReport
 
-_ENV = Environment(autoescape=False)
+_ENV = Environment(autoescape=select_autoescape(default_for_string=False, default=False))
 _TEMPLATE = None
 
 def generate_markdown(report: Report) -> GeneratedReport:

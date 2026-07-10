@@ -98,7 +98,6 @@ def diff_cmd(
 ):
     try:
         import difflib
-        import json as json_lib
         
         def load_cfg(tgt):
             if not tgt: return load_config()
@@ -120,8 +119,8 @@ def diff_cmd(
 
         if hasattr(cfg2, "model_dump"):
             cfg2 = cfg2.model_dump()
-        #str1 = json_lib.dumps(cfg1, indent=2).splitlines()
-        #str2 = json_lib.dumps(cfg2, indent=2).splitlines()
+        str1 = json_lib.dumps(cfg1, indent=2).splitlines()
+        str2 = json_lib.dumps(cfg2, indent=2).splitlines()
         
         diff = list(difflib.unified_diff(str1, str2, lineterm=""))
         

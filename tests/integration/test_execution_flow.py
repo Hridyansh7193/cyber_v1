@@ -1,8 +1,6 @@
-import pytest
 from unittest.mock import patch, MagicMock
 from schemas.tool_result import ToolResult
-from schemas.state import ExecutionState, ReconState, TargetState
-from config.schemas import BugHunterConfig
+from schemas.state import ExecutionState, TargetState
 from orchestrator.wrapper_result_applier import apply_recon_wrapper_result
 from orchestrator.delta_applier import apply_recon_delta
 from agents.reporter_agent import generate_reports

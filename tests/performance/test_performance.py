@@ -1,4 +1,3 @@
-import pytest
 import time
 
 def test_pipeline_throughput():

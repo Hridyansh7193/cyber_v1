@@ -1,10 +1,7 @@
 import subprocess
 import time
-import json
 import platform
-import os
 from pathlib import Path
-from datetime import datetime
 
 def run_cmd(cmd):
     print(f"Running: {cmd}")

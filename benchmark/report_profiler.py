@@ -1,7 +1,5 @@
 import time
 import tracemalloc
-import sys
-from uuid import uuid4
 from schemas.finding import Finding
 from schemas.report import Report
 from reporting.markdown_renderer import generate_markdown

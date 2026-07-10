@@ -1,4 +1,3 @@
-import os
 import re
 
 plugin_paths = [
@@ -46,7 +45,6 @@ for path in plugin_paths:
         )
     
     # regex to replace capabilities=("...",) with capabilities=(Capability.RECON, ...)
-    import ast
     name_match = re.search(r'name="([^"]+)"', content)
     if name_match:
         name = name_match.group(1).replace("_discovery", "").replace("_plugin", "")

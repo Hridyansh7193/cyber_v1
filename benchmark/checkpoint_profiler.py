@@ -1,6 +1,5 @@
 import time
 import tracemalloc
-import sqlite3
 from uuid import uuid4
 from pathlib import Path
 from datetime import datetime, timezone
@@ -49,7 +48,6 @@ def profile_checkpoints(num_findings):
     
     # Simulating a state update cycle (Deep Copy Overhead)
     import copy
-    import pickle
     
     tracemalloc.start()
     start_time = time.time()

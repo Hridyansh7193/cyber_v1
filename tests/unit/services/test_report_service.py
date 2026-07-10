@@ -1,8 +1,5 @@
-import pytest
-from unittest.mock import Mock
 import uuid
 from services.report_service import ReportService
-from services.orchestrator_adapter import OrchestratorAdapter
 from schemas.report import Report, ReportFormat
 
 def test_report_service_render_reports_json():

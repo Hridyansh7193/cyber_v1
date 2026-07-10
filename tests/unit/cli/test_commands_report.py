@@ -1,4 +1,3 @@
-import pytest
 from unittest.mock import patch
 from typer.testing import CliRunner
 from cli.commands_report import app

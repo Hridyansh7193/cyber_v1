@@ -1,6 +1,5 @@
 from pydantic import BaseModel, ConfigDict, Field
-from typing import Tuple, Mapping
-from types import MappingProxyType
+from typing import Tuple
 
 class ExecutionPlan(BaseModel):
     model_config = ConfigDict(frozen=True)

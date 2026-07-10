@@ -3,7 +3,7 @@ from rich.console import Console
 import yaml
 import json
 from config.schemas import BugHunterConfig
-from cli.dependencies import adapter, registry, persistence_service, report_service, scan_service, workspace_service, default_config
+from cli.dependencies import scan_service, default_config
 from cli.progress import track_scan_progress
 
 app = typer.Typer()

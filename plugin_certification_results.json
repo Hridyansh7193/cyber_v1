@@ -1,0 +1,177 @@
+[
+  {
+    "plugin": "subfinder",
+    "installed": false,
+    "version": "Missing",
+    "self_test": false,
+    "self_test_detail": "",
+    "status": "FAIL",
+    "capabilities": [
+      "PassiveRecon",
+      "DNS"
+    ]
+  },
+  {
+    "plugin": "httpx",
+    "installed": true,
+    "version": "Usage: httpx [OPTIONS] URL",
+    "self_test": true,
+    "self_test_detail": "",
+    "status": "CERTIFIED",
+    "capabilities": [
+      "Recon",
+      "HTTP"
+    ]
+  },
+  {
+    "plugin": "katana",
+    "installed": false,
+    "version": "Missing",
+    "self_test": false,
+    "self_test_detail": "",
+    "status": "FAIL",
+    "capabilities": [
+      "Recon",
+      "HTTP"
+    ]
+  },
+  {
+    "plugin": "assetfinder",
+    "installed": false,
+    "version": "Missing",
+    "self_test": false,
+    "self_test_detail": "",
+    "status": "FAIL",
+    "capabilities": [
+      "PassiveRecon",
+      "DNS"
+    ]
+  },
+  {
+    "plugin": "gau",
+    "installed": false,
+    "version": "Missing",
+    "self_test": false,
+    "self_test_detail": "",
+    "status": "FAIL",
+    "capabilities": [
+      "PassiveRecon",
+      "HTTP"
+    ]
+  },
+  {
+    "plugin": "linkfinder",
+    "installed": false,
+    "version": "Missing",
+    "self_test": false,
+    "self_test_detail": "",
+    "status": "FAIL",
+    "capabilities": [
+      "JS"
+    ]
+  },
+  {
+    "plugin": "secretfinder",
+    "installed": false,
+    "version": "Missing",
+    "self_test": false,
+    "self_test_detail": "",
+    "status": "FAIL",
+    "capabilities": [
+      "JS",
+      "Secrets"
+    ]
+  },
+  {
+    "plugin": "nuclei",
+    "installed": false,
+    "version": "Missing",
+    "self_test": false,
+    "self_test_detail": "",
+    "status": "FAIL",
+    "capabilities": [
+      "Vuln",
+      "HTTP"
+    ]
+  },
+  {
+    "plugin": "dalfox",
+    "installed": false,
+    "version": "Missing",
+    "self_test": false,
+    "self_test_detail": "",
+    "status": "FAIL",
+    "capabilities": [
+      "Vuln",
+      "Fuzzing"
+    ]
+  },
+  {
+    "plugin": "swagger",
+    "installed": false,
+    "version": "Missing",
+    "self_test": true,
+    "self_test_detail": "",
+    "status": "FAIL",
+    "capabilities": [
+      "API"
+    ]
+  },
+  {
+    "plugin": "graphql",
+    "installed": false,
+    "version": "Missing",
+    "self_test": false,
+    "self_test_detail": "",
+    "status": "FAIL",
+    "capabilities": [
+      "API"
+    ]
+  },
+  {
+    "plugin": "trufflehog",
+    "installed": false,
+    "version": "Missing",
+    "self_test": false,
+    "self_test_detail": "",
+    "status": "FAIL",
+    "capabilities": [
+      "Secrets"
+    ]
+  },
+  {
+    "plugin": "ffuf",
+    "installed": false,
+    "version": "Missing",
+    "self_test": false,
+    "self_test_detail": "",
+    "status": "FAIL",
+    "capabilities": [
+      "Fuzzing",
+      "HTTP"
+    ]
+  },
+  {
+    "plugin": "subzy",
+    "installed": false,
+    "version": "Missing",
+    "self_test": false,
+    "self_test_detail": "",
+    "status": "FAIL",
+    "capabilities": [
+      "Vuln",
+      "DNS"
+    ]
+  },
+  {
+    "plugin": "arjun",
+    "installed": false,
+    "version": "Missing",
+    "self_test": false,
+    "self_test_detail": "",
+    "status": "FAIL",
+    "capabilities": [
+      "ParameterDiscovery"
+    ]
+  }
+]

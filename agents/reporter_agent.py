@@ -1,5 +1,4 @@
 import uuid
-from datetime import datetime, UTC
 from schemas.state import ExecutionState
 from config.schemas import BugHunterConfig
 from schemas.report import Report, ReportFormat

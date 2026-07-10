@@ -1,10 +1,8 @@
-import os
 import pytest
 from pathlib import Path
 from pydantic import ValidationError
 
 from config.loader import load_config
-from config.schemas import LLMConfig
 
 CONFIG_DIR = Path("config")
 

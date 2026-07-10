@@ -5,7 +5,6 @@ from orchestrator.graph import build_graph
 from schemas.state import ExecutionState
 from orchestrator.orchestration_state import OrchestrationState
 from storage.database import get_db_session
-from storage.models import TargetModel, SubdomainModel, UrlModel, FindingModel
 
 @pytest.mark.skip(reason="Needs update for Milestone 3 TaskQueue orchestration logic")
 def test_full_pipeline_success(e2e_db, mock_subprocess_run, base_config, deterministic_target, tmp_path):

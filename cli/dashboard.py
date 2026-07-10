@@ -1,8 +1,7 @@
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
-from rich.columns import Columns
-from cli.dependencies import persistence_service, workspace_service
+from cli.dependencies import persistence_service
 
 def render_final_dashboard(job_id: str):
     console = Console()

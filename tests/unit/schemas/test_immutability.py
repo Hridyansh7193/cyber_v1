@@ -1,10 +1,9 @@
 import pytest
 from pydantic import ValidationError
 from datetime import datetime, UTC
-from schemas.state import ExecutionState, ReconState, TargetState
+from schemas.state import ExecutionState, TargetState
 from schemas.tool_result import ToolResult
 from schemas.finding import Finding, Severity, Confidence
-from schemas.report import Report, ReportFormat
 
 def test_deep_nested_immutability():
     target = TargetState(domain="example.com", session_id="123", start_time=datetime.now(UTC))

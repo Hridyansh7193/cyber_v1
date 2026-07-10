@@ -1,6 +1,6 @@
 import re
 import ipaddress
-from typing import List, Optional, Union
+from typing import List, Optional
 from utils.logger import get_logger
 
 logger = get_logger("scope_manager")
@@ -26,7 +26,7 @@ class ScopeManager:
             else:
                 try:
                     # Basic wildcard to regex translation for convenience if users provide wildcards
-                    if "*" in pattern and not pattern.startswith(".*") and not "\\" in pattern:
+                    if "*" in pattern and not pattern.startswith(".*") and "\\" not in pattern:
                         regex_pattern = pattern.replace(".", "\\.").replace("*", ".*")
                         regex_pattern = f"^{regex_pattern}$"
                     else:
@@ -40,7 +40,7 @@ class ScopeManager:
                 self._out_scope_cidrs.append(ipaddress.ip_network(pattern, strict=False))
             else:
                 try:
-                    if "*" in pattern and not pattern.startswith(".*") and not "\\" in pattern:
+                    if "*" in pattern and not pattern.startswith(".*") and "\\" not in pattern:
                         regex_pattern = pattern.replace(".", "\\.").replace("*", ".*")
                         regex_pattern = f"^{regex_pattern}$"
                     else:

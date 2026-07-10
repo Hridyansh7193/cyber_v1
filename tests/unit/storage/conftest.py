@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
-from storage.database import _engine, _SessionFactory, get_db_session
+from storage.database import get_db_session
 from sqlalchemy.orm import sessionmaker
 from storage.models import Base
 import storage.database as db_module

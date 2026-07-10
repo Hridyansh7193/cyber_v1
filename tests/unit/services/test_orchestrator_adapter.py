@@ -1,13 +1,9 @@
-import pytest
 from unittest.mock import Mock, patch
 from services.orchestrator_adapter import OrchestratorAdapter
 from services.job_registry import JobRegistry, JobStatus
 from config.schemas import BugHunterConfig
 from schemas.target import TargetState
-from schemas.generated_report import GeneratedReport
-from schemas.report import ReportFormat
 from datetime import datetime, timezone
-import uuid
 
 def test_adapter_successful_execution():
     registry = JobRegistry()

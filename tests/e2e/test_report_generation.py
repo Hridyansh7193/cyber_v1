@@ -1,11 +1,9 @@
 import pytest
-from pathlib import Path
 
 from orchestrator.graph import build_graph
 from schemas.state import ExecutionState
 from orchestrator.orchestration_state import OrchestrationState
 from schemas.finding import Finding
-from schemas.target import TargetState
 
 def test_report_generation_10k_findings(e2e_db, base_config, deterministic_target):
     # Directly invoke the reporter with 10k findings

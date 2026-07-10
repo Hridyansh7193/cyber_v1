@@ -1,5 +1,4 @@
-from typing import List, Dict, Any, Optional
-from schemas.runtime import RuntimeReport, InstallSummary, EnvironmentStatus
+from schemas.runtime import RuntimeReport, InstallSummary
 from runtime.doctor import Doctor
 from runtime.installer import Installer
 from runtime.verify import Verifier

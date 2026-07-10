@@ -1,5 +1,3 @@
-import pytest
-import uuid
 from schemas.report import Report, DiscoveredAssets
 from schemas.finding import Finding
 from reporting.sarif_renderer import generate_sarif

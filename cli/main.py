@@ -1,7 +1,5 @@
 import typer
-import sys
 import logging
-from typing import Optional
 from cli.version import __version__
 from cli.commands import app as legacy_app
 from cli.commands_jobs import app as jobs_app

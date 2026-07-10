@@ -28,7 +28,6 @@ def base_config(tmp_path):
 from schemas.finding import Finding
 from agents.planner_agent import plan
 from agents.correlation_agent import correlate
-from agents.prioritizer_agent import prioritize
 from agents.attack_graph_agent import generate_graph
 
 def generate_findings(count):
@@ -188,7 +187,6 @@ def test_state_size_benchmark(base_config):
         findings=generate_findings(1000)
     )
     
-    import copy
     
     start = time.perf_counter()
     j_base = state.model_dump_json()

@@ -1,6 +1,5 @@
 from schemas.state import ExecutionState
-import json
-from typing import Tuple, Any, Mapping, List
+from typing import Tuple, Any, Mapping
 from execution.constants import NEW_GRAPHQL
 from execution.plugins.base import BaseExecutionPlugin, PluginMetadata
 from schemas.runtime import Capability

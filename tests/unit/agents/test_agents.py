@@ -1,9 +1,6 @@
 import pytest
-import copy
-from typing import Dict, Any
 
 from schemas.state import ExecutionState, TargetState, ReconState, JSState, APIState, VulnerabilityState
-from schemas.finding import Finding, Severity, Confidence
 from schemas.report import ReportFormat
 from config.schemas import BugHunterConfig, SettingsConfig, LLMConfig, ToolsConfig, TimeoutsConfig, ReportingConfig
 from agents.deltas import TaskQueueDelta, ReconDelta, JSDelta, APIDelta, VulnerabilityDelta, FindingDelta, ReportDelta

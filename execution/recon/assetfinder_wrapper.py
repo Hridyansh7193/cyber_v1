@@ -1,5 +1,5 @@
 from schemas.state import ExecutionState
-from typing import Tuple, Any, Mapping, List
+from typing import Tuple, Any, Mapping
 from execution.constants import NEW_SUBDOMAINS
 from execution.plugins.base import BaseExecutionPlugin, PluginMetadata
 from schemas.runtime import Capability

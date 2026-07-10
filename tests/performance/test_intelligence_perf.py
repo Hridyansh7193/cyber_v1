@@ -1,5 +1,4 @@
 import time
-import pytest
 from datetime import datetime, timezone
 from schemas.state import ExecutionState, ReconState, TargetState
 from schemas.finding import Finding

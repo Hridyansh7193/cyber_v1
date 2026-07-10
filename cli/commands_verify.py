@@ -1,16 +1,12 @@
 import typer
 import time
-import os
 import json
-from typing import Dict, Any
 from cli.output_formatter import OutputFormatter
 from cli.decorators import timed_cli_command
 from execution.plugins.registry import REGISTRY
 from services.tool_manager import ToolManager
 from execution.utils.process_runner import ProcessRunner
 from schemas.state import ExecutionState, TargetState
-from datetime import datetime
-import asyncio
 
 app = typer.Typer(help="Live Validation Engine (Phase 4)")
 

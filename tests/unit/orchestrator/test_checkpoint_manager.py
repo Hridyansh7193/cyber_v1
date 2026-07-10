@@ -1,4 +1,3 @@
-import pytest
 import sqlite3
 from orchestrator.checkpoint_manager import CheckpointManager
 

@@ -1,6 +1,5 @@
 from schemas.state import ExecutionState
-import json
-from typing import List, Tuple, Any, Mapping
+from typing import Tuple, Any, Mapping
 from execution.constants import NEW_FUZZ_RESULTS
 from execution.plugins.base import BaseExecutionPlugin, PluginMetadata
 from schemas.runtime import Capability
@@ -69,7 +68,8 @@ class FfufPlugin(BaseExecutionPlugin):
             return t_str
             
         if isinstance(target, list):
-            import tempfile, os
+            import tempfile
+            import os
             fd, temp_path = tempfile.mkstemp(text=True)
             if target:
                 base_target = format_target(target[0])

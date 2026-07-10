@@ -1,15 +1,11 @@
 import pytest
 import os
-import json
-import time
-from pathlib import Path
 
 from config.schemas import BugHunterConfig
 from services.scan_service import ScanService
 from services.orchestrator_adapter import OrchestratorAdapter
-from services.job_registry import JobRegistry, JobStatus
+from services.job_registry import JobRegistry
 from services.persistence_service import PersistenceService
-from storage.database import get_db_session
 
 @pytest.fixture
 def test_config():

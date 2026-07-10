@@ -1,5 +1,4 @@
-from typing import List, Iterable, Mapping, Any, Optional
-from sqlalchemy.orm import Session
+from typing import List, Iterable, Any, Optional
 from storage.database import get_db_session
 from storage.repositories.finding_repository import FindingRepository
 from storage.repositories.report_repository import ReportRepository

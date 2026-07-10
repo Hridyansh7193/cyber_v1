@@ -1,7 +1,5 @@
 import typer
 import platform
-import sys
-from typing import Optional
 from services.analytics_service import AnalyticsService
 from services.persistence_service import PersistenceService
 from schemas.cli_responses import AnalyticsResponse

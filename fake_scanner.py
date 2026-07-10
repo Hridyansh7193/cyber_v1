@@ -1,6 +1,5 @@
 
 import sys
-import time
 
 target = sys.argv[1]
 print(f"Scanning target: {target}")

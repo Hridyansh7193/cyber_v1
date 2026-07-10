@@ -17,7 +17,7 @@ def doctor_cmd(
     from runtime.doctor import Doctor
     doc = Doctor()
     report = doc.diagnose()
-    console.print(f"[bold]BugHunter Doctor[/bold]")
+    console.print("[bold]BugHunter Doctor[/bold]")
     console.print(f"Environment: {report.environment.os} {report.environment.kernel}")
     console.print(f"Python: {report.environment.python_version}")
     console.print(f"Go: {report.environment.go_version}")
@@ -107,8 +107,6 @@ def verify_cmd():
     from services.job_registry import JobRegistry
     from services.orchestrator_adapter import OrchestratorAdapter
     from services.report_service import ReportService
-    from cli.dependencies import workspace_service
-    from services.scan_service import ScanService
     import time
     
     config = BugHunterConfig(
@@ -127,7 +125,6 @@ def verify_cmd():
     # The scan_service might need it. Let's provide None for persistence if allowed, or import it if it exists.
     # Actually, persistence is gone. It's SessionRepository, TargetRepository etc.
     # ScanService requires (adapter, registry, workspace). Let's check ScanService's signature.
-    from services.scan_service import ScanService
     
     from cli.dependencies import scan_service as di_scan_service, registry as di_registry
     scan_service = di_scan_service

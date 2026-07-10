@@ -1,4 +1,3 @@
-import pytest
 from execution.plugins.registry import REGISTRY
 import json
 

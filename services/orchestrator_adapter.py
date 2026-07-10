@@ -1,5 +1,4 @@
-import threading
-from typing import Dict, Any, Optional, List
+from typing import Any, Optional
 from orchestrator.graph import build_graph
 from schemas.state import ExecutionState
 from schemas.target import TargetState
@@ -89,7 +88,6 @@ class OrchestratorAdapter:
                     # Create checkpoint after each node
                     try:
                         import os
-                        import json
                         session_dir = os.path.join("workspaces", final_state.target.domain, "sessions", job_id)
                         if os.path.exists(session_dir):
                             checkpoint_path = os.path.join(session_dir, "checkpoint.json")

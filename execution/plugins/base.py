@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Tuple, Any, Mapping
 from pydantic import BaseModel, ConfigDict
 
-from schemas.runtime import Capability
+from schemas.runtime import Capability, SelfTestResult
 from schemas.state import ExecutionState
 
 class PluginMetadata(BaseModel):

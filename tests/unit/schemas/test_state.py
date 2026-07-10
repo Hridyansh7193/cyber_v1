@@ -1,8 +1,6 @@
-import pytest
 from datetime import datetime, UTC
 from schemas.state import ReconState, JSState, APIState, VulnerabilityState, ExecutionState
 from schemas.target import TargetState
-from pydantic import ValidationError
 
 def test_recon_state():
     state = ReconState(subdomains=("a.com",))

@@ -1,7 +1,6 @@
 from typing import Tuple
 from schemas.tool_result import ToolResult
 from config.schemas import BugHunterConfig
-from config.schemas import BugHunterConfig
 from execution.plugin_executor import PluginExecutor
 from schemas.state import ExecutionState
 

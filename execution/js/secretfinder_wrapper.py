@@ -1,6 +1,5 @@
 from schemas.state import ExecutionState
-import json
-from typing import List, Tuple, Any, Mapping
+from typing import Tuple, Any, Mapping
 from execution.plugins.base import BaseExecutionPlugin, PluginMetadata
 from execution.constants import NEW_SECRETS
 from schemas.runtime import Capability

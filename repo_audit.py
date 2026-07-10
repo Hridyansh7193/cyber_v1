@@ -1,7 +1,6 @@
 import os
 import ast
 from collections import defaultdict
-import sys
 
 def audit_repo(root_dir):
     python_files = []

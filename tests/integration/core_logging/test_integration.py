@@ -1,4 +1,3 @@
-import pytest
 import os
 import json
 from core_logging.logger_factory import LoggerFactory

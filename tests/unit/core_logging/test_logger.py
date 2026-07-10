@@ -1,10 +1,7 @@
-import pytest
 import os
 import json
 import logging
 from core_logging.logger_factory import LoggerFactory
-from core_logging.types import LogLevel
-from core_logging.json_logger import JSONFormatter
 
 def test_logger_factory_creates_logger(tmpdir):
     log_dir = str(tmpdir.mkdir("logs"))

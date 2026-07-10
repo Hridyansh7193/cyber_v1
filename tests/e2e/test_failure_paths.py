@@ -3,7 +3,6 @@ import subprocess
 from unittest.mock import patch
 from pydantic import ValidationError
 
-from orchestrator.graph import build_graph
 from schemas.state import ExecutionState
 from orchestrator.orchestration_state import OrchestrationState
 

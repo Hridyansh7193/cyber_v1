@@ -89,7 +89,7 @@ def profile_db_writes(num_inserts):
         print(f"             SQL -> Inserts: {stats.inserts}, Selects: {stats.selects}, Commits: {stats.commits}, Rollbacks: {stats.rollbacks}")
     else:
         seq_time = None
-        print(f"[Sequential] Skipped for > 1000 to save time")
+        print("[Sequential] Skipped for > 1000 to save time")
 
     # 2. Bulk (With Refresh)
     findings = [

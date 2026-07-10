@@ -1,10 +1,8 @@
 import pytest
 from unittest.mock import patch
 from sqlalchemy import event
-from sqlalchemy.exc import IntegrityError
 from storage.repositories import FindingRepository, SessionRepository
 from schemas.finding import Finding, Severity, Confidence
-from storage.models import FindingModel
 
 @pytest.fixture
 def statement_counter(db_session):

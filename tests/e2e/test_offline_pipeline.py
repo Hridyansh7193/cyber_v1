@@ -1,16 +1,8 @@
-import os
-import json
 import pytest
 from unittest import mock
-from services.scan_service import ScanService
-from config.schemas import BugHunterConfig, SettingsConfig, LLMConfig, ToolsConfig, TimeoutsConfig, ReportingConfig, ResourceLimitsConfig, AuthConfig
+from config.schemas import BugHunterConfig, SettingsConfig, LLMConfig, ToolsConfig, TimeoutsConfig, ReportingConfig
 from services.orchestrator_adapter import OrchestratorAdapter
 from services.job_registry import JobRegistry
-from services.persistence_service import PersistenceService
-from services.report_service import ReportService
-from services.workspace_service import WorkspaceService
-from schemas.tool_result import ToolResult
-from execution.plugins.base import ExecutionPlugin
 
 # We need to mock the ProcessRunner.run to return fixture data.
 # The easiest way is to mock ProcessRunner.run directly.

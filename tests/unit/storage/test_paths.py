@@ -1,4 +1,3 @@
-import pytest
 from pathlib import Path
 from storage.file_storage import save_generated_file
 import os

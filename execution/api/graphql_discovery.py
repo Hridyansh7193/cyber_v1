@@ -21,13 +21,13 @@ def main():
     
     for path in paths:
         try:
-            r = requests.post(target.rstrip("/") + path, json=query, timeout=5, verify=False)
+            r = requests.post(target.rstrip("/") + path, json=query, timeout=5, verify=False)  # nosec B501 - intentional for bug bounty targets
             if r.status_code == 200 and "data" in r.text.lower() and "__schema" in r.text.lower():
                 print(json.dumps({"url": args.url, "endpoint": path, "introspection": True}))
                 sys.exit(0)
             
             # Sometimes GET is allowed
-            r_get = requests.get(target.rstrip("/") + path + "?query={__schema{queryType{name}}}", timeout=5, verify=False)
+            r_get = requests.get(target.rstrip("/") + path + "?query={__schema{queryType{name}}}", timeout=5, verify=False)  # nosec B501
             if r_get.status_code == 200 and "data" in r_get.text.lower() and "__schema" in r_get.text.lower():
                 print(json.dumps({"url": args.url, "endpoint": path, "introspection": True}))
                 sys.exit(0)

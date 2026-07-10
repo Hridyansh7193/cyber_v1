@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 class PrioritizedAsset(BaseModel):
     model_config = ConfigDict(frozen=True)

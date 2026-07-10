@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict
-from typing import Literal, List, Dict, Optional, Any
+from typing import Literal, List, Optional
 from enum import Enum
 
 class Capability(str, Enum):

@@ -1,13 +1,9 @@
 import pytest
-import os
-import sqlite3
-import json
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from datetime import datetime, timezone
-import subprocess
 
-from storage.database import override_db, init_db
+from storage.database import override_db
 
 @pytest.fixture(scope="session")
 def fixtures_dir():

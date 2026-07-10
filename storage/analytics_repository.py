@@ -1,6 +1,5 @@
 import sqlite3
-import json
-from typing import List, Optional
+from typing import List
 from schemas.tool_metrics import ToolMetrics
 from contextlib import contextmanager
 import os

@@ -1,6 +1,4 @@
 import time
-import os
-import json
 from pathlib import Path
 from schemas.runtime import InstallSummary, InstallResult, InstallPlan
 from runtime.workspace import WorkspaceManager
@@ -72,7 +70,6 @@ class Installer:
         return InstallResult(step="Binaries", success=True, output="Binaries verified/installed")
 
     def _step_manifest(self) -> InstallResult:
-        import platform
         import sys
         manifest = InstallationManifest(
             bughunter_version="1.0.0",

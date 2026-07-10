@@ -1,5 +1,4 @@
-from typing import Dict, Optional, Tuple, List
-from pydantic import BaseModel, ConfigDict
+from typing import Dict, Optional, Tuple
 from .base import ExecutionPlugin
 
 class PluginRegistry:

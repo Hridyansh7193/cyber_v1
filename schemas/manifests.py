@@ -1,6 +1,5 @@
 from pydantic import BaseModel, ConfigDict
-from typing import List, Dict, Optional, Any
-from schemas.runtime import Capability
+from typing import List, Dict, Optional
 
 class InstallationManifest(BaseModel):
     model_config = ConfigDict(frozen=True)

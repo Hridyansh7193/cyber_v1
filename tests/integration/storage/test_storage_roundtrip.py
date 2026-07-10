@@ -1,6 +1,4 @@
-import pytest
 from datetime import datetime, timezone
-from storage.database import get_db_session
 from storage.repositories.target_repository import TargetRepository
 from storage.repositories.finding_repository import FindingRepository
 from storage.repositories.report_repository import ReportRepository
@@ -10,7 +8,6 @@ from storage.repositories.session_repository import SessionRepository
 from schemas.target import TargetState
 from schemas.finding import Finding
 from schemas.task import Task
-from schemas.generated_report import GeneratedReport
 from uuid import uuid4
 
 from storage.models import Base

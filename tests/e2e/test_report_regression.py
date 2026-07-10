@@ -1,11 +1,10 @@
-import pytest
 from datetime import datetime, timezone
 
 from schemas.state import ExecutionState
 from schemas.target import TargetState
 from schemas.finding import Finding
 from schemas.intelligence import IntelligenceState
-from schemas.attack_graph import AttackGraph, AttackGraphNode, AttackGraphEdge
+from schemas.attack_graph import AttackGraph, AttackGraphNode
 from schemas.risk_summary import RiskSummary
 from config.schemas import BugHunterConfig, SettingsConfig, ReportingConfig
 

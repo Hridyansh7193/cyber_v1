@@ -1,7 +1,6 @@
 from schemas.state import ExecutionState
 from config.schemas import BugHunterConfig
 from schemas.attack_graph import AttackGraph, AttackGraphNode, AttackGraphEdge
-import uuid
 
 def generate_graph(state: ExecutionState, config: BugHunterConfig) -> AttackGraph:
     nodes = {}

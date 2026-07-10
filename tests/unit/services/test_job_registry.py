@@ -1,5 +1,3 @@
-import pytest
-import threading
 from concurrent.futures import ThreadPoolExecutor
 from services.job_registry import JobRegistry, JobStatus
 

@@ -1,5 +1,4 @@
 import pytest
-from sqlalchemy.exc import IntegrityError
 from storage.repositories import (
     TargetRepository, SessionRepository, SubdomainRepository, HostRepository,
     URLRepository, ParameterRepository, JSRepository, SecretRepository,
@@ -8,7 +7,6 @@ from storage.repositories import (
 from schemas.target import TargetState
 from schemas.finding import Finding, Severity, Confidence
 from schemas.report import Report, ReportFormat
-from datetime import datetime, timezone
 
 def test_session_create_bulk_empty(db_session):
     repo = SessionRepository()

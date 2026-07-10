@@ -1,10 +1,5 @@
-from execution.plugins.registry import REGISTRY
 from execution.utils.process_runner import ProcessRunner
 from execution.utils.timeout_manager import TimeoutManager
-from schemas.state import ExecutionState
-from schemas.target import TargetState
-from datetime import datetime, timezone
-import pytest
 from unittest.mock import patch, MagicMock
 import subprocess
 

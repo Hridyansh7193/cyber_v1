@@ -3,8 +3,6 @@ from runtime.workspace import WorkspaceManager
 from schemas.generated_report import GeneratedReport
 from pathlib import Path
 from utils.logger import get_logger
-import os
-import shutil
 import time
 
 logger = get_logger("workspace_service")

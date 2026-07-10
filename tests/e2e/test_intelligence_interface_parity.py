@@ -1,15 +1,9 @@
-import pytest
 from typer.testing import CliRunner
 from fastapi.testclient import TestClient
 
 from api.server import app
 from cli.main import app as cli_app
-from services.scan_service import ScanService
-from services.report_service import ReportService
 
-from config.schemas import BugHunterConfig, SettingsConfig
-from schemas.target import TargetState
-from schemas.state import ExecutionState
 
 def test_intelligence_interface_parity(tmp_path, monkeypatch):
     """

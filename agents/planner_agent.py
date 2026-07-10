@@ -1,6 +1,6 @@
 from schemas.state import ExecutionState
 from config.schemas import BugHunterConfig
-from schemas.task import Task, TaskPriority, TaskStatus
+from schemas.task import Task, TaskPriority
 from agents.deltas import TaskQueueDelta
 
 def plan(state: ExecutionState, config: BugHunterConfig) -> TaskQueueDelta:

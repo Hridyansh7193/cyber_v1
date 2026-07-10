@@ -1,4 +1,3 @@
-import pytest
 from services.scope_manager import ScopeManager
 
 def test_no_scope_defined():

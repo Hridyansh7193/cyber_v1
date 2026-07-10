@@ -142,7 +142,6 @@ class ScanService:
             # 5. Save Scan Manifest
             try:
                 from schemas.manifests import ScanManifest
-                import time
                 import json
                 
                 plugins_used = []
@@ -245,7 +244,6 @@ class ScanService:
 
     def get_report(self, job_id: str, format: str = "json"):
         from schemas.generated_report import GeneratedReport
-        from schemas.report import ReportFormat
         
         if not self._persistence_service:
             return None

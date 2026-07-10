@@ -1,5 +1,4 @@
 from schemas.state import ExecutionState
-import json
 import re
 from typing import List, Tuple, Any, Mapping
 from execution.plugins.base import BaseExecutionPlugin, PluginMetadata
@@ -43,7 +42,8 @@ class ArjunPlugin(BaseExecutionPlugin):
         if target:
             if isinstance(target, list):
                 # Arjun supports file input with -i
-                import tempfile, os
+                import tempfile
+                import os
                 fd, temp_path = tempfile.mkstemp(text=True)
                 with os.fdopen(fd, 'w') as f:
                     f.write("\n".join(target))

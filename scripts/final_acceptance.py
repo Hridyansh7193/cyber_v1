@@ -1,8 +1,4 @@
 import subprocess
-import sys
-import json
-import uuid
-import time
 import os
 
 def run_cmd(cmd):

@@ -1,4 +1,3 @@
-import pytest
 from unittest.mock import Mock
 from services.scan_service import ScanService
 from services.job_registry import JobRegistry, JobStatus

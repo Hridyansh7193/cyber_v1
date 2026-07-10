@@ -1,5 +1,4 @@
 from pydantic import BaseModel, ConfigDict, Field
-from typing import Tuple
 
 class RiskSummary(BaseModel):
     model_config = ConfigDict(frozen=True)

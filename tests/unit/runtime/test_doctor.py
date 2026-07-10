@@ -1,4 +1,3 @@
-import pytest
 from runtime.doctor import Doctor
 from schemas.runtime import RuntimeReport
 

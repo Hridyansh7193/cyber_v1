@@ -3,7 +3,6 @@ from services.job_registry import JobRegistry
 from services.orchestrator_adapter import OrchestratorAdapter
 from services.scan_service import ScanService
 from services.report_service import ReportService
-from fastapi import Request
 
 # Global singleton instances for API
 _registry = JobRegistry()

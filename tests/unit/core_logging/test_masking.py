@@ -1,4 +1,3 @@
-import pytest
 from core_logging.masking import mask_string, mask_sensitive_data
 
 def test_mask_string_jwt():

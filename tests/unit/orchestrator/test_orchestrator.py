@@ -6,12 +6,11 @@ from orchestrator.graph_state import GraphState
 from orchestrator.graph import build_graph
 from orchestrator.checkpoint_manager import CheckpointManager
 from langgraph.graph import END
-from orchestrator.transitions import passive_recon_transition, js_transition
+from orchestrator.transitions import passive_recon_transition
 from orchestrator.delta_applier import apply_recon_delta
 from orchestrator.wrapper_result_applier import apply_recon_wrapper_result
 from agents.deltas import ReconDelta
 from orchestrator.node_executor import execute_node
-from orchestrator.node_result import NodeResult
 from config.schemas import BugHunterConfig, SettingsConfig, LLMConfig, ToolsConfig, TimeoutsConfig, ReportingConfig
 
 @pytest.fixture

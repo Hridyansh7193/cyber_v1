@@ -1,6 +1,5 @@
 from schemas.state import ExecutionState
-import json
-from typing import Tuple, Any, Mapping, List
+from typing import Tuple, Any, Mapping
 from execution.constants import NEW_SUBDOMAINS
 from execution.plugins.base import BaseExecutionPlugin, PluginMetadata
 from schemas.runtime import Capability
@@ -38,7 +37,8 @@ class SubfinderWrapper(BaseExecutionPlugin):
             cmd.append(flags["json_flag"])
             
         if isinstance(target, list):
-            import tempfile, os
+            import tempfile
+            import os
             fd, temp_path = tempfile.mkstemp(text=True)
             with os.fdopen(fd, 'w') as f:
                 f.write("\n".join(target))

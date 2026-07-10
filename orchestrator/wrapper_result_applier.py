@@ -2,7 +2,7 @@ from schemas.state import ExecutionState, ReconState, JSState, APIState, Vulnera
 from schemas.tool_result import ToolResult
 from schemas.telemetry import ExecutionTelemetry
 from execution.constants import *
-from typing import Tuple, List, Mapping, Any
+from typing import Tuple
 
 def _append_trace(state: ExecutionState, stage: str, tool_res: ToolResult, stored_count: int):
     if state.runtime_context and hasattr(state.runtime_context, "trace"):

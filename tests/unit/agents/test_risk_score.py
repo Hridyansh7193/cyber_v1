@@ -3,7 +3,6 @@ from config.schemas import BugHunterConfig, SettingsConfig, LLMConfig, ToolsConf
 from schemas.target import TargetState
 from schemas.finding import Finding
 from agents.risk_score_agent import score_risk
-import uuid
 from datetime import datetime, timezone
 
 def test_risk_score_agent():
