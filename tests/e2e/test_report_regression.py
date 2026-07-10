@@ -4,12 +4,12 @@ from datetime import datetime, timezone
 from schemas.state import ExecutionState
 from schemas.target import TargetState
 from schemas.finding import Finding
-from schemas.intelligence import IntelligenceState, PlannerDecision
+from schemas.intelligence import IntelligenceState
 from schemas.attack_graph import AttackGraph, AttackGraphNode, AttackGraphEdge
 from schemas.risk_summary import RiskSummary
 from config.schemas import BugHunterConfig, SettingsConfig, ReportingConfig
 
-from agents.reporter import generate_reports
+from agents.reporter_agent import generate_reports
 from reporting.markdown_renderer import generate_markdown
 
 def test_report_includes_intelligence(tmp_path):
@@ -47,7 +47,6 @@ def test_report_includes_intelligence(tmp_path):
         ),
         intelligence=IntelligenceState(
             version=1,
-            planner=PlannerDecision(execute_nodes=("recon_node",), skipped_nodes=(), priority_overrides=(), reasoning="Test", confidence=1.0),
             attack_graph=ag,
             risk_summary=RiskSummary(score=8.5, level="HIGH", reasoning="SQLi found")
         )

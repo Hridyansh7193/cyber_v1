@@ -3,15 +3,16 @@ from datetime import datetime, timezone
 from schemas.state import ExecutionState, TargetState
 from orchestrator.node_executor import execute_node
 
-def get_base_state():
-    from schemas.intelligence import IntelligenceState
-    from schemas.planner_decision import PlannerDecision, ExecutionPlan
-    
-    plan = ExecutionPlan(recon_plugins=("subfinder",), js_plugins=(), api_plugins=(), vuln_plugins=())
-    intel = IntelligenceState(planner=PlannerDecision(execution_plan=plan, reasoning=""))
-    return ExecutionState(target=TargetState(domain="test.com", scope=[], session_id="1", start_time=datetime.now(timezone.utc)), intelligence=intel)
-
+from schemas.task import Task, TaskPriority, TaskStatus
 from schemas.runtime import Capability
+
+def get_base_state():
+    return ExecutionState(
+        target=TargetState(domain="test.com", scope=[], session_id="1", start_time=datetime.now(timezone.utc)),
+        task_queue=(
+            Task(name="plugin:recon:subfinder", priority=TaskPriority.HIGH, status=TaskStatus.PENDING),
+        )
+    )
 
 def test_wrapper_exception_propagation():
     def failing_wrapper(plugins, config, target):

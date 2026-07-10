@@ -1,98 +1,61 @@
 from schemas.state import ExecutionState
 from config.schemas import BugHunterConfig
-from schemas.planner_decision import PlannerDecision, ExecutionPlan
-from schemas.intelligence import IntelligenceState
-from agents.deltas.intelligence_delta import IntelligenceDelta
+from schemas.task import Task, TaskPriority, TaskStatus
+from agents.deltas import TaskQueueDelta
 
-def plan(state: ExecutionState, config: BugHunterConfig) -> IntelligenceDelta:
-    execute_nodes = []
-    skipped_nodes = []
-    reasoning = []
+def plan(state: ExecutionState, config: BugHunterConfig) -> TaskQueueDelta:
+    tasks = []
     
-    # Simple logic to determine which plugins to run based on config.
-    # In a real scenario, this would consult the profile and target state.
-    recon_plugins = ("subfinder", "httpx", "assetfinder", "katana", "gau")
-    js_plugins = ("linkfinder", "secretfinder", "trufflehog")
-    api_plugins = ("swagger", "graphql")
-    vuln_plugins = ("nuclei", "dalfox", "subzy", "ffuf")
+    # 1. Node Tasks
+    # Recon is always executed unless we already have targets
+    tasks.append(Task(name="node:passive_recon_node", priority=TaskPriority.HIGH))
+    tasks.append(Task(name="node:active_recon_node", priority=TaskPriority.HIGH))
+    tasks.append(Task(name="node:scope_enforcement_node", priority=TaskPriority.HIGH))
     
-    # 1. Recon is always executed unless we already have targets
-    if not state.recon_state.subdomains and not state.recon_state.urls:
-        execute_nodes.append("recon_node")
-        reasoning.append("No existing recon data, executing recon_node.")
-    else:
-        execute_nodes.append("recon_node")
-        reasoning.append("Executing recon_node to find more targets.")
-        
-    # 2. JS node
+    # JS node
     if config.tools.enable_flags.get("js", True):
-        execute_nodes.append("js_node")
-    else:
-        skipped_nodes.append("js_node")
-        js_plugins = ()
-        reasoning.append("JS module disabled by config.")
+        tasks.append(Task(name="node:js_node", priority=TaskPriority.MEDIUM))
         
-    # 3. API node
+    # API node
     if config.tools.enable_flags.get("api", True):
-        execute_nodes.append("api_node")
-    else:
-        skipped_nodes.append("api_node")
-        api_plugins = ()
-        reasoning.append("API module disabled by config.")
+        tasks.append(Task(name="node:api_node", priority=TaskPriority.MEDIUM))
         
-    # 4. Vuln node
-    execute_nodes.append("vulnerability_node")
+    # Vuln node
+    tasks.append(Task(name="node:vulnerability_node", priority=TaskPriority.MEDIUM))
     
-    # 5. WAF and Tech Stack Logic
+    # Parameter, Analysis, and Report nodes
+    tasks.append(Task(name="node:parameter_node", priority=TaskPriority.MEDIUM))
+    tasks.append(Task(name="node:analysis_node", priority=TaskPriority.HIGH))
+    tasks.append(Task(name="node:report_node", priority=TaskPriority.HIGH))
+    
+    # 2. Plugin Tasks
+    recon_plugins = ["subfinder", "httpx", "assetfinder", "katana", "gau"]
+    js_plugins = ["linkfinder", "secretfinder", "trufflehog"]
+    api_plugins = ["swagger", "graphql"]
+    vuln_plugins = ["nuclei", "dalfox", "subzy", "ffuf"]
+    
     has_waf = any(state.recon_state.waf_detected.values())
-    vuln_plugins_list = list(vuln_plugins)
-    js_plugins_list = list(js_plugins)
-    api_plugins_list = list(api_plugins)
-    recon_plugins_list = list(recon_plugins)
-    
     if has_waf:
-        reasoning.append("WAF detected. Limiting aggressive tools (skipping Dalfox and ffuf).")
-        if "dalfox" in vuln_plugins_list:
-            vuln_plugins_list.remove("dalfox")
-        if "ffuf" in vuln_plugins_list:
-            vuln_plugins_list.remove("ffuf")
+        if "dalfox" in vuln_plugins: vuln_plugins.remove("dalfox")
+        if "ffuf" in vuln_plugins: vuln_plugins.remove("ffuf")
             
     is_wordpress = any("wordpress" in str(techs).lower() for techs in state.recon_state.tech_stack.values())
-    if is_wordpress and "wpscan" not in vuln_plugins_list:
-        reasoning.append("WordPress detected. Enabling WPScan.")
-        vuln_plugins_list.append("wpscan")
+    if is_wordpress and "wpscan" not in vuln_plugins:
+        vuln_plugins.append("wpscan")
         
-    # 6. JavaScript Logic
-    if not state.js_state.js_files and state.target.session_id: # Only skip if we've already done some recon and found none. If it's the first run, we might not have JS files yet, but wait, JS files are found by recon? No, gau/wayback finds them.
-        # Actually, let's keep them if it's the first pass, but planner runs before execution.
-        pass
-
-    # 7. API Logic
     if state.api_state.swagger_urls or state.api_state.graphql_urls or state.api_state.endpoints:
-        reasoning.append("APIs detected. Prioritizing API tools.")
-        if "graphql" not in api_plugins_list:
-            api_plugins_list.append("graphql")
-        if "swagger" not in api_plugins_list:
-            api_plugins_list.append("swagger")
-            
-    # Add parameter node plugins if needed (arjun is handled by orchestrator, but we can add it here if planner controls it)
-    parameter_plugins = ("arjun",)
+        if "graphql" not in api_plugins: api_plugins.append("graphql")
+        if "swagger" not in api_plugins: api_plugins.append("swagger")
+        
+    # If the user disabled js/api nodes, don't schedule their plugins
+    if not config.tools.enable_flags.get("js", True):
+        js_plugins = []
+    if not config.tools.enable_flags.get("api", True):
+        api_plugins = []
+        
+    for p in recon_plugins: tasks.append(Task(name=f"plugin:recon:{p}"))
+    for p in js_plugins: tasks.append(Task(name=f"plugin:js:{p}"))
+    for p in api_plugins: tasks.append(Task(name=f"plugin:api:{p}"))
+    for p in vuln_plugins: tasks.append(Task(name=f"plugin:vuln:{p}"))
     
-    plan = ExecutionPlan(
-        recon_plugins=tuple(recon_plugins_list),
-        js_plugins=tuple(js_plugins_list),
-        api_plugins=tuple(api_plugins_list),
-        vuln_plugins=tuple(vuln_plugins_list)
-    )
-    
-    decision = PlannerDecision(
-        execute_nodes=tuple(execute_nodes),
-        skipped_nodes=tuple(skipped_nodes),
-        execution_plan=plan,
-        priority_overrides=(),
-        reasoning=" ".join(reasoning),
-        confidence=1.0
-    )
-    
-    intelligence = IntelligenceState(planner=decision)
-    return IntelligenceDelta(intelligence=intelligence)
+    return TaskQueueDelta(task_queue=tuple(tasks))

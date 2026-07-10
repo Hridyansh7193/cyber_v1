@@ -16,13 +16,12 @@ def test_planner_agent():
     # 1. Test full run (no existing recon data)
     state = ExecutionState(target=TargetState(domain="example.com", scope=[], session_id="1", start_time=datetime.now(timezone.utc)))
     delta = plan(state, config)
-    decision = delta.intelligence.planner
+    tasks = [t.name for t in delta.task_queue]
     
-    assert "recon_node" in decision.execute_nodes
-    assert "js_node" in decision.execute_nodes
-    assert "api_node" in decision.execute_nodes
-    assert "vulnerability_node" in decision.execute_nodes
-    assert not decision.skipped_nodes
+    assert "node:passive_recon_node" in tasks
+    assert "node:js_node" in tasks
+    assert "node:api_node" in tasks
+    assert "node:vulnerability_node" in tasks
     
     # 2. Test JS/API disabled
     config_disabled = BugHunterConfig(
@@ -33,12 +32,12 @@ def test_planner_agent():
         reporting=ReportingConfig(report_formats=["json", "markdown"], output_directories={"json": "out/json", "markdown": "out/markdown"})
     )
     delta_disabled = plan(state, config_disabled)
-    decision_disabled = delta_disabled.intelligence.planner
+    tasks_disabled = [t.name for t in delta_disabled.task_queue]
     
-    assert "js_node" in decision_disabled.skipped_nodes
-    assert "api_node" in decision_disabled.skipped_nodes
-    assert "recon_node" in decision_disabled.execute_nodes
-    assert "vulnerability_node" in decision_disabled.execute_nodes
+    assert "node:js_node" not in tasks_disabled
+    assert "node:api_node" not in tasks_disabled
+    assert "node:passive_recon_node" in tasks_disabled
+    assert "node:vulnerability_node" in tasks_disabled
     
     # 3. Determinism test
     delta1 = plan(state, config)

@@ -28,7 +28,8 @@ def test_plugin_executor_recon(mock_run):
         reporting={"report_formats": ["json"], "output_directories": {}}
     )
     
-    target = TargetState(session_id="test", domain="example.com", start_time=datetime.now(timezone.utc))
+    import uuid
+    target = TargetState(session_id=uuid.uuid4().hex, domain="example.com", start_time=datetime.now(timezone.utc))
     state = ExecutionState(target=target)
     results = PluginExecutor.execute_plugins(("subfinder",), config, state)
     
@@ -57,7 +58,8 @@ def test_plugin_executor_js(mock_run):
         reporting={"report_formats": ["json"], "output_directories": {}}
     )
     
-    target = TargetState(session_id="test", domain="example.com", start_time=datetime.now(timezone.utc))
+    import uuid
+    target = TargetState(session_id=uuid.uuid4().hex, domain="example.com", start_time=datetime.now(timezone.utc))
     from schemas.state import JSState
     state = ExecutionState(target=target, js_state=JSState(js_files=("http://example.com/app.js",)))
     results = PluginExecutor.execute_plugins(("linkfinder",), config, state)
@@ -87,8 +89,10 @@ def test_plugin_executor_vuln(mock_run):
         reporting={"report_formats": ["json"], "output_directories": {}}
     )
     
-    target = TargetState(session_id="test", domain="example.com", start_time=datetime.now(timezone.utc))
-    state = ExecutionState(target=target)
+    import uuid
+    target = TargetState(session_id=uuid.uuid4().hex, domain="example.com", start_time=datetime.now(timezone.utc))
+    from schemas.state import ReconState
+    state = ExecutionState(target=target, recon_state=ReconState(urls=("http://example.com",)))
     results = PluginExecutor.execute_plugins(("nuclei",), config, state)
     
     assert len(results) == 1

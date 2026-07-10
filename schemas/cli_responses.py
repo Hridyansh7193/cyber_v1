@@ -31,12 +31,8 @@ class SearchResponse(BaseModel):
 
 class PlannerResponse(BaseModel):
     planner_version: str
-    confidence: float
-    executed_nodes: List[str]
-    skipped_nodes: List[str]
-    reasoning: str
-    execution_plan: Dict[str, Any]
-    overrides: List[str]
+    task_queue: List[Dict[str, Any]]
+    total_tasks: int
 
 class CleanupResponse(BaseModel):
     cache_files: int

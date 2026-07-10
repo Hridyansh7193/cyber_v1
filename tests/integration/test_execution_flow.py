@@ -5,7 +5,7 @@ from schemas.state import ExecutionState, ReconState, TargetState
 from config.schemas import BugHunterConfig
 from orchestrator.wrapper_result_applier import apply_recon_wrapper_result
 from orchestrator.delta_applier import apply_recon_delta
-from agents.reporter import generate_reports
+from agents.reporter_agent import generate_reports
 from execution.wrappers import ReconWrapper
 from agents.deltas import ReconDelta
 

@@ -1,5 +1,5 @@
 from schemas.state import ExecutionState, ReconState, JSState, APIState, VulnerabilityState
-from agents.deltas import ReconDelta, JSDelta, APIDelta, VulnerabilityDelta, AnalysisDelta, ReportDelta, IntelligenceDelta
+from agents.deltas import ReconDelta, JSDelta, APIDelta, VulnerabilityDelta, FindingDelta, TaskQueueDelta, ReportDelta, IntelligenceDelta
 from schemas.finding import Finding
 import uuid
 
@@ -60,19 +60,18 @@ def apply_vulnerability_delta(state: ExecutionState, delta: VulnerabilityDelta) 
         existing_findings[finding.id] = finding
     return state.model_copy(deep=True, update={"findings": tuple(existing_findings.values())})
 
-def apply_analysis_delta(state: ExecutionState, delta: AnalysisDelta) -> ExecutionState:
+def apply_finding_delta(state: ExecutionState, delta: FindingDelta) -> ExecutionState:
     existing_findings = {f.id: f for f in state.findings}
-    for group in delta.grouped_findings:
-        finding = Finding(
-            id=group.get('id', ''),
-            title=group.get('title', 'Associated Endpoint'),
-            severity=group.get('severity', 'info'),
-            confidence=group.get('confidence', 'certain'),
-            evidence=group.get('evidence', 'Inferred via analysis node'),
-            references=tuple(group.get('references', []))
-        )
+    for finding in delta.findings:
         existing_findings[finding.id] = finding
     return state.model_copy(deep=True, update={"findings": tuple(existing_findings.values())})
+
+def apply_task_queue_delta(state: ExecutionState, delta: TaskQueueDelta) -> ExecutionState:
+    from schemas.task import Task
+    merged = list(state.task_queue)
+    # Just append new tasks for now (simple logic)
+    merged.extend(delta.task_queue)
+    return state.model_copy(deep=True, update={"task_queue": tuple(merged)})
 
 def apply_report_delta(state: ExecutionState, delta: ReportDelta) -> ExecutionState:
     new_reports = tuple(state.reports) + tuple(delta.reports)
@@ -83,8 +82,6 @@ def apply_intelligence_delta(state: ExecutionState, delta: IntelligenceDelta) ->
         return state.model_copy(deep=True, update={"intelligence": delta.intelligence})
     
     updates = {}
-    if delta.intelligence.planner is not None:
-        updates["planner"] = delta.intelligence.planner
     if delta.intelligence.prioritized_assets:
         updates["prioritized_assets"] = delta.intelligence.prioritized_assets
     if delta.intelligence.correlated_findings:

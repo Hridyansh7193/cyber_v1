@@ -3,10 +3,11 @@ from typing import Tuple, Dict, Any
 
 from schemas.report import Report
 from schemas.finding import Finding
+from schemas.task import Task
 
-class PlannerDelta(BaseModel):
+class TaskQueueDelta(BaseModel):
     model_config = ConfigDict(frozen=True)
-    recommended_actions: Tuple[str, ...]
+    task_queue: Tuple[Task, ...]
 
 class ReconDelta(BaseModel):
     model_config = ConfigDict(frozen=True)
@@ -30,9 +31,9 @@ class VulnerabilityDelta(BaseModel):
     model_config = ConfigDict(frozen=True)
     findings: Tuple[Dict[str, Any], ...]
 
-class AnalysisDelta(BaseModel):
+class FindingDelta(BaseModel):
     model_config = ConfigDict(frozen=True)
-    grouped_findings: Tuple[Dict[str, Any], ...]
+    findings: Tuple[Finding, ...]
 
 class ReportDelta(BaseModel):
     model_config = ConfigDict(frozen=True)

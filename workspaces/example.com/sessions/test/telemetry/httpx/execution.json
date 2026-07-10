@@ -1,8 +1,8 @@
 {
-  "command": "/mock/httpx -silent -json -title -tech-detect -rt -u example.com",
+  "command": "",
   "arguments": [
     "/mock/httpx"
   ],
   "exit_code": 0,
-  "runtime": 1.0
+  "runtime": 0.0
 }

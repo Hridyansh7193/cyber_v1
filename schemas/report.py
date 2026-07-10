@@ -14,6 +14,9 @@ class ReportFormat(str, Enum):
     MARKDOWN = "markdown"
     HTML = "html"
     PDF = "pdf"
+    SARIF = "sarif"
+    CSV = "csv"
+    BURP_XML = "burpxml"
 
 class DiscoveredAssets(BaseModel):
     model_config = ConfigDict(frozen=True)

@@ -12,7 +12,6 @@ from storage.analytics_repository import AnalyticsRepository
 from schemas.finding import Finding
 from schemas.report import Report
 from schemas.tool_metrics import ToolMetrics
-from schemas.intelligence import PlannerDecision
 from storage.models import FindingModel, ReportModel, ScanSessionModel, LogModel
 import json
 
@@ -29,6 +28,12 @@ class PersistenceService:
         self.secret_repo = SecretRepository()
         self.analytics_repo = analytics_repo or AnalyticsRepository()
         
+        from storage.database import run_migrations
+        try:
+            run_migrations()
+        except Exception as e:
+            import logging
+            logging.getLogger("persistence").warning(f"Database migration check failed: {e}")
     def _get_session(self):
         return get_db_session()
         
@@ -98,17 +103,17 @@ class PersistenceService:
                 )
                 self.analytics_repo.insert_metric(metric)
 
-    def get_planner_decision(self, session_id: str) -> Optional[PlannerDecision]:
-        """Extracts the PlannerDecision from the persisted state_blob of a session."""
+    def get_task_queue(self, session_id: str) -> Optional[List[dict]]:
+        """Extracts the Task Queue from the persisted state_blob of a session."""
         session = self.get_session(session_id)
         if not session or not session.state_blob:
             return None
             
         try:
             state_dict = json.loads(session.state_blob)
-            intel = state_dict.get("intelligence")
-            if intel and intel.get("planner"):
-                return PlannerDecision(**intel["planner"])
+            tasks = state_dict.get("task_queue")
+            if tasks is not None:
+                return tasks
         except Exception:
             pass
         return None

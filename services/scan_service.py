@@ -138,6 +138,49 @@ class ScanService:
                     logger.info(f"Trace report saved to {trace_path}")
                 except Exception as e:
                     logger.error(f"Failed to save trace report: {e}")
+
+            # 5. Save Scan Manifest
+            try:
+                from schemas.manifests import ScanManifest
+                import time
+                import json
+                
+                plugins_used = []
+                tool_failures = []
+                if hasattr(final_state, 'logs') and final_state.logs:
+                    for log in final_state.logs:
+                        if hasattr(log, 'tool'):
+                            plugins_used.append(log.tool)
+                            if not log.success:
+                                tool_failures.append(log.tool)
+                                
+                runtime_ms = 0.0
+                if final_state.target and final_state.target.start_time:
+                    end_time = datetime.datetime.now(datetime.timezone.utc)
+                    runtime_ms = (end_time - final_state.target.start_time).total_seconds() * 1000
+                    
+                planner_decisions = []
+                skipped_nodes = []
+                if final_state.task_queue:
+                    planner_decisions = [t.name for t in final_state.task_queue]
+                    
+                manifest = ScanManifest(
+                    plugins_used=list(set(plugins_used)),
+                    plugin_versions={}, # Simplified for now
+                    runtime_ms=runtime_ms,
+                    profile=config.profile.value if hasattr(config, "profile") else "default",
+                    skipped_nodes=skipped_nodes,
+                    planner_decisions=planner_decisions,
+                    tool_failures=list(set(tool_failures)),
+                    quality_score=0.0
+                )
+                
+                manifest_path = __import__('os').path.join("workspaces", domain, "sessions", job_id, "manifest.json")
+                with open(manifest_path, "w", encoding="utf-8") as f:
+                    f.write(manifest.model_dump_json(indent=2))
+                logger.info(f"Scan manifest saved to {manifest_path}")
+            except Exception as e:
+                logger.error(f"Failed to save scan manifest: {e}")
         else:
             if self._persistence_service:
                 self._persistence_service.update_session(job_id, "failed")

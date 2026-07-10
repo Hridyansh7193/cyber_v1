@@ -19,20 +19,16 @@ def planner(
 
     try:
         persistence = PersistenceService()
-        decision = persistence.get_planner_decision(job_id)
+        tasks = persistence.get_task_queue(job_id)
         
-        if not decision:
-            OutputFormatter.render_error(f"Planner decision not found for JOB_ID {job_id}")
+        if tasks is None:
+            OutputFormatter.render_error(f"Task Queue not found for JOB_ID {job_id}")
             raise typer.Exit(code=NOT_FOUND)
             
         response = PlannerResponse(
             planner_version="1.0",
-            confidence=decision.confidence,
-            executed_nodes=decision.selected_nodes,
-            skipped_nodes=[], # This would be derived dynamically or stored in planner decision
-            reasoning=decision.reasoning,
-            execution_plan={"nodes": decision.selected_nodes},
-            overrides=[]
+            task_queue=tasks,
+            total_tasks=len(tasks)
         )
 
         if json_out:

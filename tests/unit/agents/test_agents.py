@@ -6,14 +6,14 @@ from schemas.state import ExecutionState, TargetState, ReconState, JSState, APIS
 from schemas.finding import Finding, Severity, Confidence
 from schemas.report import ReportFormat
 from config.schemas import BugHunterConfig, SettingsConfig, LLMConfig, ToolsConfig, TimeoutsConfig, ReportingConfig
-from agents.deltas import PlannerDelta, ReconDelta, JSDelta, APIDelta, VulnerabilityDelta, AnalysisDelta, ReportDelta
-from agents.planner import plan
+from agents.deltas import TaskQueueDelta, ReconDelta, JSDelta, APIDelta, VulnerabilityDelta, FindingDelta, ReportDelta
+from agents.planner_agent import plan
 from agents.recon import analyze_recon
 from agents.js import analyze_js
 from agents.api import analyze_api
 from agents.vulnerability import analyze_vulnerabilities
-from agents.analyzer import associate
-from agents.reporter import generate_reports
+from agents.analyzer_agent import analyze_intelligence
+from agents.reporter_agent import generate_reports
 
 @pytest.fixture
 def mock_config() -> BugHunterConfig:
@@ -44,8 +44,8 @@ def test_planner_pure_function(mock_state, mock_config):
     
     # Deterministic output
     assert delta1 == delta2
-    assert isinstance(delta1, PlannerDelta)
-    assert "vulnerability_analysis" in delta1.recommended_actions
+    assert isinstance(delta1, TaskQueueDelta)
+    assert any(t.name == "node:vulnerability_node" for t in delta1.task_queue)
     
     # State immutability
     assert mock_state.model_dump() == original_state_dump
@@ -103,11 +103,11 @@ def test_vulnerability_pure_function(mock_state, mock_config):
 def test_analyzer_pure_function(mock_state, mock_config):
     original_state_dump = mock_state.model_dump()
     
-    delta1 = associate(mock_state, mock_config)
-    delta2 = associate(mock_state, mock_config)
+    delta1 = analyze_intelligence(mock_state, mock_config)
+    delta2 = analyze_intelligence(mock_state, mock_config)
     
     assert delta1 == delta2
-    assert isinstance(delta1, AnalysisDelta)
+    assert isinstance(delta1, FindingDelta)
     # Should not produce random severity logic
     assert mock_state.model_dump() == original_state_dump
 
@@ -146,7 +146,6 @@ def test_reporter_json_generation(mock_state, mock_config):
     assert delta.reports[0].report_path == "out/json/report.json"
 
 def test_reporter_uuid5_determinism(mock_state, mock_config):
-    import uuid
     delta1 = generate_reports(mock_state, mock_config)
     delta2 = generate_reports(mock_state, mock_config)
     assert delta1.reports[0].report_id == delta2.reports[0].report_id
@@ -175,7 +174,6 @@ def test_reporter_empty_findings(mock_state, mock_config):
         assert report.total_findings == 0
 
 def test_reporter_invalid_format(mock_state, mock_config):
-    # Should skip the invalid format silently (lines 30-31)
     config = mock_config.model_copy(update={"reporting": ReportingConfig(report_formats=["json", "invalid_format"], output_directories={"json": "out/json"})})
     delta = generate_reports(mock_state, config)
     assert len(delta.reports) == 1
@@ -183,22 +181,17 @@ def test_reporter_invalid_format(mock_state, mock_config):
 
 def test_planner_empty_state(mock_config):
     from datetime import datetime, timezone
-    # All states are default empty
     empty_state = ExecutionState(
         target=TargetState(domain="example.com", scope=[], session_id="sess_1", start_time=datetime.now(timezone.utc))
     )
     delta = plan(empty_state, mock_config)
-    assert "recon" in delta.recommended_actions
-    assert "js_analysis" in delta.recommended_actions
-    assert "api_analysis" in delta.recommended_actions
-    assert "vulnerability_analysis" in delta.recommended_actions
+    tasks = [t.name for t in delta.task_queue]
+    assert "node:passive_recon_node" in tasks
+    assert "node:js_node" in tasks
+    assert "node:api_node" in tasks
+    assert "node:vulnerability_node" in tasks
 
 def test_planner_repeated_execution_determinism(mock_state, mock_config):
     d1 = plan(mock_state, mock_config)
     d2 = plan(mock_state, mock_config)
     assert d1 == d2
-
-def test_planner_target_absent(mock_config):
-    # ExecutionState strictly requires TargetState, so target is never strictly absent.
-    # We test with a bare minimum target.
-    pass

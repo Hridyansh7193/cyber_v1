@@ -38,12 +38,11 @@ def test_planner_effectiveness(base_config):
     )
     
     delta = plan(state, base_config)
-    decision = delta.intelligence.planner
+    tasks = [t.name for t in delta.task_queue]
     
-    assert "js_node" in decision.skipped_nodes
-    assert "api_node" in decision.execute_nodes
-    assert "recon_node" in decision.execute_nodes
-    assert "vulnerability_node" in decision.execute_nodes
+    # Recon and API should be included
+    assert "node:passive_recon_node" in tasks
+    assert "node:api_node" in tasks
 
 def test_prioritizer_validation(base_config):
     # 6. Prioritizer Validation

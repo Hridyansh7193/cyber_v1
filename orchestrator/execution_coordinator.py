@@ -5,7 +5,7 @@ from schemas.runtime import Capability
 from config.schemas import BugHunterConfig
 
 class ExecutionCoordinator:
-    """Coordinates execution of plugins through wrappers based on the Planner's ExecutionPlan."""
+    """Coordinates execution of plugins through wrappers based on the TaskQueue."""
     
     @staticmethod
     def execute_capability(
@@ -15,25 +15,24 @@ class ExecutionCoordinator:
         wrapper_func: Callable[[Tuple[str, ...], BugHunterConfig, ExecutionState], Tuple[ToolResult, ...]]
     ) -> Tuple[ToolResult, ...]:
         
-        plan = None
-        if state.intelligence and state.intelligence.planner:
-            plan = state.intelligence.planner.execution_plan
-            
-        if not plan:
-            return ()
-            
-        plugin_names = ()
+        # Determine prefix for this capability
+        prefix = ""
         if capability == Capability.RECON:
-            plugin_names = plan.recon_plugins
+            prefix = "plugin:recon:"
         elif capability == Capability.JS:
-            plugin_names = plan.js_plugins
+            prefix = "plugin:js:"
         elif capability == Capability.API:
-            plugin_names = plan.api_plugins
+            prefix = "plugin:api:"
         elif capability == Capability.VULN:
-            plugin_names = plan.vuln_plugins
+            prefix = "plugin:vuln:"
             
+        plugin_names = []
+        for task in state.task_queue:
+            if task.name.startswith(prefix):
+                plugin_names.append(task.name[len(prefix):])
+                
         if not plugin_names:
             return ()
             
         # Future architecture hook: handle retries, cancellation, timeouts, telemetry here
-        return wrapper_func(plugin_names, config, state)
+        return wrapper_func(tuple(plugin_names), config, state)

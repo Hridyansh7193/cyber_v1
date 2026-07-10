@@ -7,11 +7,10 @@ from execution.wrappers import ParameterWrapper
 from schemas.runtime import Capability
 
 def parameter_node(state: NodeResult, config: BugHunterConfig) -> NodeResult:
-    if state.execution_state.intelligence and state.execution_state.intelligence.planner:
-        if "parameter_node" in state.execution_state.intelligence.planner.skipped_nodes:
-            new_orch = start_task(state.orchestration_state, "parameter")
-            new_orch = complete_task(new_orch, "parameter")
-            return NodeResult(execution_state=state.execution_state, orchestration_state=new_orch)
+    if not any(t.name == "node:parameter_node" for t in state.execution_state.task_queue):
+        new_orch = start_task(state.orchestration_state, "parameter")
+        new_orch = complete_task(new_orch, "parameter")
+        return NodeResult(execution_state=state.execution_state, orchestration_state=new_orch)
 
     orch = start_task(state.orchestration_state, "parameter")
     

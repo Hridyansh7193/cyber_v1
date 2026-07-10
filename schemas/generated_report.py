@@ -4,7 +4,7 @@ from uuid import UUID
 
 class GeneratedReport(BaseModel):
     report_id: UUID
-    format: Literal["markdown", "json"]
+    format: Literal["markdown", "json", "sarif", "csv", "burpxml"]
     filename: str
     mime_type: str
     encoding: str = "utf-8"

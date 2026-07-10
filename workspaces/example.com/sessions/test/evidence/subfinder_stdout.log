@@ -18,3 +18,5 @@ sub1.example.com
 
 {"host": "sub1.example.com"}
 
+{invalid_json}
+
