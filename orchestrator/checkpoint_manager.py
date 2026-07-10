@@ -1,6 +1,7 @@
 import os
 import threading
 from langgraph.checkpoint.sqlite import SqliteSaver
+from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
 import sqlite3
 
 
@@ -21,7 +22,8 @@ class CheckpointManager:
         # Shared connection — protected by _lock
         self._lock = threading.Lock()
         self.conn = sqlite3.connect(db_path, check_same_thread=False)
-        self._saver = SqliteSaver(self.conn)
+        # Use JsonPlusSerializer instead of msgpack to support Pydantic V2 models natively
+        self._saver = SqliteSaver(self.conn, serde=JsonPlusSerializer())
         self._saver.setup()
 
     def get_saver(self) -> SqliteSaver:

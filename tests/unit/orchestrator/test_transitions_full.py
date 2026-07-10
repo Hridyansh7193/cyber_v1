@@ -11,7 +11,7 @@ def test_passive_recon_transition():
     assert passive_recon_transition(state) == "scope_enforcement_node"
     
     state["orchestration_state"].task_status["passive_recon"] = "CANCELLED"
-    assert passive_recon_transition(state) == "scope_enforcement_node"
+    assert passive_recon_transition(state) == END
     
     state["orchestration_state"].task_status["passive_recon"] = "PENDING"
     assert passive_recon_transition(state) == END
@@ -27,7 +27,7 @@ def test_js_transition():
     assert js_transition(state) == "api_node"
     
     state["orchestration_state"].task_status["js"] = "CANCELLED"
-    assert js_transition(state) == "api_node"
+    assert js_transition(state) == END
     
     state["orchestration_state"].task_status["js"] = "PENDING"
     assert js_transition(state) == END
@@ -40,7 +40,7 @@ def test_api_transition():
     assert api_transition(state) == "parameter_node"
     
     state["orchestration_state"].task_status["api"] = "CANCELLED"
-    assert api_transition(state) == "parameter_node"
+    assert api_transition(state) == END
     
     state["orchestration_state"].task_status["api"] = "PENDING"
     assert api_transition(state) == END
@@ -53,7 +53,7 @@ def test_vuln_transition():
     assert vuln_transition(state) == "analysis_node"
     
     state["orchestration_state"].task_status["vulnerability"] = "CANCELLED"
-    assert vuln_transition(state) == "analysis_node"
+    assert vuln_transition(state) == END
     
     state["orchestration_state"].task_status["vulnerability"] = "PENDING"
     assert vuln_transition(state) == END
@@ -66,7 +66,8 @@ def test_analysis_transition():
     assert analysis_transition(state) == "report_node"
     
     state["orchestration_state"].task_status["analysis"] = "CANCELLED"
-    assert analysis_transition(state) == "report_node"
+    assert analysis_transition(state) == END
     
     state["orchestration_state"].task_status["analysis"] = "PENDING"
     assert analysis_transition(state) == END
+

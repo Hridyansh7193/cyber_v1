@@ -87,6 +87,7 @@ class OrchestratorAdapter:
         ]
         final_state = initial_exec_state
         node_transitions: dict[str, NodeTransition] = {}
+        last_node_name = None
         
         try:
             # Start watchdog to detect stalled nodes
@@ -95,7 +96,6 @@ class OrchestratorAdapter:
             
             # Stream graph execution with comprehensive tracking
             stream_iter = self._app.stream(graph_state_input, config=config_run)
-            last_node_name = None
             
             for i, output in enumerate(stream_iter):
                 job = self._job_registry.get_job(job_id)
