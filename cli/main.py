@@ -17,6 +17,7 @@ from cli.commands_artifacts import app as artifacts_app
 from cli.commands_doctor import app as doctor_app
 from cli.commands_trace import app as trace_app
 from cli.commands_benchmark import app as benchmark_app
+from cli.commands_verify import app as verify_app
 
 from cli.dependencies import workspace_service
 from schemas.cli_responses import CleanupResponse
@@ -91,6 +92,7 @@ app.add_typer(planner_app, name="planner", help="Planner commands")
 app.add_typer(artifacts_app, name="artifacts", help="Artifact commands")
 app.add_typer(trace_app, name="")
 app.add_typer(benchmark_app, name="")
+app.add_typer(verify_app, name="")
 
 # Ensure legacy commands (scan, validate-config) are still accessible at root
 app.add_typer(legacy_app, name="")

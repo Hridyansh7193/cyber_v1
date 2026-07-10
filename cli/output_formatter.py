@@ -97,3 +97,12 @@ class OutputFormatter:
     @staticmethod
     def render_error(msg: str) -> None:
         console.print(f"[red]Error: {msg}[/red]")
+
+    @staticmethod
+    def render_info(msg: str) -> None:
+        console.print(f"[cyan]{msg}[/cyan]")
+
+    @staticmethod
+    def render_warning(msg: str) -> None:
+        console.print(f"[yellow]Warning: {msg}[/yellow]")
+

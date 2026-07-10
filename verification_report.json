@@ -1,0 +1,66 @@
+{
+    "subfinder": {
+        "status": "UNVERIFIED",
+        "reason": "Missing Binary"
+    },
+    "httpx": {
+        "status": "VERIFIED",
+        "command": "-silent -json -title -tech-detect -rt -u scanme.nmap.org",
+        "exit_code": -3,
+        "runtime": 0.019740819931030273,
+        "stdout_size": 0,
+        "parsed_objects": 2
+    },
+    "katana": {
+        "status": "UNVERIFIED",
+        "reason": "Missing Binary"
+    },
+    "assetfinder": {
+        "status": "UNVERIFIED",
+        "reason": "Missing Binary"
+    },
+    "gau": {
+        "status": "UNVERIFIED",
+        "reason": "Missing Binary"
+    },
+    "linkfinder": {
+        "status": "UNVERIFIED",
+        "reason": "Missing Binary"
+    },
+    "secretfinder": {
+        "status": "UNVERIFIED",
+        "reason": "Missing Binary"
+    },
+    "nuclei": {
+        "status": "UNVERIFIED",
+        "reason": "Missing Binary"
+    },
+    "dalfox": {
+        "status": "UNVERIFIED",
+        "reason": "Missing Binary"
+    },
+    "swagger": {
+        "status": "VERIFIED",
+        "reason": "Internal Plugin"
+    },
+    "graphql": {
+        "status": "VERIFIED",
+        "reason": "Internal Plugin"
+    },
+    "trufflehog": {
+        "status": "UNVERIFIED",
+        "reason": "Missing Binary"
+    },
+    "ffuf": {
+        "status": "UNVERIFIED",
+        "reason": "Missing Binary"
+    },
+    "subzy": {
+        "status": "UNVERIFIED",
+        "reason": "Missing Binary"
+    },
+    "arjun": {
+        "status": "UNVERIFIED",
+        "reason": "Missing Binary"
+    }
+}
