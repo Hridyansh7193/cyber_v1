@@ -16,6 +16,18 @@ class Capability(str, Enum):
     REPORTING = "Reporting"
     ANALYTICS = "Analytics"
 
+class SelfTestResult(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    binary: bool
+    execution: bool
+    parser: bool
+    metadata_builder: bool
+    candidate_routing: bool
+
+    @property
+    def passed(self) -> bool:
+        return self.binary and self.execution and self.parser and self.metadata_builder and self.candidate_routing
+
 class RuntimeCheck(BaseModel):
     model_config = ConfigDict(frozen=True)
 

@@ -28,7 +28,22 @@ class GraphQLPlugin(BaseExecutionPlugin):
         return any(kw in path for kw in api_keywords)
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
+        from services.tool_manager import ToolManager
+        from services.compatibility import CompatibilityManager
+        
+        tool_info = ToolManager().get_tool("graphql")
+        version = tool_info.version if tool_info else None
+        
+        flags = CompatibilityManager().get_flags("graphql", version)
+        
         cmd = []
+        if flags.get("silent_flag"):
+            cmd.append(flags["silent_flag"])
+        if flags.get("json_flag"):
+            # Some tools like ffuf have space-separated flags (e.g. "-o output.json -of json")
+            for f in flags["json_flag"].split():
+                cmd.append(f)
+
         if isinstance(target, list):
             if target:
                 cmd.extend(["-u", str(target[0])])

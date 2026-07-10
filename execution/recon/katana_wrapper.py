@@ -23,7 +23,20 @@ class KatanaPlugin(BaseExecutionPlugin):
         return t.startswith("http://") or t.startswith("https://")
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
-        cmd = ["-silent", "-j"]
+        from services.tool_manager import ToolManager
+        from services.compatibility import CompatibilityManager
+        
+        tool_info = ToolManager().get_tool("katana")
+        version = tool_info.version if tool_info else None
+        
+        flags = CompatibilityManager().get_flags("katana", version)
+        
+        cmd = []
+        if flags.get("silent_flag"):
+            cmd.append(flags["silent_flag"])
+        if flags.get("json_flag"):
+            cmd.append(flags["json_flag"])
+            
         if isinstance(target, list):
             import tempfile, os
             fd, temp_path = tempfile.mkstemp(text=True)

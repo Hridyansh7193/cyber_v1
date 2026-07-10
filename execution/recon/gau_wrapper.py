@@ -22,7 +22,22 @@ class GauWrapper(BaseExecutionPlugin):
         return not t.startswith("http://") and not t.startswith("https://") and "/" not in t
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
-        cmd = ["--json"]
+        from services.tool_manager import ToolManager
+        from services.compatibility import CompatibilityManager
+        
+        tool_info = ToolManager().get_tool("gau")
+        version = tool_info.version if tool_info else None
+        
+        flags = CompatibilityManager().get_flags("gau", version)
+        
+        cmd = []
+        if flags.get("silent_flag"):
+            cmd.append(flags["silent_flag"])
+        if flags.get("json_flag"):
+            # Some tools like ffuf have space-separated flags (e.g. "-o output.json -of json")
+            for f in flags["json_flag"].split():
+                cmd.append(f)
+
         if isinstance(target, list):
             # Gau takes single domains by positional argument
             if target:

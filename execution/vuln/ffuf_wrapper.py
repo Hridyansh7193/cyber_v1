@@ -34,7 +34,20 @@ class FfufPlugin(BaseExecutionPlugin):
         if not wordlist_path and wordlist_mgr:
             wordlist_path = wordlist_mgr.get("common")
             
-        cmd = ["-json", "-s"]
+        from services.tool_manager import ToolManager
+        from services.compatibility import CompatibilityManager
+        
+        tool_info = ToolManager().get_tool("ffuf")
+        version = tool_info.version if tool_info else None
+        
+        flags = CompatibilityManager().get_flags("ffuf", version)
+        
+        cmd = []
+        if flags.get("silent_flag"):
+            cmd.append(flags["silent_flag"])
+        if flags.get("json_flag"):
+            for f in flags["json_flag"].split():
+                cmd.append(f)
         
         # Dynamic performance profile
         if bughunter_config and hasattr(bughunter_config, "profile"):

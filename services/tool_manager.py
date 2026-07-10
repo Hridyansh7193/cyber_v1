@@ -10,9 +10,15 @@ class ToolInfo(BaseModel):
     capabilities: List[str] = []
 
 class ToolManager:
-    def __init__(self):
-        self._tools: Dict[str, ToolInfo] = {}
+    _instance = None
 
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(ToolManager, cls).__new__(cls)
+            cls._instance._tools = {}
+            cls._instance.detect()
+        return cls._instance
+        
     def _find_binary(self, bin_name: str) -> Optional[str]:
         if bin_name in ("python", "python3"):
             return shutil.which(bin_name)

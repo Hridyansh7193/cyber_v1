@@ -159,6 +159,17 @@ class Doctor:
                 except ImportError:
                     status_val = "FAIL"
                     message_val = "Missing Dependency"
+                    
+            # 5. Execute Self Test
+            if status_val == "PASS" and hasattr(plugin, "self_test"):
+                try:
+                    result = plugin.self_test()
+                    if not result.passed:
+                        status_val = "FAIL"
+                        message_val = "Self-Test Failed: " + ", ".join(k for k, v in result.model_dump().items() if not v)
+                except Exception as e:
+                    status_val = "FAIL"
+                    message_val = f"Self-Test Error: {str(e)[:20]}"
 
             statuses.append(PluginStatus(
                 plugin=name,
@@ -179,7 +190,50 @@ class Doctor:
         )
 
     def _run_checks(self) -> List[RuntimeCheck]:
-        return [
-            RuntimeCheck(name="Permissions", status="PASS", message="Workspace is writable"),
-            RuntimeCheck(name="Network", status="PASS", message="Internet access available")
-        ]
+        checks = []
+        import sys
+        import os
+        from config.loader import load_config
+        
+        # 1. Python Version Check
+        py_version = sys.version_info
+        if py_version.major < 3 or (py_version.major == 3 and py_version.minor < 12):
+            checks.append(RuntimeCheck(name="Python Version", status="FAIL", message=f"Python {sys.version.split()[0]} is unsupported. Requires >= 3.12"))
+        else:
+            checks.append(RuntimeCheck(name="Python Version", status="PASS", message=f"Python {sys.version.split()[0]} is supported."))
+
+        # 2. Config Validation Check
+        try:
+            # We assume config defaults exist in the execution environment
+            # This ensures pydantic parses and validates the baseline config properly
+            cwd_config = os.path.join(os.getcwd(), "config")
+            if os.path.exists(cwd_config):
+                config = load_config(cwd_config)
+                checks.append(RuntimeCheck(name="Configuration", status="PASS", message="Configuration file is valid"))
+            else:
+                checks.append(RuntimeCheck(name="Configuration", status="WARNING", message="Config directory not found locally, skipping config load check"))
+        except Exception as e:
+            checks.append(RuntimeCheck(name="Configuration", status="FAIL", message=f"Invalid configuration: {str(e)}"))
+
+        # 3. Workspace Directory Check
+        workspace_dir = os.path.expanduser("~/.bughunter/workspace")
+        try:
+            os.makedirs(workspace_dir, exist_ok=True)
+            if os.access(workspace_dir, os.W_OK):
+                checks.append(RuntimeCheck(name="Workspace Permissions", status="PASS", message="Workspace directory is writable"))
+            else:
+                checks.append(RuntimeCheck(name="Workspace Permissions", status="FAIL", message="Workspace directory is NOT writable"))
+        except Exception:
+            checks.append(RuntimeCheck(name="Workspace Permissions", status="FAIL", message="Failed to access workspace directory"))
+            
+        # 4. Database Directory Check
+        db_dir = os.path.expanduser("~/.bughunter")
+        if os.path.exists(db_dir) and os.access(db_dir, os.W_OK):
+            checks.append(RuntimeCheck(name="Database Permissions", status="PASS", message="Database directory is writable"))
+        else:
+            checks.append(RuntimeCheck(name="Database Permissions", status="FAIL", message="Database directory is NOT writable"))
+
+        # 5. Network Check
+        checks.append(RuntimeCheck(name="Network", status="PASS", message="Internet access assumed available (Mocked)"))
+
+        return checks

@@ -30,7 +30,19 @@ class TrufflehogWrapper(BaseExecutionPlugin):
         
         bughunter_config = config.get("config")
         
+        from services.tool_manager import ToolManager
+        from services.compatibility import CompatibilityManager
+        
+        tool_info = ToolManager().get_tool("trufflehog")
+        version = tool_info.version if tool_info else None
+        
+        flags = CompatibilityManager().get_flags("trufflehog", version)
+        
         cmd = [mode, "--no-update"]
+        if flags.get("silent_flag"):
+            cmd.append(flags["silent_flag"])
+        if flags.get("json_flag"):
+            cmd.append(flags["json_flag"])
         
         if isinstance(target, list):
             import tempfile, os

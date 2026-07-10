@@ -23,7 +23,20 @@ class SubfinderWrapper(BaseExecutionPlugin):
         return not t.startswith("http://") and not t.startswith("https://") and "/" not in t
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
-        cmd = ["-silent", "-json"]
+        from services.tool_manager import ToolManager
+        from services.compatibility import CompatibilityManager
+        
+        tool_info = ToolManager().get_tool("subfinder")
+        version = tool_info.version if tool_info else None
+        
+        flags = CompatibilityManager().get_flags("subfinder", version)
+        
+        cmd = []
+        if flags.get("silent_flag"):
+            cmd.append(flags["silent_flag"])
+        if flags.get("json_flag"):
+            cmd.append(flags["json_flag"])
+            
         if isinstance(target, list):
             import tempfile, os
             fd, temp_path = tempfile.mkstemp(text=True)
@@ -32,6 +45,7 @@ class SubfinderWrapper(BaseExecutionPlugin):
             cmd.extend(["-dL", temp_path])
         else:
             cmd.extend(["-d", str(target)])
+            
         return tuple(cmd)
 
     def parse(self, stdout: str, stderr: str) -> tuple:

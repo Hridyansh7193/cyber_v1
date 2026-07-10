@@ -31,17 +31,35 @@ def doctor_cmd(
     else:
         from rich.table import Table
         
+        console.print("\n[bold]Runtime Checks[/bold]")
+        for check in report.checks:
+            if check.status == "PASS":
+                console.print(f"[green][PASS] {check.name}[/green]: {check.message}")
+            elif check.status == "WARNING":
+                console.print(f"[yellow][WARN] {check.name}[/yellow]: {check.message}")
+            else:
+                console.print(f"[red][FAIL] {check.name}[/red]: {check.message}")
+
         # Plugin Capability Self-Test
+        console.print("\n[bold]Plugin Status[/bold]")
         table = Table("Plugin", "Status")
         
         operational_count = 0
         total_plugins = len(report.plugins)
         
         for plugin in report.plugins:
-            color = "green" if plugin.status == "PASS" else "red"
-            msg = plugin.message if plugin.status != "PASS" else "OK"
+            if plugin.status == "PASS":
+                color = "green"
+                msg = "[PASS] OK" if plugin.message == "OK" else plugin.message
+            elif plugin.status == "WARNING":
+                color = "yellow"
+                msg = f"[WARN] {plugin.message}"
+            else:
+                color = "red"
+                msg = f"[FAIL] {plugin.message}"
+                
             if plugin.message == "Internal":
-                msg = "Internal"
+                msg = "[PASS] Internal"
                 color = "blue"
                 
             table.add_row(plugin.plugin, f"[{color}]{msg}[/{color}]")
@@ -51,11 +69,14 @@ def doctor_cmd(
                 
         console.print(table)
         
-        console.print("\n[bold]Overall[/bold]")
-        console.print(f"{operational_count} / {total_plugins} operational")
-        console.print(f"{total_plugins - operational_count} unavailable\n")
+        console.print("\n[bold]Overall Health[/bold]")
+        console.print(f"Plugins: {operational_count} / {total_plugins} operational")
+        if report.summary_fail > 0:
+            console.print("[red]Environment has failing checks. Scans may fail.[/red]\n")
+        else:
+            console.print("[green]Environment looks healthy![/green]\n")
         
-    raise typer.Exit(code=SUCCESS)
+    raise typer.Exit(code=SUCCESS if report.summary_fail == 0 else INTERNAL_ERROR)
 
 @app.command("plugins")
 @timed_cli_command

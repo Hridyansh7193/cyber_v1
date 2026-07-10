@@ -23,7 +23,22 @@ class NucleiPlugin(BaseExecutionPlugin):
         return t.startswith("http://") or t.startswith("https://")
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
-        cmd = ["-silent"]
+        from services.tool_manager import ToolManager
+        from services.compatibility import CompatibilityManager
+        
+        tool_info = ToolManager().get_tool("nuclei")
+        version = tool_info.version if tool_info else None
+        
+        flags = CompatibilityManager().get_flags("nuclei", version)
+        
+        cmd = []
+        if flags.get("silent_flag"):
+            cmd.append(flags["silent_flag"])
+        if flags.get("json_flag"):
+            # Some tools like ffuf have space-separated flags (e.g. "-o output.json -of json")
+            for f in flags["json_flag"].split():
+                cmd.append(f)
+
         
         # Add dynamic tags based on tech stack
         tech_tags = set()

@@ -1,0 +1,97 @@
+plugins:
+  subfinder:
+    versions:
+      "2.x":
+        json_flag: "-json"
+        silent_flag: "-silent"
+        timeout_flag: "-timeout"
+        concurrency_flag: "-t"
+  httpx:
+    versions:
+      "1.x":
+        json_flag: "-json"
+        silent_flag: "-silent"
+        timeout_flag: "-timeout"
+        concurrency_flag: "-t"
+  katana:
+    versions:
+      "1.x":
+        json_flag: "-j"
+        silent_flag: "-silent"
+        timeout_flag: "-timeout"
+        concurrency_flag: "-c"
+  nuclei:
+    versions:
+      "2.x":
+        json_flag: "-json"
+        silent_flag: "-silent"
+        timeout_flag: "-timeout"
+        concurrency_flag: "-c"
+      "3.x":
+        json_flag: "-jsonl"
+        silent_flag: "-silent"
+        timeout_flag: "-timeout"
+        concurrency_flag: "-c"
+  dalfox:
+    versions:
+      "2.x":
+        json_flag: "format json"
+        silent_flag: ""
+        timeout_flag: "--timeout"
+        concurrency_flag: "-w"
+  ffuf:
+    versions:
+      "2.x":
+        json_flag: "-o output.json -of json"
+        silent_flag: "-s"
+        timeout_flag: "-t"
+        concurrency_flag: "-t"
+  gau:
+    versions:
+      "2.x":
+        json_flag: "--json"
+        silent_flag: ""
+        timeout_flag: ""
+        concurrency_flag: "-t"
+  assetfinder:
+    versions:
+      "0.x":
+        json_flag: ""
+        silent_flag: ""
+        timeout_flag: ""
+        concurrency_flag: ""
+  linkfinder:
+    versions:
+      "1.x":
+        json_flag: "-o cli"
+        silent_flag: ""
+        timeout_flag: ""
+        concurrency_flag: ""
+  secretfinder:
+    versions:
+      "1.x":
+        json_flag: "-o cli"
+        silent_flag: ""
+        timeout_flag: ""
+        concurrency_flag: ""
+  subzy:
+    versions:
+      "1.x":
+        json_flag: "--json"
+        silent_flag: ""
+        timeout_flag: ""
+        concurrency_flag: "--concurrency"
+  trufflehog:
+    versions:
+      "3.x":
+        json_flag: "--json"
+        silent_flag: ""
+        timeout_flag: ""
+        concurrency_flag: ""
+  arjun:
+    versions:
+      "2.x":
+        json_flag: "-oJ output.json"
+        silent_flag: ""
+        timeout_flag: ""
+        concurrency_flag: "-t"

@@ -2,11 +2,11 @@ from schemas.state import ExecutionState
 import json
 import re
 from typing import List, Tuple, Any, Mapping
-from execution.plugins.base import ExecutionPlugin, PluginMetadata
+from execution.plugins.base import BaseExecutionPlugin, PluginMetadata
 from schemas.runtime import Capability
 from execution.constants import NEW_PARAMETERS
 
-class ArjunPlugin(ExecutionPlugin):
+class ArjunPlugin(BaseExecutionPlugin):
     def metadata(self) -> PluginMetadata:
         return PluginMetadata(
             name="arjun",
@@ -23,9 +23,34 @@ class ArjunPlugin(ExecutionPlugin):
         t = str(target).lower()
         return t.startswith("http://") or t.startswith("https://")
 
-    def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
-        # Arjun supports -i for file input
-        return ("-t", "10") # 10 threads. The target will be passed by executor
+    def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
+        from services.tool_manager import ToolManager
+        from services.compatibility import CompatibilityManager
+        
+        tool_info = ToolManager().get_tool("arjun")
+        version = tool_info.version if tool_info else None
+        
+        flags = CompatibilityManager().get_flags("arjun", version)
+        
+        cmd = []
+        if flags.get("silent_flag"):
+            cmd.append(flags["silent_flag"])
+        if flags.get("json_flag"):
+            for f in flags["json_flag"].split():
+                cmd.append(f)
+                
+        cmd.extend(["-t", "10"]) # 10 threads
+        if target:
+            if isinstance(target, list):
+                # Arjun supports file input with -i
+                import tempfile, os
+                fd, temp_path = tempfile.mkstemp(text=True)
+                with os.fdopen(fd, 'w') as f:
+                    f.write("\n".join(target))
+                cmd.extend(["-i", temp_path])
+            else:
+                cmd.extend(["-u", str(target)])
+        return tuple(cmd)
 
     def validate(self, state: ExecutionState, config: Mapping[str, Any]) -> bool:
         urls = set(state.recon_state.urls)

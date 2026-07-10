@@ -23,7 +23,21 @@ class HttpxPlugin(BaseExecutionPlugin):
         return not t.startswith("http://") and not t.startswith("https://") and "/" not in t
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
-        cmd = ["-silent", "-json", "-title", "-tech-detect", "-rt"]
+        from services.tool_manager import ToolManager
+        from services.compatibility import CompatibilityManager
+        
+        tool_info = ToolManager().get_tool("httpx")
+        version = tool_info.version if tool_info else None
+        
+        flags = CompatibilityManager().get_flags("httpx", version)
+        
+        cmd = []
+        if flags.get("silent_flag"):
+            cmd.append(flags["silent_flag"])
+        if flags.get("json_flag"):
+            cmd.append(flags["json_flag"])
+            
+        cmd.extend(["-title", "-tech-detect", "-rt"])
         if isinstance(target, list):
             import tempfile, os
             fd, temp_path = tempfile.mkstemp(text=True)
