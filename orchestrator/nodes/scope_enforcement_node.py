@@ -1,5 +1,6 @@
 import time
 import datetime
+import threading
 from urllib.parse import urlparse
 from config.schemas import BugHunterConfig
 from orchestrator.node_result import NodeResult
@@ -14,6 +15,9 @@ monitor = get_monitor()
 # Safety cap: if passive recon found more than this many URLs, process only the first N.
 # Prevents O(N*M) regex loops from stalling the pipeline for minutes.
 _MAX_URLS_TO_FILTER = 5_000
+
+# Timeout for URL filtering (seconds). If taking longer, abort and use partial results.
+_URL_FILTER_TIMEOUT_SEC = 300.0  # 5 minutes
 
 def _now_iso() -> str:
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
@@ -42,45 +46,70 @@ def scope_enforcement_node(state: NodeResult, config: BugHunterConfig) -> NodeRe
         out_of_scope = list(target.out_of_scope) if target.out_of_scope else []
 
         scope_manager = ScopeManager(in_scope=in_scope, out_of_scope=out_of_scope)
-        logger.debug(f"ScopeManager initialized: in_scope={len(in_scope)}, out_of_scope={len(out_of_scope)}")
+        logger.info(f"ScopeManager initialized: in_scope={len(in_scope)}, out_of_scope={len(out_of_scope)}")
 
         # 2. Filter subdomains
         orch = start_task(state.orchestration_state, "scope_enforcement")
 
         recon = state.execution_state.recon_state
         original_subs = list(recon.subdomains)
-        logger.debug(f"Filtering {len(original_subs)} subdomains...")
+        logger.info(f"[SCOPE] Filtering {len(original_subs)} subdomains...")
         
         t_filter_subs = time.monotonic()
         filtered_subs = scope_manager.filter_targets(original_subs)
         elapsed_subs = time.monotonic() - t_filter_subs
-        logger.debug(f"Subdomain filtering took {elapsed_subs:.3f}s")
+        logger.info(f"[SCOPE] Subdomains: {len(original_subs)} → {len(filtered_subs)} ({elapsed_subs:.3f}s)")
 
         original_hosts = list(recon.alive_hosts)
-        logger.debug(f"Filtering {len(original_hosts)} hosts...")
+        logger.info(f"[SCOPE] Filtering {len(original_hosts)} hosts...")
         
         t_filter_hosts = time.monotonic()
         filtered_hosts = scope_manager.filter_targets(original_hosts)
         elapsed_hosts = time.monotonic() - t_filter_hosts
-        logger.debug(f"Host filtering took {elapsed_hosts:.3f}s")
+        logger.info(f"[SCOPE] Hosts: {len(original_hosts)} → {len(filtered_hosts)} ({elapsed_hosts:.3f}s)")
 
         # 3. Filter URLs — cap at _MAX_URLS_TO_FILTER to prevent long blocking loops
         original_urls = list(recon.urls)
         url_count = len(original_urls)
+        
+        logger.info(f"[SCOPE] Starting URL filtering: {url_count} total URLs...")
+        
         if url_count > _MAX_URLS_TO_FILTER:
             logger.warning(
-                f"scope_enforcement_node: {url_count} URLs discovered — capping at "
-                f"{_MAX_URLS_TO_FILTER} to prevent stall. Increase _MAX_URLS_TO_FILTER if needed."
+                f"[SCOPE] URL cap: {url_count} URLs discovered > {_MAX_URLS_TO_FILTER} limit. "
+                f"Processing only first {_MAX_URLS_TO_FILTER}."
             )
             original_urls = original_urls[:_MAX_URLS_TO_FILTER]
 
-        logger.debug(f"Filtering {len(original_urls)} URLs...")
+        logger.info(f"[SCOPE] Beginning URL filtering loop ({len(original_urls)} URLs)...")
         t_filter_urls = time.monotonic()
         
         filtered_urls = []
+        log_interval = min(100, max(len(original_urls) // 10, 1))  # Log 10 times during filtering
+        timeout_at = t_filter_urls + _URL_FILTER_TIMEOUT_SEC
+        
         for i, u in enumerate(original_urls):
-            if i % 100 == 0 and i > 0:
-                logger.debug(f"  Progress: {i}/{len(original_urls)} URLs processed...")
+            # Check for timeout
+            if time.monotonic() > timeout_at:
+                logger.error(
+                    f"[SCOPE] URL filtering TIMEOUT after {_URL_FILTER_TIMEOUT_SEC}s! "
+                    f"Processed {i}/{len(original_urls)} URLs. "
+                    f"Aborting filtering to prevent indefinite stall."
+                )
+                # Keep what we've filtered so far
+                break
+            
+            # Log progress every log_interval
+            if i % log_interval == 0 and i > 0:
+                elapsed_so_far = time.monotonic() - t_filter_urls
+                rate = i / elapsed_so_far if elapsed_so_far > 0 else 0
+                remaining = len(original_urls) - i
+                eta_sec = remaining / rate if rate > 0 else 0
+                logger.info(
+                    f"[SCOPE] URL progress: {i}/{len(original_urls)} "
+                    f"({100*i/len(original_urls):.1f}%) | "
+                    f"rate={rate:.0f} URLs/s | ETA={eta_sec:.0f}s"
+                )
             
             if "://" in u:
                 try:
@@ -88,22 +117,25 @@ def scope_enforcement_node(state: NodeResult, config: BugHunterConfig) -> NodeRe
                     if scope_manager.is_in_scope(netloc):
                         filtered_urls.append(u)
                 except Exception as parse_err:
-                    logger.warning(f"Failed to parse URL '{u}': {parse_err}")
+                    logger.warning(f"[SCOPE] Failed to parse URL '{u[:50]}...': {parse_err}")
             else:
                 if scope_manager.is_in_scope(u):
                     filtered_urls.append(u)
         
         elapsed_urls = time.monotonic() - t_filter_urls
-        logger.debug(f"URL filtering took {elapsed_urls:.3f}s")
+        logger.info(
+            f"[SCOPE] URL filtering complete: {len(original_urls)} → {len(filtered_urls)} "
+            f"({elapsed_urls:.3f}s, {len(original_urls)/elapsed_urls:.0f} URLs/s)"
+        )
 
         if len(filtered_subs) < len(original_subs):
-            logger.info(f"ScopeManager dropped {len(original_subs) - len(filtered_subs)} subdomains.")
+            logger.info(f"[SCOPE] Dropped {len(original_subs) - len(filtered_subs)} subdomains (out of scope)")
         if len(filtered_hosts) < len(original_hosts):
-            logger.info(f"ScopeManager dropped {len(original_hosts) - len(filtered_hosts)} alive hosts.")
+            logger.info(f"[SCOPE] Dropped {len(original_hosts) - len(filtered_hosts)} hosts (out of scope)")
         if url_count > _MAX_URLS_TO_FILTER:
-            logger.info(f"ScopeManager processed {_MAX_URLS_TO_FILTER}/{url_count} URLs (capped).")
+            logger.info(f"[SCOPE] Dropped {url_count - len(original_urls)} URLs (capped)")
         elif len(filtered_urls) < len(original_urls):
-            logger.info(f"ScopeManager dropped {len(original_urls) - len(filtered_urls)} URLs.")
+            logger.info(f"[SCOPE] Dropped {len(original_urls) - len(filtered_urls)} URLs (out of scope)")
 
         # Apply changes
         new_recon = recon.model_copy(update={
