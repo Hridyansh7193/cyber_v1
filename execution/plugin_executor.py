@@ -9,7 +9,16 @@ from execution.plugins.registry import REGISTRY
 from execution.plugins.base import ExecutionPlugin
 from execution.utils.process_runner import ProcessRunner
 from execution.utils.timeout_manager import TimeoutManager
-from execution.constants import METADATA_SCHEMA_VERSION
+from execution.constants import (
+    METADATA_SCHEMA_VERSION,
+    NEW_SUBDOMAINS,
+    NEW_HOSTS,
+    NEW_URLS,
+    NEW_PARAMETERS,
+    NEW_JS_FILES,
+    NEW_ENDPOINTS,
+    NEW_SECRETS
+)
 import time
 from utils.logger import get_logger
 
@@ -69,40 +78,52 @@ class PluginExecutor:
             current_target = target
             if current_target is None:
                 eligibility = plugin.metadata().target_eligibility
-                candidate_pool = set()
                 
-                if "domain" in eligibility:
-                    candidate_pool.add(state.target.domain)
-                if "subdomains" in eligibility and hasattr(state, "recon_state"):
-                    candidate_pool.update(state.recon_state.subdomains)
-                if "alive_hosts" in eligibility and hasattr(state, "recon_state"):
-                    candidate_pool.update(state.recon_state.alive_hosts)
-                if "urls" in eligibility and hasattr(state, "recon_state"):
-                    candidate_pool.update(state.recon_state.urls)
-                if "parameters" in eligibility and hasattr(state, "recon_state"):
-                    candidate_pool.update(state.recon_state.parameters)
-                if "js_files" in eligibility and hasattr(state, "js_state"):
-                    candidate_pool.update(state.js_state.js_files)
-                if "endpoints" in eligibility and hasattr(state, "js_state"):
-                    candidate_pool.update(state.js_state.endpoints)
-                    
-                # If no specific eligibility is defined, fallback to sensible defaults
-                if not eligibility:
-                    if plugin.metadata().name in ["subfinder", "assetfinder", "gau"]:
-                        candidate_pool.add(state.target.domain)
-                    elif hasattr(state, "recon_state") and state.recon_state.alive_hosts:
-                        candidate_pool.add(list(state.recon_state.alive_hosts)[0])
-                    else:
-                        candidate_pool.add(state.target.resolved_url or state.target.domain)
-
-                # Filter pool using wrapper's smart target selection
-                filtered_pool = [t for t in candidate_pool if plugin.is_candidate(t)]
+                # Check eligibility categories in order of preference (priority fallback hierarchy)
+                resolved_targets = []
+                for elig_type in eligibility:
+                    candidates = []
+                    if elig_type == "domain":
+                        candidates = [state.target.domain]
+                    elif elig_type == "subdomains" and hasattr(state, "recon_state") and state.recon_state.subdomains:
+                        candidates = list(state.recon_state.subdomains)
+                    elif elig_type == "alive_hosts" and hasattr(state, "recon_state") and state.recon_state.alive_hosts:
+                        candidates = list(state.recon_state.alive_hosts)
+                    elif elig_type == "urls" and hasattr(state, "recon_state") and state.recon_state.urls:
+                        candidates = list(state.recon_state.urls)
+                    elif elig_type == "parameters" and hasattr(state, "recon_state") and state.recon_state.parameters:
+                        candidates = list(state.recon_state.parameters)
+                    elif elig_type == "js_files" and hasattr(state, "js_state") and state.js_state.js_files:
+                        candidates = list(state.js_state.js_files)
+                    elif elig_type == "endpoints" and hasattr(state, "js_state") and state.js_state.endpoints:
+                        candidates = list(state.js_state.endpoints)
+                        
+                    # Filter candidates using plugin.is_candidate
+                    filtered = [c for c in candidates if plugin.is_candidate(c)]
+                    if filtered:
+                        resolved_targets = filtered
+                        break  # Found the highest-priority eligible target list!
                 
-                # Sort for deterministic execution
-                if filtered_pool:
-                    current_target = sorted(list(set(filtered_pool)))
+                if resolved_targets:
+                    current_target = sorted(list(set(resolved_targets)))
                 else:
-                    current_target = None
+                    # If no specific eligibility is defined, fallback to sensible defaults
+                    if not eligibility:
+                        candidate_pool = set()
+                        if plugin.metadata().name in ["subfinder", "assetfinder", "gau"]:
+                            candidate_pool.add(state.target.domain)
+                        elif hasattr(state, "recon_state") and state.recon_state.alive_hosts:
+                            candidate_pool.add(list(state.recon_state.alive_hosts)[0])
+                        else:
+                            candidate_pool.add(state.target.resolved_url or state.target.domain)
+                        
+                        filtered_pool = [t for t in candidate_pool if plugin.is_candidate(t)]
+                        if filtered_pool:
+                            current_target = sorted(list(set(filtered_pool)))
+                        else:
+                            current_target = None
+                    else:
+                        current_target = None
             
             # If a list was resolved but it is empty, skip execution to prevent hanging tools
             if current_target is None or (isinstance(current_target, (list, tuple, set)) and not current_target):
@@ -442,5 +463,85 @@ class PluginExecutor:
                 logger.error(f"Invariant violation: Parsed output lost for {plugin.metadata().name}")
 
             results.append(tool_res)
+            
+            # Apply the results of this plugin to the state dynamically,
+            # so the next plugin in the loop can see the newly discovered targets!
+            if tool_res.success and tool_res.metadata:
+                output = tool_res.metadata
+                if hasattr(state, "recon_state") and state.recon_state:
+                    new_subdomains = list(state.recon_state.subdomains)
+                    new_hosts = list(state.recon_state.alive_hosts)
+                    new_urls = list(state.recon_state.urls)
+                    new_params = list(state.recon_state.parameters)
+                    merged_tech = dict(state.recon_state.tech_stack)
+                    merged_waf = dict(state.recon_state.waf_detected)
+                    
+                    updated = False
+                    if NEW_SUBDOMAINS in output:
+                        new_subdomains.extend(output[NEW_SUBDOMAINS])
+                        updated = True
+                    if NEW_HOSTS in output:
+                        new_hosts.extend(output[NEW_HOSTS])
+                        updated = True
+                    if NEW_URLS in output:
+                        new_urls.extend(output[NEW_URLS])
+                        updated = True
+                    if NEW_PARAMETERS in output:
+                        new_params.extend(output[NEW_PARAMETERS])
+                        updated = True
+                    if "tech_stack" in output:
+                        for k, v in output["tech_stack"].items():
+                            if k in merged_tech:
+                                merged_tech[k] = tuple(dict.fromkeys(list(merged_tech[k]) + list(v)))
+                            else:
+                                merged_tech[k] = v
+                        updated = True
+                    if "waf_detected" in output:
+                        merged_waf.update(output["waf_detected"])
+                        updated = True
+                        
+                    if updated:
+                        state = state.model_copy(update={
+                            "recon_state": state.recon_state.model_copy(update={
+                                "subdomains": tuple(dict.fromkeys(new_subdomains)),
+                                "alive_hosts": tuple(dict.fromkeys(new_hosts)),
+                                "urls": tuple(dict.fromkeys(new_urls)),
+                                "parameters": tuple(dict.fromkeys(new_params)),
+                                "tech_stack": merged_tech,
+                                "waf_detected": merged_waf
+                            })
+                        })
+                        
+                if hasattr(state, "js_state") and state.js_state:
+                    new_js_files = list(state.js_state.js_files)
+                    new_endpoints = list(state.js_state.endpoints)
+                    new_secrets = list(state.js_state.secrets)
+                    
+                    updated = False
+                    if NEW_JS_FILES in output:
+                        new_js_files.extend(output[NEW_JS_FILES])
+                        updated = True
+                    if NEW_ENDPOINTS in output:
+                        new_endpoints.extend(output[NEW_ENDPOINTS])
+                        updated = True
+                    if NEW_SECRETS in output:
+                        new_secrets.extend(output[NEW_SECRETS])
+                        updated = True
+                        
+                    if updated:
+                        seen_secrets = set()
+                        merged_secrets = []
+                        for s in new_secrets:
+                            repr_str = str(sorted(s.items())) if isinstance(s, dict) else str(s)
+                            if repr_str not in seen_secrets:
+                                seen_secrets.add(repr_str)
+                                merged_secrets.append(s)
+                        state = state.model_copy(update={
+                            "js_state": state.js_state.model_copy(update={
+                                "js_files": tuple(dict.fromkeys(new_js_files)),
+                                "endpoints": tuple(dict.fromkeys(new_endpoints)),
+                                "secrets": tuple(merged_secrets)
+                            })
+                        })
             
         return tuple(results)
