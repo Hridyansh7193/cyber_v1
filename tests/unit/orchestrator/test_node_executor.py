@@ -10,7 +10,7 @@ def get_base_state():
     return ExecutionState(
         target=TargetState(domain="test.com", scope=[], session_id="1", start_time=datetime.now(timezone.utc)),
         task_queue=(
-            Task(name="plugin:recon:subfinder", priority=TaskPriority.HIGH, status=TaskStatus.PENDING),
+            Task(name="plugin:recon:httpx", priority=TaskPriority.HIGH, status=TaskStatus.PENDING),
         )
     )
 

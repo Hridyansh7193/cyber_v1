@@ -94,8 +94,8 @@ class ProcessRunner:
             # If successful or it's a timeout/error we shouldn't retry, break. 
             # We retry on unexpected internal failures or sometimes exit_code != 0 if desired, 
             # but usually we only retry if it was a system failure.
-            # The spec says "retry policy (1 retry)". Let's retry if exit_code < 0 or if there's a crash.
-            if exit_code in (0, 1, 2) or attempt == max_retries:
+            # The spec says "retry policy (1 retry)". Let's retry if exit_code < -1 or if there's a crash.
+            if exit_code in (-1, 0, 1, 2) or attempt == max_retries:
                 break
                 
             logger.warning(f"Retry {attempt + 1}/{max_retries} for {tool_name} (Exit code: {exit_code})")

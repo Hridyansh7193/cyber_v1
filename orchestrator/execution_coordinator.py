@@ -17,7 +17,7 @@ class ExecutionCoordinator:
         
         # Determine prefix for this capability
         prefix = ""
-        if capability == Capability.RECON:
+        if capability in (Capability.RECON, Capability.PASSIVE_RECON, Capability.DNS, Capability.HTTP):
             prefix = "plugin:recon:"
         elif capability == Capability.JS:
             prefix = "plugin:js:"
@@ -25,11 +25,19 @@ class ExecutionCoordinator:
             prefix = "plugin:api:"
         elif capability == Capability.VULN:
             prefix = "plugin:vuln:"
+        elif capability == Capability.PARAMETER_DISCOVERY:
+            # Although parameter tools are in recon, wait parameter wrapper is just a generic executor.
+            prefix = "plugin:vuln:" # we'll catch it or we'll rely on the capability matching. Actually parameter_node doesn't even use this wrapper. Wait, parameter_node uses ParameterWrapper.execute
             
         plugin_names = []
+        from execution.plugins.registry import REGISTRY
         for task in state.task_queue:
             if task.name.startswith(prefix):
-                plugin_names.append(task.name[len(prefix):])
+                name = task.name[len(prefix):]
+                plugin = REGISTRY.get_plugin(name)
+                # Verify the plugin actually has the requested capability
+                if plugin and capability in plugin.metadata().capabilities:
+                    plugin_names.append(name)
                 
         if not plugin_names:
             return ()

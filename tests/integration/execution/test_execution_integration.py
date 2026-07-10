@@ -28,4 +28,4 @@ def test_integration_nuclei_timeout(mock_which, mock_subrun):
     
     assert not res.success
     assert res.exit_code == -1
-    assert mock_subrun.call_count == 2
+    assert mock_subrun.call_count == 1
