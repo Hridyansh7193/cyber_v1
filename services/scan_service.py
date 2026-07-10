@@ -1,4 +1,6 @@
+import os
 import threading
+import datetime
 from typing import Dict, Any, Optional
 from services.orchestrator_adapter import OrchestratorAdapter
 from services.job_registry import JobRegistry, JobStatus
@@ -14,6 +16,10 @@ from services.wordlist_manager import WordlistManager
 from services.target_resolver import TargetResolver
 
 logger = get_logger("scan_service")
+
+
+def _now_iso() -> str:
+    return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
 class ScanService:
     """Orchestrates scan execution, persistence, and workspace output."""
@@ -33,10 +39,26 @@ class ScanService:
 
     def submit_scan(self, domain: str, config: BugHunterConfig, metadata: dict = None, resume_session_id: str = None) -> str:
         job_id = resume_session_id if resume_session_id else self._registry.create_job(domain, metadata)
-        thread = threading.Thread(target=self.run_scan_sync, args=(domain, config, metadata, job_id, resume_session_id is not None), daemon=True)
+        # Non-daemon thread: the worker must run to completion even after the CLI
+        # main thread finishes. The CLI progress loop calls join() to wait for it.
+        # daemon=True was the original bug that caused silent worker death.
+        thread = threading.Thread(
+            target=self.run_scan_sync,
+            args=(domain, config, metadata, job_id, resume_session_id is not None),
+            daemon=False,
+            name=f"scan-worker-{job_id[:8]}"
+        )
         self._threads[job_id] = thread
+        logger.info(
+            f"[LIFECYCLE] THREAD_START | job={job_id} | thread={thread.name} "
+            f"| pid={os.getpid()} | ts={_now_iso()}"
+        )
         thread.start()
         return job_id
+
+    def get_worker_thread(self, job_id: str) -> Optional[threading.Thread]:
+        """Return the worker thread for this job, or None if not found."""
+        return self._threads.get(job_id)
         
     def run_scan_sync(self, domain: str, config: BugHunterConfig, metadata: dict = None, job_id: str = None, is_resume: bool = False) -> str:
         if not job_id:
