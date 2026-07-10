@@ -36,6 +36,16 @@ class KatanaPlugin(BaseExecutionPlugin):
         if flags.get("json_flag"):
             cmd.append(flags["json_flag"])
             
+        # Add depth limit based on config (default to 2)
+        depth = 2
+        bh_config = config.get("config")
+        if bh_config and hasattr(bh_config, "settings") and bh_config.settings:
+            depth = bh_config.settings.scan_depth
+        cmd.extend(["-depth", str(depth)])
+        
+        # Add crawl duration limit to prevent long hangs (default to 120 seconds)
+        cmd.extend(["-crawl-duration", "120s"])
+            
         if isinstance(target, list):
             import tempfile
             import os
