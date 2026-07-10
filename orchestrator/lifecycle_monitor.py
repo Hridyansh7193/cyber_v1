@@ -205,14 +205,29 @@ class LifecycleMonitor:
             ""
         ]
         
+        current_time = time.monotonic()
+        
         for t in transitions:
             status_mark = "✓" if t.status == "SUCCESS" else "✗" if t.status == "FAILED" else "⏳"
+            
+            # Calculate elapsed time - use stored value if available, otherwise compute from entry time
+            if t.elapsed_seconds is not None:
+                elapsed = t.elapsed_seconds
+            else:
+                # Node may still be running or failed before mark_complete was called
+                exit_time = t.exit_time if t.exit_time is not None else current_time
+                elapsed = exit_time - t.entry_time
+            
             lines.append(
-                f"{status_mark} {t.node_name}: {t.elapsed_seconds:.2f}s "
+                f"{status_mark} {t.node_name}: {elapsed:.2f}s "
                 f"({t.status})" + (f" - {t.error}" if t.error else "")
             )
             
-        total_time = sum(t.elapsed_seconds for t in transitions if t.elapsed_seconds)
+        total_time = sum(
+            (t.elapsed_seconds if t.elapsed_seconds is not None else 
+             (t.exit_time - t.entry_time if t.exit_time else current_time - t.entry_time))
+            for t in transitions
+        )
         lines.append(f"Total: {total_time:.2f}s")
         
         return "\n".join(lines)

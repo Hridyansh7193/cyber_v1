@@ -191,6 +191,42 @@ class OrchestratorAdapter:
             )
             return final_state
             
+        except RuntimeError as re:
+            # Handle LangGraph executor shutdown or similar runtime errors
+            if "cannot schedule new futures after shutdown" in str(re):
+                logger.critical(
+                    f"[LIFECYCLE] EXECUTOR_SHUTDOWN | job={job_id} | error={str(re)} | "
+                    f"This may indicate the executor thread pool was prematurely closed. "
+                    f"Check for resource cleanup issues.",
+                    exc_info=True
+                )
+            
+            # Mark current node as failed if applicable
+            if last_node_name and last_node_name in node_transitions:
+                monitor.node_exit(
+                    node_transitions[last_node_name],
+                    status="FAILED",
+                    error=str(re)
+                )
+            
+            error_msg = f"RuntimeError: {str(re)}"
+            logger.error(
+                f"[LIFECYCLE] SCAN_FAILED | job={job_id} | error={error_msg} "
+                f"| pid={pid} | tid={tid} | ts={_now_iso()}",
+                exc_info=True
+            )
+            
+            # Dump diagnostic info
+            try:
+                diagnostics = monitor.dump_diagnostics(job_id)
+                logger.error(f"[LIFECYCLE] DIAGNOSTICS:\n{diagnostics}")
+            except Exception as diag_err:
+                logger.error(f"Failed to generate diagnostics: {diag_err}")
+            
+            self._job_registry.update_status(job_id, JobStatus.FAILED, error_msg)
+            monitor.scan_failed(job_id, error_msg)
+            return None
+            
         except Exception as e:
             # Mark current node as failed if applicable
             if last_node_name and last_node_name in node_transitions:
