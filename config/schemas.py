@@ -59,6 +59,8 @@ class ExecutionBudget(BaseModel):
     max_targets_per_plugin: int = 5000
     max_retries: int = 3
     max_failures: int = 100
+    chunk_size: int = 50
+    max_workers: int = 1
 
 class AuthConfig(BaseModel):
     model_config = ConfigDict(frozen=True)

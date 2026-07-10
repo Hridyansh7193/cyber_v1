@@ -12,10 +12,17 @@ from utils.logger import get_logger
 logger = get_logger("orchestrator_adapter")
 
 class OrchestratorAdapter:
-    def __init__(self, job_registry: JobRegistry, config: BugHunterConfig):
+    def __init__(self, job_registry: JobRegistry, config: BugHunterConfig, checkpointer: Optional[Any] = None):
         self._job_registry = job_registry
         self._config = config
-        self._app = build_graph(config)
+        if checkpointer is None:
+            import os
+            from orchestrator.checkpoint_manager import CheckpointManager
+            checkpointer_path = os.path.join(os.getcwd(), "workspaces", "checkpoints.db")
+            checkpointer = CheckpointManager(db_path=checkpointer_path)
+            
+        self._checkpointer = checkpointer
+        self._app = build_graph(config, checkpointer=self._checkpointer)
 
     def run_scan(self, job_id: str, target: TargetState, runtime_context: Optional[RuntimeContext] = None, resume_state: Optional[ExecutionState] = None) -> Optional[ExecutionState]:
         """Run the scan synchronously, returning the final ExecutionState."""
@@ -31,10 +38,21 @@ class OrchestratorAdapter:
         )
         
         config_run = {"configurable": {"thread_id": job_id}}
+        
+        # Check if we are resuming from the checkpointer natively
         graph_state_input = {
             "execution_state": initial_exec_state,
             "orchestration_state": initial_state
         }
+        if self._checkpointer:
+            saved_state = self._checkpointer.load(config_run)
+            if saved_state:
+                logger.info(f"LangGraph checkpoint found for job {job_id}. Resuming natively.")
+                graph_state_input = None
+                
+                # If resuming, we need to extract the execution state from the saved graph state
+                if "execution_state" in saved_state.values:
+                    initial_exec_state = saved_state.values["execution_state"]
         
         stages = [
             "init_node", "planner_node", "passive_recon_node", 

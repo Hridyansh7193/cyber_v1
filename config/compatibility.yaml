@@ -95,3 +95,17 @@ plugins:
         silent_flag: ""
         timeout_flag: ""
         concurrency_flag: "-t"
+  graphql:
+    versions:
+      "1.x":
+        json_flag: ""
+        silent_flag: ""
+        timeout_flag: ""
+        concurrency_flag: ""
+  swagger:
+    versions:
+      "1.x":
+        json_flag: ""
+        silent_flag: ""
+        timeout_flag: ""
+        concurrency_flag: ""

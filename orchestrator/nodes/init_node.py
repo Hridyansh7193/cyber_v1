@@ -8,7 +8,8 @@ import os
 def init_node(state: NodeResult, config: BugHunterConfig) -> NodeResult:
     # Phase 5: Fast-Fail Configuration Validation
     ws_manager = WorkspaceManager()
-    base_dir = ws_manager.get_base_dir()
+    base_dir = ws_manager.root_dir
+    os.makedirs(base_dir, exist_ok=True)
     
     # 1. Workspace / Output Directory Writability
     if not os.access(base_dir, os.W_OK):

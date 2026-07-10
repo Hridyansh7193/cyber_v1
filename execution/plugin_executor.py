@@ -1,5 +1,7 @@
 import os
+import json
 import tempfile
+import concurrent.futures
 from schemas import tool_result
 from typing import Tuple, List, Any
 from schemas.tool_result import ToolResult
@@ -122,110 +124,160 @@ class PluginExecutor:
                     unique_targets = max_targets
                     current_target = original_target_list if plugin.metadata().supports_multi_input else original_target_list
                     
+            # Chunk-Level Resume offsets
+            plugin_name = plugin.metadata().name
+            offset_path = ""
+            start_chunk_idx = 0
+            if state.target.session_id:
+                offset_path = os.path.join("workspaces", state.target.domain, "sessions", state.target.session_id, "plugin_offsets.json")
+                if os.path.exists(offset_path):
+                    try:
+                        with open(offset_path, "r", encoding="utf-8") as f:
+                            offsets = json.load(f)
+                            start_chunk_idx = offsets.get(plugin_name, 0)
+                            if start_chunk_idx > 0:
+                                logger.info(f"Resuming {plugin_name} from chunk {start_chunk_idx}")
+                    except Exception:
+                        pass
+                        
+            chunk_size = 50
+            if hasattr(config, "execution_budget") and hasattr(config.execution_budget, "chunk_size"):
+                chunk_size = config.execution_budget.chunk_size
+                
+            max_workers = 1
+            if hasattr(config, "execution_budget") and hasattr(config.execution_budget, "max_workers"):
+                max_workers = config.execution_budget.max_workers
+                
+            target_chunks = [original_target_list[i:i + chunk_size] for i in range(0, len(original_target_list), chunk_size)]
+            
             # Auth header injection
             if config.auth.headers:
                 supported_auth_tools = {"httpx", "nuclei", "dalfox", "ffuf", "katana"}
-                if plugin.metadata().name in supported_auth_tools:
+                if plugin_name in supported_auth_tools:
                     for header in config.auth.headers:
                         final_command.extend(["-H", header])
             
-            # For tools that can natively handle a list of targets (like nuclei with -l), pass the list.
-            # Otherwise, iterate.
             native_multi = {"nuclei", "dalfox", "httpx", "subzy", "katana"}
-            
-            final_commands = []
-            temp_path = None
             
             timeout_override = None
             if hasattr(config, "timeouts"):
-                plugin_name = plugin.metadata().name
                 if hasattr(config.timeouts, f"{plugin_name}_timeout"):
                     timeout_override = getattr(config.timeouts, f"{plugin_name}_timeout")
                 elif hasattr(config.timeouts, "global_timeout"):
                     timeout_override = getattr(config.timeouts, "global_timeout")
             
-            if isinstance(current_target, list) and plugin.metadata().name not in native_multi:
-                for t in current_target:
-                    cmd_args = plugin.build_command(state,
-                        {
-                            "tool_manager": state.runtime_context.tool_manager if state.runtime_context else None,
-                            "wordlist_manager": state.runtime_context.wordlist_manager if state.runtime_context else None,
-                            "config": config,
-                        },
-                        target=t
-                    )
-                    if cmd_args:
-                        final_commands.append(list(final_command) + list(cmd_args))
-            else:
-                cmd_args = plugin.build_command(state,
-                    {
-                        "tool_manager": state.runtime_context.tool_manager if state.runtime_context else None,
-                        "wordlist_manager": state.runtime_context.wordlist_manager if state.runtime_context else None,
-                        "config": config,
-                    },
-                    target=current_target
-                )
-                if cmd_args:
-                    final_commands.append(list(final_command) + list(cmd_args))
-                    for arg in cmd_args:
-                        if isinstance(arg, str) and (arg.startswith(tempfile.gettempdir()) or "/tmp" in arg):
-                            if os.path.exists(arg):
-                                temp_path = arg
-                                break
-            
-            if not final_commands:
-                logger.info(f"Skipping {plugin.metadata().name}: build_command returned empty arguments.")
-                continue
-
             merged_stdout = ""
             merged_stderr = ""
             merged_exit = 0
             merged_time = 0.0
             last_cmd = ""
             
-            total_commands = len(final_commands)
             plugin_start_time = time.time()
             
-            # Phase 0 Instrumentation Logging (PRE-EXECUTION)
             logger.info("=" * 80)
-            logger.info(f"Plugin: {plugin.metadata().name}")
+            logger.info(f"Plugin: {plugin_name}")
             logger.info(f"Received Targets : {received_count}")
             logger.info(f"Unique Targets   : {unique_targets}")
-            logger.info(f"Executed Targets : {total_commands}")
+            logger.info(f"Total Chunks     : {len(target_chunks)}")
+            if start_chunk_idx > 0:
+                logger.info(f"Resuming From    : Chunk {start_chunk_idx}")
             logger.info("=" * 80)
             
-            for idx, cmd in enumerate(final_commands, 1):
+            def process_command(cmd, idx, total, t_path=None):
                 cmd_start_time = time.time()
                 elapsed_total = int(cmd_start_time - plugin_start_time)
+                logger.info(f"[{plugin_name.upper()}] Command {idx} / {total} | Elapsed: {elapsed_total}s")
                 
-                # Phase 0.5 Progress Update
-                logger.info(f"[{plugin.metadata().name.upper()}] Target {idx} / {total_commands} | Elapsed: {elapsed_total}s")
-                
-                result = ProcessRunner.run(cmd, plugin.metadata().name, timeout=timeout_override)
-                merged_stdout += result.stdout + "\n"
-                if result.stderr:
-                    merged_stderr += result.stderr + "\n"
-                merged_exit = result.exit_code if result.exit_code != 0 else merged_exit
-                merged_time += result.execution_time
+                result = ProcessRunner.run(cmd, plugin_name, timeout=timeout_override)
                 sanitized_cmd = [arg if not (isinstance(arg, str) and (arg.startswith(tempfile.gettempdir()) or "/tmp" in arg)) else "/tmp/target_list" for arg in cmd]
-                last_cmd = " ".join(map(str, sanitized_cmd))
-            
-            avg_time = merged_time / total_commands if total_commands > 0 else 0
-            # Phase 0 Instrumentation Logging (POST-EXECUTION)
-            logger.info("=" * 80)
-            logger.info(f"Plugin: {plugin.metadata().name} - FINISHED")
-            logger.info(f"Runtime          : {merged_time:.2f} sec")
-            logger.info(f"Average          : {avg_time:.2f} sec")
-            logger.info("=" * 80)
-            
+                cmd_str = " ".join(map(str, sanitized_cmd))
+                
+                if t_path:
+                    try:
+                        os.remove(t_path)
+                    except OSError:
+                        pass
+                        
+                return result, cmd_str
+
+            for chunk_idx, chunk in enumerate(target_chunks):
+                if chunk_idx < start_chunk_idx:
+                    continue
+                    
+                final_commands = []
+                temp_paths = []
+                
+                if plugin_name not in native_multi:
+                    for t in chunk:
+                        cmd_args = plugin.build_command(state,
+                            {
+                                "tool_manager": state.runtime_context.tool_manager if state.runtime_context else None,
+                                "wordlist_manager": state.runtime_context.wordlist_manager if state.runtime_context else None,
+                                "config": config,
+                            },
+                            target=t
+                        )
+                        if cmd_args:
+                            final_commands.append(list(final_command) + list(cmd_args))
+                            temp_paths.append(None)
+                else:
+                    cmd_args = plugin.build_command(state,
+                        {
+                            "tool_manager": state.runtime_context.tool_manager if state.runtime_context else None,
+                            "wordlist_manager": state.runtime_context.wordlist_manager if state.runtime_context else None,
+                            "config": config,
+                        },
+                        target=chunk
+                    )
+                    if cmd_args:
+                        final_commands.append(list(final_command) + list(cmd_args))
+                        t_path = None
+                        for arg in cmd_args:
+                            if isinstance(arg, str) and (arg.startswith(tempfile.gettempdir()) or "/tmp" in arg):
+                                if os.path.exists(arg):
+                                    t_path = arg
+                                    break
+                        temp_paths.append(t_path)
+                        
+                if not final_commands:
+                    continue
+                    
+                total_commands = len(final_commands)
+                
+                with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+                    futures = [
+                        executor.submit(process_command, cmd, i+1, total_commands, temp_paths[i])
+                        for i, cmd in enumerate(final_commands)
+                    ]
+                    for future in concurrent.futures.as_completed(futures):
+                        try:
+                            result, cmd_str = future.result()
+                            merged_stdout += result.stdout + "\n"
+                            if result.stderr:
+                                merged_stderr += result.stderr + "\n"
+                            merged_exit = result.exit_code if result.exit_code != 0 else merged_exit
+                            merged_time += result.execution_time
+                            last_cmd = cmd_str
+                        except Exception as e:
+                            merged_stderr += f"Execution error: {e}\n"
+                            merged_exit = 1
+                
+                # Save chunk offset
+                if offset_path:
+                    try:
+                        os.makedirs(os.path.dirname(offset_path), exist_ok=True)
+                        offsets = {}
+                        if os.path.exists(offset_path):
+                            with open(offset_path, "r", encoding="utf-8") as f:
+                                offsets = json.load(f)
+                        offsets[plugin_name] = chunk_idx + 1
+                        with open(offset_path, "w", encoding="utf-8") as f:
+                            json.dump(offsets, f)
+                    except Exception as e:
+                        logger.warning(f"Failed to save plugin offset: {e}")
+                        
             from execution.utils.process_runner import ProcessResult
             result = ProcessResult(exit_code=merged_exit, stdout=merged_stdout, stderr=merged_stderr, execution_time=merged_time, binary_path=binary_path, command=last_cmd, cwd=os.getcwd(), error_message="")
-
-            if temp_path:
-                try:
-                    os.remove(temp_path)
-                except OSError:
-                    pass
             logger.info(f"EXIT CODE : {result.exit_code}")
             logger.info("STDOUT:")
             logger.info(result.stdout)
@@ -251,10 +303,8 @@ class PluginExecutor:
                 except Exception as e:
                     logger.error(f"Failed to write evidence for {plugin.metadata().name}: {e}")
                     
-                # Full telemetry directory logging
-                telemetry_dir = os.path.join("workspaces", target_str, "sessions", state.target.session_id, "telemetry", plugin.metadata().name)
+                telemetry_dir = os.path.join("workspaces", target_str, "sessions", state.target.session_id, "telemetry", plugin_name)
                 os.makedirs(telemetry_dir, exist_ok=True)
-                import json
                 try:
                     with open(os.path.join(telemetry_dir, "stdout.txt"), "w", encoding="utf-8") as f:
                         f.write(result.stdout)
@@ -268,7 +318,7 @@ class PluginExecutor:
                             "runtime": result.execution_time
                         }, f, indent=2)
                 except Exception as e:
-                    logger.error(f"Failed to write telemetry for {plugin.metadata().name}: {e}")
+                    logger.error(f"Failed to write telemetry for {plugin_name}: {e}")
             
             parsed = []
             errors = []
@@ -290,11 +340,10 @@ class PluginExecutor:
                 
             if state.target.session_id:
                 target_str = state.target.domain
-                telemetry_dir = os.path.join("workspaces", target_str, "sessions", state.target.session_id, "telemetry", plugin.metadata().name)
+                telemetry_dir = os.path.join("workspaces", target_str, "sessions", state.target.session_id, "telemetry", plugin_name)
                 try:
                     with open(os.path.join(telemetry_dir, "parsed.json"), "w", encoding="utf-8") as f:
                         # Pydantic models might be in parsed, serialize cautiously
-                        import json
                         def default_serializer(obj):
                             if hasattr(obj, "model_dump"): return obj.model_dump()
                             if hasattr(obj, "__dict__"): return obj.__dict__

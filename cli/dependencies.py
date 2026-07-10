@@ -20,6 +20,7 @@ def _create_default_config() -> BugHunterConfig:
 
 registry = JobRegistry()
 default_config = _create_default_config()
+
 adapter = OrchestratorAdapter(registry, default_config)
 
 persistence_service = PersistenceService()

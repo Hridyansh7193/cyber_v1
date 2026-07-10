@@ -1,11 +1,16 @@
+import os
 from langgraph.checkpoint.sqlite import SqliteSaver
 import sqlite3
 
 class CheckpointManager:
     def __init__(self, db_path: str = ":memory:"):
+        if db_path != ":memory:":
+            os.makedirs(os.path.dirname(os.path.abspath(db_path)), exist_ok=True)
+            
         # Hidden SqliteSaver internally
         self.conn = sqlite3.connect(db_path, check_same_thread=False)
         self._saver = SqliteSaver(self.conn)
+        self._saver.setup()
 
     def get_saver(self):
         return self._saver
@@ -20,3 +25,4 @@ class CheckpointManager:
     def clear(self):
         # Cleanup
         self.conn.close()
+
