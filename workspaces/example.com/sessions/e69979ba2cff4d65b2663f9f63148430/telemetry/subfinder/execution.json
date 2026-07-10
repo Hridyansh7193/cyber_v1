@@ -1,0 +1,8 @@
+{
+  "command": "subfinder -silent -json -d example.com",
+  "arguments": [
+    "subfinder"
+  ],
+  "exit_code": 0,
+  "runtime": 1.0
+}

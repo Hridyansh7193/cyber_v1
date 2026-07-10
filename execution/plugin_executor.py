@@ -8,6 +8,7 @@ from config.schemas import BugHunterConfig
 from execution.plugins.registry import REGISTRY
 from execution.plugins.base import ExecutionPlugin
 from execution.utils.process_runner import ProcessRunner
+from execution.utils.timeout_manager import TimeoutManager
 from execution.constants import METADATA_SCHEMA_VERSION
 import time
 from utils.logger import get_logger
@@ -202,6 +203,17 @@ class PluginExecutor:
             for chunk_idx, chunk in enumerate(target_chunks):
                 if chunk_idx < start_chunk_idx:
                     continue
+                
+                # Per-plugin runtime budget: abort if this plugin has been running too long
+                plugin_elapsed = time.time() - plugin_start_time
+                plugin_budget = timeout_override if timeout_override else TimeoutManager.get_timeout(plugin_name)
+                # Give the plugin at most 2x its per-command timeout as total budget
+                plugin_total_budget = plugin_budget * 2
+                if plugin_elapsed > plugin_total_budget:
+                    logger.warning(f"Plugin {plugin_name} exceeded total runtime budget ({int(plugin_elapsed)}s > {plugin_total_budget}s). Aborting remaining chunks.")
+                    merged_stderr += f"Plugin {plugin_name} aborted: exceeded total runtime budget of {plugin_total_budget}s\n"
+                    merged_exit = -1
+                    break
                     
                 final_commands = []
                 temp_paths = []
@@ -243,23 +255,38 @@ class PluginExecutor:
                     
                 total_commands = len(final_commands)
                 
-                with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-                    futures = [
-                        executor.submit(process_command, cmd, i+1, total_commands, temp_paths[i])
-                        for i, cmd in enumerate(final_commands)
-                    ]
-                    for future in concurrent.futures.as_completed(futures):
-                        try:
-                            result, cmd_str = future.result()
-                            merged_stdout += result.stdout + "\n"
-                            if result.stderr:
-                                merged_stderr += result.stderr + "\n"
-                            merged_exit = result.exit_code if result.exit_code != 0 else merged_exit
-                            merged_time += result.execution_time
-                            last_cmd = cmd_str
-                        except Exception as e:
-                            merged_stderr += f"Execution error: {e}\n"
-                            merged_exit = 1
+                try:
+                    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+                        futures = []
+                        for i, cmd in enumerate(final_commands):
+                            try:
+                                futures.append(
+                                    executor.submit(process_command, cmd, i+1, total_commands, temp_paths[i])
+                                )
+                            except RuntimeError as e:
+                                # Interpreter shutdown or executor already closed
+                                logger.warning(f"Could not submit command {i+1}/{total_commands} for {plugin_name}: {e}")
+                                merged_stderr += f"Executor shutdown during {plugin_name}: {e}\n"
+                                merged_exit = 1
+                                break
+                        for future in concurrent.futures.as_completed(futures):
+                            try:
+                                result, cmd_str = future.result()
+                                merged_stdout += result.stdout + "\n"
+                                if result.stderr:
+                                    merged_stderr += result.stderr + "\n"
+                                merged_exit = result.exit_code if result.exit_code != 0 else merged_exit
+                                merged_time += result.execution_time
+                                last_cmd = cmd_str
+                            except Exception as e:
+                                merged_stderr += f"Execution error: {e}\n"
+                                merged_exit = 1
+                except RuntimeError as e:
+                    # Catch "cannot schedule new futures after interpreter shutdown"
+                    logger.error(f"ThreadPoolExecutor RuntimeError for {plugin_name}: {e}")
+                    merged_stderr += f"Executor shutdown: {e}\n"
+                    merged_exit = 1
+                    break
                 
                 # Save chunk offset
                 if offset_path:
