@@ -18,7 +18,10 @@ class ToolResult(BaseModel):
     received_count: int = 1
     errors: Tuple[str, ...] = Field(default_factory=tuple)
     error_message: Optional[str] = None
+    failure_category: Optional[str] = None # CONFIGURATION, NETWORK, TIMEOUT, PARSER, RATE_LIMIT, AUTH, TOOL, DEPENDENCY, UNKNOWN
     execution_time: float = Field(ge=0.0)
+    completed_targets: int = 0
+    remaining_targets: int = 0
     raw_output_path: Optional[str] = None
     parsed_output: Tuple[Any, ...] = Field(default_factory=tuple)
     metadata_schema_version: int = 1

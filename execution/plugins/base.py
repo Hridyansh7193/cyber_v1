@@ -14,6 +14,11 @@ class PluginMetadata(BaseModel):
     supported_tools: Tuple[str, ...]
     minimum_version: str | None = None
     recommended_version: str | None = None
+    supported_versions: str | None = None
+    required_flags: Tuple[str, ...] = tuple()
+    target_eligibility: Tuple[str, ...] = tuple() # e.g., 'domain', 'url', 'js', 'api'
+    supports_multi_input: bool = False
+    supports_resume: bool = False
 
 class PluginValidator(ABC):
     @abstractmethod
@@ -52,6 +57,10 @@ class BaseExecutionPlugin(ExecutionPlugin, ABC):
         return bool(state.target.domain)
 
     def health_check(self) -> bool:
+        return True
+        
+    def is_candidate(self, target: Any) -> bool:
+        """Determines if a given target is eligible for this plugin."""
         return True
     
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:

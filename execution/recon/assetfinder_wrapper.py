@@ -12,8 +12,14 @@ class AssetfinderWrapper(BaseExecutionPlugin):
             description="Subdomain discovery via assetfinder",
             capabilities=(Capability.PASSIVE_RECON, Capability.DNS),
             minimum_version="0.0.1",
-            supported_tools=("assetfinder",)
+            supported_tools=("assetfinder",),
+            target_eligibility=("domain",),
+            supports_multi_input=False
         )
+
+    def is_candidate(self, target: Any) -> bool:
+        t = str(target).lower()
+        return not t.startswith("http://") and not t.startswith("https://") and "/" not in t
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
         cmd = ["--subs-only"]

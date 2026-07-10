@@ -13,8 +13,15 @@ class TrufflehogWrapper(BaseExecutionPlugin):
             description="Secret leakage detection",
             capabilities=(Capability.SECRETS,),
             minimum_version="0.0.1",
-            supported_tools=("trufflehog",)
+            supported_tools=("trufflehog",),
+            target_eligibility=("js_files", "urls"),
+            supports_multi_input=False
         )
+
+    def is_candidate(self, target: Any) -> bool:
+        t = str(target).lower()
+        path = t.split("?")[0]
+        return path.endswith(".js")
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
         # Target here could be a repo or a file path

@@ -13,8 +13,14 @@ class NucleiPlugin(BaseExecutionPlugin):
             description="Vulnerability scanning",
             capabilities=(Capability.VULN, Capability.HTTP),
             minimum_version="0.0.1",
-            supported_tools=("nuclei",)
+            supported_tools=("nuclei",),
+            target_eligibility=("urls", "alive_hosts", "endpoints"),
+            supports_multi_input=True
         )
+
+    def is_candidate(self, target: Any) -> bool:
+        t = str(target).lower()
+        return t.startswith("http://") or t.startswith("https://")
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
         cmd = ["-silent"]
@@ -34,6 +40,19 @@ class NucleiPlugin(BaseExecutionPlugin):
         
         # Optional: Add severity filter (allow low and info so they show up)
         cmd.extend(["-severity", "critical,high,medium,low,info"])
+        
+        # Dynamic performance profile
+        bughunter_config = config.get("config")
+        if bughunter_config and hasattr(bughunter_config, "profile"):
+            profile_name = bughunter_config.profile.value
+            if profile_name == "light":
+                cmd.extend(["-c", "20", "-rl", "50"])
+            elif profile_name == "aggressive":
+                cmd.extend(["-c", "100", "-rl", "300"])
+            else: # balanced
+                cmd.extend(["-c", "50", "-rl", "150"])
+        else:
+            cmd.extend(["-c", "50", "-rl", "150"])
 
         if isinstance(target, list):
             import tempfile, os

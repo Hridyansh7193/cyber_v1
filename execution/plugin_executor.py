@@ -66,60 +66,41 @@ class PluginExecutor:
             # Auto-extract target from state if not provided
             current_target = target
             if current_target is None:
-                if plugin.metadata().name in ["subfinder", "assetfinder", "gau"]:
-                    current_target = state.target.domain
-                elif plugin.metadata().name in ["httpx"]:
-                    current_target = list(state.recon_state.subdomains) if state.recon_state.subdomains else state.target.domain
-                elif plugin.metadata().name in ["katana"]:
-                    current_target = list(state.recon_state.alive_hosts) if state.recon_state.alive_hosts else state.target.resolved_url or state.target.domain
-                elif plugin.metadata().name in ["nuclei", "subzy"]:
-                    # Vuln plugins act on URLs or endpoints
-                    urls = set(state.recon_state.urls)
-                    # Note: JS endpoints might be relative, ideally we'd make them absolute. 
-                    # For now, we only pass valid URLs to avoid breaking tools.
-                    valid_urls = {u for u in urls if u.startswith("http")}
-                    current_target = list(valid_urls) if valid_urls else list(state.recon_state.alive_hosts) if state.recon_state.alive_hosts else state.target.resolved_url or state.target.domain
-                elif plugin.metadata().name == "ffuf":
-                    # FFUF should typically fuzz the base domain/URL, not every discovered endpoint
-                    current_target = list(state.recon_state.alive_hosts)[0] if state.recon_state.alive_hosts else state.target.resolved_url or state.target.domain
-                elif plugin.metadata().name == "dalfox":
-                    # Dalfox should target discovered parameters or URLs to minimize noise
-                    current_target = sorted(list(state.recon_state.parameters)) if state.recon_state.parameters else (sorted(list(state.recon_state.urls)) if state.recon_state.urls else None)
-                elif plugin.metadata().name in ["linkfinder", "secretfinder", "trufflehog"]:
-                    # JS plugins need JS files. Extract JS files directly from recon_state.urls if js_files is empty
-                    js_files = sorted(list(state.js_state.js_files)) if state.js_state.js_files else []
-                    if not js_files and hasattr(state, 'recon_state'):
-                        raw_urls = state.recon_state.urls
-                        js_files = sorted([u for u in raw_urls if u.split('?')[0].lower().endswith('.js')])
-                    current_target = js_files if js_files else None
-                elif plugin.metadata().name in ["swagger_discovery", "graphql_discovery", "swagger", "graphql"]:
-                    endpoints = sorted(list(state.js_state.endpoints)) if hasattr(state, 'js_state') else []
-                    raw_urls = sorted(list(state.recon_state.urls)) if hasattr(state, 'recon_state') else []
+                eligibility = plugin.metadata().target_eligibility
+                candidate_pool = set()
+                
+                if "domain" in eligibility:
+                    candidate_pool.add(state.target.domain)
+                if "subdomains" in eligibility and hasattr(state, "recon_state"):
+                    candidate_pool.update(state.recon_state.subdomains)
+                if "alive_hosts" in eligibility and hasattr(state, "recon_state"):
+                    candidate_pool.update(state.recon_state.alive_hosts)
+                if "urls" in eligibility and hasattr(state, "recon_state"):
+                    candidate_pool.update(state.recon_state.urls)
+                if "parameters" in eligibility and hasattr(state, "recon_state"):
+                    candidate_pool.update(state.recon_state.parameters)
+                if "js_files" in eligibility and hasattr(state, "js_state"):
+                    candidate_pool.update(state.js_state.js_files)
+                if "endpoints" in eligibility and hasattr(state, "js_state"):
+                    candidate_pool.update(state.js_state.endpoints)
                     
-                    # Target Eligibility Matrix: Strictly additive filtering for API candidates
-                    filtered_urls = []
-                    api_keywords = ["api", "graphql", "swagger", "rest", "json", "v1", "v2", "v3", "gql"]
-                    static_exts = (".css", ".js", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".woff", ".woff2", ".ttf", ".eot", ".ico", ".html", ".htm", ".php", ".asp", ".aspx", ".jsp")
-                    
-                    for u in raw_urls:
-                        u_lower = u.lower()
-                        path_part = u_lower.split("?")[0]
-                        
-                        # Exclude static assets and traditional web pages unless they explicitly contain API keywords
-                        if any(path_part.endswith(ext) for ext in static_exts) and not any(kw in u_lower for kw in api_keywords):
-                            continue
-                            
-                        # Strict inclusion: Only allow if it contains an API keyword in the path
-                        if any(kw in path_part for kw in api_keywords):
-                            filtered_urls.append(u)
-                            
-                    current_target = endpoints + filtered_urls if (endpoints or filtered_urls) else None
-                else:
-                    # Generic fallback
-                    if state.recon_state.alive_hosts:
-                        current_target = sorted(list(state.recon_state.alive_hosts))[0]
+                # If no specific eligibility is defined, fallback to sensible defaults
+                if not eligibility:
+                    if plugin.metadata().name in ["subfinder", "assetfinder", "gau"]:
+                        candidate_pool.add(state.target.domain)
+                    elif hasattr(state, "recon_state") and state.recon_state.alive_hosts:
+                        candidate_pool.add(list(state.recon_state.alive_hosts)[0])
                     else:
-                        current_target = state.target.resolved_url or state.target.domain
+                        candidate_pool.add(state.target.resolved_url or state.target.domain)
+
+                # Filter pool using wrapper's smart target selection
+                filtered_pool = [t for t in candidate_pool if plugin.is_candidate(t)]
+                
+                # Sort for deterministic execution
+                if filtered_pool:
+                    current_target = sorted(list(set(filtered_pool)))
+                else:
+                    current_target = None
             
             # If a list was resolved but it is empty, skip execution to prevent hanging tools
             if current_target is None or (isinstance(current_target, (list, tuple, set)) and not current_target):
@@ -129,7 +110,18 @@ class PluginExecutor:
             original_target_list = current_target if isinstance(current_target, (list, tuple, set)) else [current_target]
             received_count = len(original_target_list)
             unique_targets = len(set(original_target_list))
-                        
+            
+            # ---------------------------------------------------------
+            # Execution Budget Manager: Enforce target limits
+            # ---------------------------------------------------------
+            if hasattr(config, "execution_budget") and config.execution_budget:
+                max_targets = config.execution_budget.max_targets_per_plugin
+                if unique_targets > max_targets:
+                    logger.warning(f"Plugin {plugin.metadata().name} received {unique_targets} targets, exceeding budget of {max_targets}. Truncating.")
+                    original_target_list = list(set(original_target_list))[:max_targets]
+                    unique_targets = max_targets
+                    current_target = original_target_list if plugin.metadata().supports_multi_input else original_target_list
+                    
             # Auth header injection
             if config.auth.headers:
                 supported_auth_tools = {"httpx", "nuclei", "dalfox", "ffuf", "katana"}
@@ -331,6 +323,23 @@ class PluginExecutor:
 
             success = result.success and len(errors) == 0
                 
+            failure_category = None
+            if not success:
+                # Basic failure classification based on the errors array and exit code
+                err_text = (" ".join(errors) + " " + result.stderr + " " + (result.error_message or "")).lower()
+                if "timeout" in err_text or "timed out" in err_text:
+                    failure_category = "TIMEOUT"
+                elif "error: invalid input" in err_text or "usage:" in err_text or "flag provided but not defined" in err_text:
+                    failure_category = "CLI"
+                elif "network" in err_text or "connection" in err_text or "i/o timeout" in err_text or "ssl error" in err_text or "max retries" in err_text:
+                    failure_category = "NETWORK"
+                elif "parse" in err_text or "json" in err_text:
+                    failure_category = "PARSER"
+                elif result.exit_code == -2:
+                    failure_category = "DEPENDENCY"
+                else:
+                    failure_category = "UNKNOWN"
+
             tool_res = ToolResult(
                 tool_name=plugin.metadata().name,
                 plugin_version=plugin.metadata().version,
@@ -346,6 +355,7 @@ class PluginExecutor:
                 received_count=received_count,
                 errors=tuple(errors),
                 error_message=result.error_message if result.error_message else None,
+                failure_category=failure_category,
                 execution_time=result.execution_time,
                 parsed_output=parsed_tuple,
                 metadata_schema_version=METADATA_SCHEMA_VERSION,

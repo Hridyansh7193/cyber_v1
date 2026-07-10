@@ -14,7 +14,8 @@ def scan_cmd(
     domain: str, 
     config: str = typer.Option(None, help="Path to config file"),
     header: list[str] = typer.Option(None, "--header", "-H", help="Custom headers (e.g. 'Cookie: session=123')"),
-    resume: str = typer.Option(None, "--resume", help="Resume an interrupted scan given its session ID")
+    resume: str = typer.Option(None, "--resume", help="Resume an interrupted scan given its session ID"),
+    profile: str = typer.Option("balanced", "--profile", help="Performance profile (light, balanced, aggressive, custom)")
 ):
     """Start a new scan or resume an interrupted one."""
     cfg = default_config
@@ -29,6 +30,15 @@ def scan_cmd(
         # Pydantic models with frozen=True require model_copy(update=...)
         new_auth = cfg.auth.model_copy(update={"headers": list(header)})
         cfg = cfg.model_copy(update={"auth": new_auth})
+        
+    if profile:
+        from config.schemas import PerformanceProfile
+        try:
+            profile_enum = PerformanceProfile(profile.lower())
+            cfg = cfg.model_copy(update={"profile": profile_enum})
+        except ValueError:
+            console.print(f"[red]Invalid profile:[/red] {profile}. Valid options: light, balanced, aggressive, custom")
+            raise typer.Exit(code=2)
                 
     try:
         job_id = scan_service.submit_scan(domain, cfg, resume_session_id=resume)
@@ -39,6 +49,9 @@ def scan_cmd(
         if status and status["status"] == "failed":
             console.print(f"[red]Scan failed:[/red] {status.get('error')}")
             raise typer.Exit(code=1)
+            
+        from cli.dashboard import render_final_dashboard
+        render_final_dashboard(job_id)
             
     except ValueError as e:
         console.print(f"[red]Validation Error:[/red] {e}")

@@ -45,6 +45,21 @@ class ResourceLimitsConfig(BaseModel):
     max_urls: int = 50000
     max_findings: int = 1000
 
+from enum import Enum
+
+class PerformanceProfile(str, Enum):
+    LIGHT = "light"
+    BALANCED = "balanced"
+    AGGRESSIVE = "aggressive"
+    CUSTOM = "custom"
+
+class ExecutionBudget(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    max_runtime_seconds: int = 3600
+    max_targets_per_plugin: int = 5000
+    max_retries: int = 3
+    max_failures: int = 100
+
 class AuthConfig(BaseModel):
     model_config = ConfigDict(frozen=True)
     headers: List[str] = []
@@ -59,3 +74,5 @@ class BugHunterConfig(BaseModel):
     reporting: ReportingConfig
     resource_limits: ResourceLimitsConfig = ResourceLimitsConfig()
     auth: AuthConfig = AuthConfig()
+    execution_budget: ExecutionBudget = ExecutionBudget()
+    profile: PerformanceProfile = PerformanceProfile.BALANCED

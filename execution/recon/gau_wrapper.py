@@ -12,8 +12,14 @@ class GauWrapper(BaseExecutionPlugin):
             description="Historical URL discovery",
             capabilities=(Capability.PASSIVE_RECON, Capability.HTTP),
             minimum_version="0.0.1",
-            supported_tools=("gau",)
+            supported_tools=("gau",),
+            target_eligibility=("domain",),
+            supports_multi_input=False
         )
+
+    def is_candidate(self, target: Any) -> bool:
+        t = str(target).lower()
+        return not t.startswith("http://") and not t.startswith("https://") and "/" not in t
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
         cmd = ["--json"]

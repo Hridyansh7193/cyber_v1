@@ -13,8 +13,15 @@ class SecretFinderWrapper(BaseExecutionPlugin):
             description="Find secrets in JS files",
             capabilities=(Capability.JS, Capability.SECRETS),
             minimum_version="0.0.1",
-            supported_tools=("secretfinder",)
+            supported_tools=("secretfinder",),
+            target_eligibility=("js_files", "urls"),
+            supports_multi_input=False
         )
+
+    def is_candidate(self, target: Any) -> bool:
+        t = str(target).lower()
+        path = t.split("?")[0]
+        return path.endswith(".js")
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
         cmd = []
@@ -32,13 +39,24 @@ class SecretFinderWrapper(BaseExecutionPlugin):
         cmd.extend(["-o", "cli"])
         return tuple(cmd)
 
-    def parse(self, stdout: str, stderr: str) -> List[str]:
+    def parse(self, stdout: str, stderr: str) -> tuple:
         results = []
+        errors = []
+        
+        # Check for logical errors first
+        combined_output = (stdout + "\n" + stderr).lower()
+        if "max retries exceeded" in combined_output or "connectiontimeout" in combined_output or "error" in combined_output:
+            for line in combined_output.splitlines():
+                if "error" in line or "max retries" in line or "timeout" in line:
+                    errors.append(f"Logical error detected: {line.strip()}")
+            if not results: # If we have logical errors and no results, it's a failure
+                return [], errors
+
         for line in stdout.splitlines():
             line = line.strip()
             if line and " -> " in line:
                 results.append(line)
-        return list(dict.fromkeys(results))
+        return list(dict.fromkeys(results)), errors
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
         return {NEW_SECRETS: parsed}

@@ -13,8 +13,15 @@ class LinkFinderWrapper(BaseExecutionPlugin):
             description="Extract endpoints via LinkFinder",
             capabilities=(Capability.JS,),
             minimum_version="0.0.1",
-            supported_tools=("linkfinder",)
+            supported_tools=("linkfinder",),
+            target_eligibility=("js_files", "urls"),
+            supports_multi_input=False
         )
+
+    def is_candidate(self, target: Any) -> bool:
+        t = str(target).lower()
+        path = t.split("?")[0]
+        return path.endswith(".js")
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
         cmd = []
@@ -39,6 +46,16 @@ class LinkFinderWrapper(BaseExecutionPlugin):
         lines = OutputParser.parse_lines(stdout)
         results = []
         errors = []
+        
+        # Check for logical errors first
+        combined_output = (stdout + "\n" + stderr).lower()
+        if "invalid input" in combined_output or "error" in combined_output or "timed out" in combined_output:
+            for line in combined_output.splitlines():
+                if "error" in line or "timed out" in line or "invalid input" in line:
+                    errors.append(f"Logical error detected: {line.strip()}")
+            if not results: # If we have logical errors and no results, it's a failure
+                return [], errors
+
         for line in lines:
             if line.startswith("[+]") or line.startswith("Running") or line.startswith("Invalid input") or line.startswith("URL:") or line.startswith("BANNER"):
                 continue

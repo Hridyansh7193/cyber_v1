@@ -12,12 +12,18 @@ class KatanaPlugin(BaseExecutionPlugin):
             version="1.1.0",
             description="Web crawling",
             capabilities=(Capability.RECON, Capability.HTTP),
-            minimum_version="0.0.1",
-            supported_tools=("katana",)
+            minimum_version="1.0.0",
+            supported_tools=("katana",),
+            target_eligibility=("alive_hosts", "domain", "urls"),
+            supports_multi_input=True
         )
 
+    def is_candidate(self, target: Any) -> bool:
+        t = str(target).lower()
+        return t.startswith("http://") or t.startswith("https://")
+
     def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
-        cmd = ["-silent", "-json"]
+        cmd = ["-silent", "-j"]
         if isinstance(target, list):
             import tempfile, os
             fd, temp_path = tempfile.mkstemp(text=True)

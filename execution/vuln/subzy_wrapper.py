@@ -13,8 +13,14 @@ class SubzyPlugin(BaseExecutionPlugin):
             description="Subdomain takeover detection via subzy",
             capabilities=(Capability.VULN, Capability.DNS),
             minimum_version="0.0.1",
-            supported_tools=("subzy",)
+            supported_tools=("subzy",),
+            target_eligibility=("subdomains", "domain", "alive_hosts"),
+            supports_multi_input=True
         )
+
+    def is_candidate(self, target: Any) -> bool:
+        t = str(target).lower()
+        return not t.startswith("http://") and not t.startswith("https://") and "/" not in t
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
         cmd = ["run", "--hide_fails"]
@@ -31,6 +37,16 @@ class SubzyPlugin(BaseExecutionPlugin):
     def parse(self, stdout: str, stderr: str) -> tuple:
         results = []
         errors = []
+        
+        # Check for logical errors first
+        combined_output = (stdout + "\n" + stderr)
+        if "Error: downloadFingerprints" in combined_output or "Usage:" in combined_output:
+            for line in combined_output.splitlines():
+                if "Error:" in line or "Usage:" in line or "timeout" in line.lower():
+                    errors.append(f"Logical error detected: {line.strip()}")
+            if not results: # If we have logical errors and no results, it's a failure
+                return [], errors
+
         try:
             start_idx = stdout.find('[')
             end_idx = stdout.rfind(']')

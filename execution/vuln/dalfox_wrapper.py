@@ -13,8 +13,14 @@ class DalfoxPlugin(BaseExecutionPlugin):
             description="XSS Scanning",
             capabilities=(Capability.VULN, Capability.FUZZING),
             minimum_version="0.0.1",
-            supported_tools=("dalfox",)
+            supported_tools=("dalfox",),
+            target_eligibility=("parameters", "urls"),
+            supports_multi_input=True
         )
+
+    def is_candidate(self, target: Any) -> bool:
+        t = str(target).lower()
+        return "=" in t and (t.startswith("http://") or t.startswith("https://"))
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
         cmd = []
@@ -28,6 +34,20 @@ class DalfoxPlugin(BaseExecutionPlugin):
             cmd.extend(["url", str(target)])
             
         cmd.extend(["--format", "json"])
+        
+        # Dynamic performance profile
+        bughunter_config = config.get("config")
+        if bughunter_config and hasattr(bughunter_config, "profile"):
+            profile_name = bughunter_config.profile.value
+            if profile_name == "light":
+                cmd.extend(["--worker", "50", "--timeout", "5"])
+            elif profile_name == "aggressive":
+                cmd.extend(["--worker", "200", "--timeout", "20"])
+            else: # balanced
+                cmd.extend(["--worker", "100", "--timeout", "10"])
+        else:
+            cmd.extend(["--worker", "100", "--timeout", "10"])
+        
         return tuple(cmd)
 
     def parse(self, stdout: str, stderr: str) -> tuple:

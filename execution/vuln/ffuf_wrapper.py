@@ -13,8 +13,14 @@ class FfufPlugin(BaseExecutionPlugin):
             description="Content discovery via ffuf",
             capabilities=(Capability.FUZZING, Capability.HTTP),
             minimum_version="0.0.1",
-            supported_tools=("ffuf",)
+            supported_tools=("ffuf",),
+            target_eligibility=("alive_hosts", "domain"),
+            supports_multi_input=False
         )
+
+    def is_candidate(self, target: Any) -> bool:
+        # FFUF usually wants a host/domain
+        return True
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
         # PluginExecutor passes config with 'wordlist_manager'
@@ -28,7 +34,19 @@ class FfufPlugin(BaseExecutionPlugin):
         if not wordlist_path and wordlist_mgr:
             wordlist_path = wordlist_mgr.get("common")
             
-        cmd = ["-json", "-t", "50", "-maxtime", "300", "-s"]
+        cmd = ["-json", "-s"]
+        
+        # Dynamic performance profile
+        if bughunter_config and hasattr(bughunter_config, "profile"):
+            profile_name = bughunter_config.profile.value
+            if profile_name == "light":
+                cmd.extend(["-t", "20", "-maxtime", "30"])
+            elif profile_name == "aggressive":
+                cmd.extend(["-t", "100", "-maxtime", "120"])
+            else: # balanced
+                cmd.extend(["-t", "50", "-maxtime", "55"])
+        else:
+            cmd.extend(["-t", "50", "-maxtime", "55"])
         
         # Ensure target has a scheme
         def format_target(t: Any) -> str:

@@ -63,6 +63,17 @@ class ScanService:
         runtime_context.trace.job_id = job_id
         runtime_context.trace.target = domain
         
+        # PRE-FLIGHT CHECK: Environment Validation (Doctor)
+        from runtime.doctor import Doctor
+        doc = Doctor()
+        report = doc.diagnose()
+        
+        if report.summary_fail > 0:
+            error_msg = f"Environment validation failed. Found {report.summary_fail} missing dependencies/tools. Run `bughunter doctor` to see details."
+            logger.error(error_msg)
+            self._registry.update_status(job_id, JobStatus.FAILED, error=error_msg)
+            return job_id
+        
         if self._persistence_service and not is_resume:
             self._persistence_service.create_session(job_id, domain)
             

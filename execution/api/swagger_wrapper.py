@@ -13,8 +13,19 @@ class SwaggerPlugin(BaseExecutionPlugin):
             description="Swagger endpoint discovery",
             capabilities=(Capability.API,),
             minimum_version="0.0.1",
-            supported_tools=("swagger_discover",)
+            supported_tools=("swagger_discover",),
+            target_eligibility=("endpoints", "urls"),
+            supports_multi_input=False
         )
+
+    def is_candidate(self, target: Any) -> bool:
+        t = str(target).lower()
+        path = t.split("?")[0]
+        static_exts = (".css", ".js", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".woff", ".woff2", ".ttf", ".eot", ".ico", ".html", ".htm", ".php", ".asp", ".aspx", ".jsp")
+        api_keywords = ["api", "graphql", "swagger", "rest", "json", "v1", "v2", "v3", "gql"]
+        if any(path.endswith(ext) for ext in static_exts) and not any(kw in t for kw in api_keywords):
+            return False
+        return any(kw in path for kw in api_keywords)
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
         cmd = []

@@ -14,8 +14,14 @@ class ArjunPlugin(ExecutionPlugin):
             description="Parameter discovery",
             capabilities=(Capability.PARAMETER_DISCOVERY,),
             minimum_version="0.0.1",
-            supported_tools=("arjun",)
+            supported_tools=("arjun",),
+            target_eligibility=("endpoints", "urls"),
+            supports_multi_input=True
         )
+
+    def is_candidate(self, target: Any) -> bool:
+        t = str(target).lower()
+        return t.startswith("http://") or t.startswith("https://")
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any]) -> Tuple[str, ...]:
         # Arjun supports -i for file input
