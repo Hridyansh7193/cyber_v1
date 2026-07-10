@@ -1,0 +1,8 @@
+{
+  "command": "/home/akshat/go/bin/gau --json testphp.vulnweb.com",
+  "arguments": [
+    "/home/akshat/go/bin/gau"
+  ],
+  "exit_code": 0,
+  "runtime": 44.744218587875366
+}

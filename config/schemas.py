@@ -60,7 +60,7 @@ class ExecutionBudget(BaseModel):
     max_retries: int = 3
     max_failures: int = 100
     chunk_size: int = 50
-    max_workers: int = 1
+    max_workers: int = 5
 
 class AuthConfig(BaseModel):
     model_config = ConfigDict(frozen=True)

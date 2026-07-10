@@ -55,7 +55,7 @@ class ToolManager:
         import subprocess
         import re
         
-        for flag in ["-version", "--version"]:
+        for flag in ["-version", "--version", "version"]:
             cmd = [path, flag]
             if path.endswith(".py"):
                 cmd = ["python3", path, flag]
@@ -63,7 +63,8 @@ class ToolManager:
                 res = subprocess.run(cmd, capture_output=True, text=True, timeout=2)
                 out = res.stdout + res.stderr
                 if out:
-                    m = re.search(r"v?(\d+\.\d+\.\d+(?:-\w+)?)", out)
+                    # Look for standalone version strings, avoid IPs like 127.0.0.1
+                    m = re.search(r"(?<![\d.])v?(\d+\.\d+\.\d+(?:-\w+)?)(?![\d.])", out)
                     if m:
                         return m.group(1)
             except Exception:
@@ -87,7 +88,8 @@ class ToolManager:
             "graphql_discover": ["graphql_discovery.py", "graphql_discover", "graphql_discover.py"],
             "trufflehog": ["trufflehog"],
             "ffuf": ["ffuf"],
-            "subzy": ["subzy"]
+            "subzy": ["subzy"],
+            "arjun": ["arjun"]
         }
 
         for tool_name, binaries in supported_tools.items():

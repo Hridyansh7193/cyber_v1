@@ -1,0 +1,8 @@
+{
+  "command": "/home/akshat/go/bin/dalfox format json file /tmp/target_list --format json --worker 100 --timeout 10",
+  "arguments": [
+    "/home/akshat/go/bin/dalfox"
+  ],
+  "exit_code": 1,
+  "runtime": 0.09771370887756348
+}

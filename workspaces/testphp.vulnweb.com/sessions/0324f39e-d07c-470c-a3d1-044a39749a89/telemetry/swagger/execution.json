@@ -1,0 +1,9 @@
+{
+  "command": "/home/akshat/Desktop/project/cyber_v1/.venv/bin/python /home/akshat/Desktop/project/cyber_v1/execution/api/swagger_discovery.py -u http://testphp.vulnweb.com/.well-known/assetlinks.json",
+  "arguments": [
+    "/home/akshat/Desktop/project/cyber_v1/.venv/bin/python",
+    "/home/akshat/Desktop/project/cyber_v1/execution/api/swagger_discovery.py"
+  ],
+  "exit_code": 0,
+  "runtime": 252.19341731071472
+}

@@ -1,0 +1,9 @@
+{
+  "command": "/home/akshat/Desktop/project/cyber_v1/.venv/bin/python /home/akshat/tools/LinkFinder/linkfinder.py -o cli -i http://testphp.vulnweb.com/bxss/test.js -o cli",
+  "arguments": [
+    "/home/akshat/Desktop/project/cyber_v1/.venv/bin/python",
+    "/home/akshat/tools/LinkFinder/linkfinder.py"
+  ],
+  "exit_code": 0,
+  "runtime": 80.48525905609131
+}

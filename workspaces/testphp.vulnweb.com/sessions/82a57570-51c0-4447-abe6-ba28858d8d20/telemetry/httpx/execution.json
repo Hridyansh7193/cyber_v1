@@ -1,0 +1,8 @@
+{
+  "command": "/home/akshat/go/bin/httpx -silent -json -title -tech-detect -rt -l /tmp/target_list",
+  "arguments": [
+    "/home/akshat/go/bin/httpx"
+  ],
+  "exit_code": 0,
+  "runtime": 22.515634298324585
+}

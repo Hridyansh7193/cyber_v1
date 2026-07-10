@@ -14,10 +14,10 @@ monitor = get_monitor()
 
 # Safety cap: if passive recon found more than this many URLs, process only the first N.
 # Prevents O(N*M) regex loops from stalling the pipeline for minutes.
-_MAX_URLS_TO_FILTER = 5_000
+_MAX_URLS_TO_FILTER = 2_000
 
 # Timeout for URL filtering (seconds). If taking longer, abort and use partial results.
-_URL_FILTER_TIMEOUT_SEC = 300.0  # 5 minutes
+_URL_FILTER_TIMEOUT_SEC = 60.0  # 1 minute
 
 def _now_iso() -> str:
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
@@ -89,6 +89,8 @@ def scope_enforcement_node(state: NodeResult, config: BugHunterConfig) -> NodeRe
         timeout_at = t_filter_urls + _URL_FILTER_TIMEOUT_SEC
         
         for i, u in enumerate(original_urls):
+            if i >= _MAX_URLS_TO_FILTER:
+                break
             # Check for timeout
             if time.monotonic() > timeout_at:
                 logger.error(
@@ -111,16 +113,21 @@ def scope_enforcement_node(state: NodeResult, config: BugHunterConfig) -> NodeRe
                     f"rate={rate:.0f} URLs/s | ETA={eta_sec:.0f}s"
                 )
             
-            if "://" in u:
+            normalized = str(u).strip()
+            if not normalized:
+                continue
+
+            if "://" in normalized:
                 try:
-                    netloc = urlparse(u).netloc.split(":")[0]
-                    if scope_manager.is_in_scope(netloc):
-                        filtered_urls.append(u)
+                    parsed = urlparse(normalized)
+                    host = parsed.netloc.split(":")[0].lower()
+                    if scope_manager.is_in_scope(host):
+                        filtered_urls.append(normalized)
                 except Exception as parse_err:
-                    logger.warning(f"[SCOPE] Failed to parse URL '{u[:50]}...': {parse_err}")
+                    logger.warning(f"[SCOPE] Failed to parse URL '{normalized[:50]}...': {parse_err}")
             else:
-                if scope_manager.is_in_scope(u):
-                    filtered_urls.append(u)
+                if scope_manager.is_in_scope(normalized):
+                    filtered_urls.append(normalized)
         
         elapsed_urls = time.monotonic() - t_filter_urls
         logger.info(

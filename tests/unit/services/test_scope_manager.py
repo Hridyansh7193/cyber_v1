@@ -31,3 +31,9 @@ def test_filter_targets():
     targets = ["test.com", "api.test.com", "bad.test.com", "other.com"]
     filtered = sm.filter_targets(targets)
     assert filtered == ["test.com", "api.test.com"]
+
+
+def test_normalizes_urls_before_scope_check():
+    sm = ScopeManager(in_scope=["*.example.com", "example.com"])
+    filtered = sm.filter_targets(["https://example.com/path", "https://api.example.com/v1"])
+    assert filtered == ["https://example.com/path", "https://api.example.com/v1"]

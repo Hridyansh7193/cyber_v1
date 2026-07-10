@@ -5,8 +5,8 @@ README.md
 pyproject.toml
 requirements.txt
 agents/__init__.py
-agents/analysis_agent.py
 agents/analyzer.py
+agents/analyzer_agent.py
 agents/api.py
 agents/attack_graph_agent.py
 agents/correlation_agent.py
@@ -15,7 +15,7 @@ agents/planner.py
 agents/planner_agent.py
 agents/prioritizer_agent.py
 agents/recon.py
-agents/reporter.py
+agents/reporter_agent.py
 agents/risk_score_agent.py
 agents/vulnerability.py
 agents/deltas/__init__.py
@@ -36,6 +36,7 @@ cli/__init__.py
 cli/commands.py
 cli/commands_analytics.py
 cli/commands_artifacts.py
+cli/commands_benchmark.py
 cli/commands_config.py
 cli/commands_doctor.py
 cli/commands_jobs.py
@@ -45,7 +46,9 @@ cli/commands_profile.py
 cli/commands_report.py
 cli/commands_search.py
 cli/commands_trace.py
+cli/commands_verify.py
 cli/commands_workspace.py
+cli/dashboard.py
 cli/decorators.py
 cli/dependencies.py
 cli/exit_codes.py
@@ -54,6 +57,7 @@ cli/output_formatter.py
 cli/progress.py
 cli/version.py
 config/__init__.py
+config/compatibility.yaml
 config/loader.py
 config/migration.py
 config/plugins.yaml
@@ -113,6 +117,7 @@ orchestrator/error_handler.py
 orchestrator/execution_coordinator.py
 orchestrator/graph.py
 orchestrator/graph_state.py
+orchestrator/lifecycle_monitor.py
 orchestrator/node_executor.py
 orchestrator/node_result.py
 orchestrator/orchestration_state.py
@@ -135,8 +140,11 @@ orchestrator/nodes/report_node.py
 orchestrator/nodes/scope_enforcement_node.py
 orchestrator/nodes/vulnerability_node.py
 reporting/__init__.py
+reporting/burpxml_renderer.py
+reporting/csv_renderer.py
 reporting/json_renderer.py
 reporting/markdown_renderer.py
+reporting/sarif_renderer.py
 reporting/templates/__init__.py
 reporting/templates/report.md.j2
 runtime/__init__.py
@@ -150,6 +158,7 @@ schemas/attack_graph.py
 schemas/cli_responses.py
 schemas/correlated_finding.py
 schemas/enums.py
+schemas/errors.py
 schemas/finding.py
 schemas/generated_report.py
 schemas/intelligence.py
@@ -169,8 +178,10 @@ schemas/telemetry.py
 schemas/tool_metrics.py
 schemas/tool_result.py
 schemas/trace.py
+schemas/versions.py
 services/__init__.py
 services/analytics_service.py
+services/compatibility.py
 services/job_registry.py
 services/orchestrator_adapter.py
 services/persistence_service.py
@@ -188,6 +199,9 @@ storage/__init__.py
 storage/analytics_repository.py
 storage/database.py
 storage/file_storage.py
+storage/alembic/env.py
+storage/alembic/versions/37018f834149_create_tables.py
+storage/alembic/versions/4e8a4c5e2809_initial_schema.py
 storage/migrations/__init__.py
 storage/models/__init__.py
 storage/repositories/__init__.py

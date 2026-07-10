@@ -13,7 +13,7 @@ class KatanaPlugin(BaseExecutionPlugin):
             capabilities=(Capability.RECON, Capability.HTTP),
             minimum_version="1.0.0",
             supported_tools=("katana",),
-            target_eligibility=("alive_hosts", "domain", "urls"),
+            target_eligibility=("alive_hosts", "domain"),
             supports_multi_input=True
         )
 

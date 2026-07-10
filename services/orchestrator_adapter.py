@@ -129,10 +129,12 @@ class OrchestratorAdapter:
                     if node_name in stages:
                         stage_idx = stages.index(node_name)
                         progress = min(100.0, ((stage_idx + 1) / len(stages)) * 100.0)
+                        next_stage = stages[stage_idx + 1] if stage_idx + 1 < len(stages) else "completing"
                     else:
                         progress = min(100.0, ((i + 1) / len(stages)) * 100.0)
+                        next_stage = node_name
                     
-                    self._job_registry.update_progress(job_id, node_name, progress)
+                    self._job_registry.update_progress(job_id, next_stage, progress)
                     
                     logger.info(
                         f"[LIFECYCLE] NODE_STREAM_OUTPUT | job={job_id} | node={node_name} "

@@ -1,0 +1,8 @@
+{
+  "command": "/home/akshat/go/bin/subzy --json --targets /tmp/target_list",
+  "arguments": [
+    "/home/akshat/go/bin/subzy"
+  ],
+  "exit_code": 0,
+  "runtime": 0.011947154998779297
+}

@@ -1,0 +1,9 @@
+{
+  "command": "/home/akshat/Desktop/project/cyber_v1/.venv/bin/python /home/akshat/Desktop/project/cyber_v1/execution/api/graphql_discovery.py -u http://testphp.vulnweb.com/http://testphp.vulnweb.cohttp://testphp.vulnwebhttp://testphp.vulnwhttp://testphp.vulnweb.com/vendor/installed.json",
+  "arguments": [
+    "/home/akshat/Desktop/project/cyber_v1/.venv/bin/python",
+    "/home/akshat/Desktop/project/cyber_v1/execution/api/graphql_discovery.py"
+  ],
+  "exit_code": 0,
+  "runtime": 151.3428316116333
+}

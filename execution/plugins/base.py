@@ -79,13 +79,16 @@ class BaseExecutionPlugin(ExecutionPlugin, ABC):
         from services.tool_manager import ToolManager
         
         # Binary Check
-        tool_name = self.metadata().name
+        metadata = self.metadata()
         tm = ToolManager()
-        binary = tm.available(tool_name)
-        if not binary and tool_name not in ("graphql", "swagger"):
-            # For pure python tools like swagger/graphql, they might be marked available differently or not needed
-            binary = False
-        else:
+
+        candidate_tool_names = list(dict.fromkeys([*metadata.supported_tools, metadata.name]))
+        binary = any(
+            tm.available(tool_name) or (tm.get_tool(tool_name) is not None)
+            for tool_name in candidate_tool_names
+        )
+
+        if not binary and any(name in {"graphql", "swagger", "graphql_discovery", "swagger_discovery"} for name in candidate_tool_names):
             binary = True
             
         execution = True

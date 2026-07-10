@@ -1,0 +1,2 @@
+time="2026-07-11T02:44:07+05:30" level=warning msg="error reading config: Config file /home/akshat/.gau.toml not found, using default config"
+

@@ -137,16 +137,26 @@ class PluginExecutor:
             # ---------------------------------------------------------
             # Execution Budget Manager: Enforce target limits
             # ---------------------------------------------------------
+            plugin_name = plugin.metadata().name
+            
+            heavy_tools = {"katana", "nuclei", "ffuf", "dalfox"}
+            if plugin_name in heavy_tools:
+                heavy_cap = 100
+                if unique_targets > heavy_cap:
+                    logger.warning(f"Plugin {plugin_name} is a heavy tool. Capping targets from {unique_targets} to {heavy_cap}.")
+                    original_target_list = list(set(original_target_list))[:heavy_cap]
+                    unique_targets = heavy_cap
+                    current_target = original_target_list if plugin.metadata().supports_multi_input else original_target_list
+
             if hasattr(config, "execution_budget") and config.execution_budget:
                 max_targets = config.execution_budget.max_targets_per_plugin
                 if unique_targets > max_targets:
-                    logger.warning(f"Plugin {plugin.metadata().name} received {unique_targets} targets, exceeding budget of {max_targets}. Truncating.")
+                    logger.warning(f"Plugin {plugin_name} received {unique_targets} targets, exceeding budget of {max_targets}. Truncating.")
                     original_target_list = list(set(original_target_list))[:max_targets]
                     unique_targets = max_targets
                     current_target = original_target_list if plugin.metadata().supports_multi_input else original_target_list
                     
             # Chunk-Level Resume offsets
-            plugin_name = plugin.metadata().name
             offset_path = ""
             start_chunk_idx = 0
             if state.target.session_id:
