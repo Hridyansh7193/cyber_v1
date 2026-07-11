@@ -52,6 +52,22 @@ def test_golden_dataset_dalfox():
     assert len(parsed) == 1
     assert parsed[0]["type"] == "XSS"
 
+
+def test_golden_dataset_dalfox_json_array():
+    plugin = REGISTRY.get_plugin("dalfox")
+    stdout = json.dumps([
+        {"type": "XSS", "poc": "https://example.com/?q=one"},
+        {"type": "XSS", "poc": "https://example.com/?q=two"},
+    ], indent=2)
+
+    parsed, errors = plugin.parse(stdout, "")
+
+    assert errors == []
+    assert [record["poc"] for record in parsed] == [
+        "https://example.com/?q=one",
+        "https://example.com/?q=two",
+    ]
+
 def test_golden_dataset_trufflehog():
     plugin = REGISTRY.get_plugin("trufflehog")
     mock_json = json.dumps({

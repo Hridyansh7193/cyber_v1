@@ -1,5 +1,6 @@
 from schemas.state import ExecutionState
 from typing import Tuple, Any, Mapping
+import json
 from execution.constants import NEW_DALFOX
 from execution.plugins.base import BaseExecutionPlugin, PluginMetadata
 from schemas.runtime import Capability
@@ -66,9 +67,34 @@ class DalfoxPlugin(BaseExecutionPlugin):
         return tuple(cmd)
 
     def parse(self, stdout: str, stderr: str) -> tuple:
+        """Parse both JSON-lines and the JSON array emitted by Dalfox file mode."""
+        stripped_output = stdout.strip()
+        if not stripped_output:
+            return [], []
+
+        # Dalfox's `file --format json` mode emits one JSON array, often
+        # pretty-printed. Parsing it a line at a time turns `[`, `,`, and `]`
+        # into string records, which later violates VulnerabilityState's
+        # dictionary-only contract.
+        try:
+            decoded = json.loads(stripped_output)
+        except json.JSONDecodeError:
+            decoded = None
+
+        if decoded is not None:
+            records = decoded if isinstance(decoded, list) else [decoded]
+            invalid_count = sum(not isinstance(record, dict) for record in records)
+            if invalid_count:
+                return [], [f"Dalfox JSON contained {invalid_count} non-object record(s)."]
+            return records, []
+
         from execution.utils.output_parser import OutputParser
         parsed_json, errors = OutputParser.parse_json(stdout)
-        return parsed_json, errors
+        records = [record for record in parsed_json if isinstance(record, dict)]
+        invalid_count = len(parsed_json) - len(records)
+        if invalid_count:
+            errors.append(f"Dalfox JSON-lines contained {invalid_count} non-object record(s).")
+        return records, errors
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
         return {NEW_DALFOX: parsed}
