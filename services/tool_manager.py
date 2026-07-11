@@ -40,15 +40,21 @@ class ToolManager:
         # Filter out virtual environment paths to avoid resolving python packages (like httpx)
         # instead of actual system binaries (like ProjectDiscovery's httpx).
         path_env = os.environ.get("PATH", "")
-        clean_paths = [p for p in path_env.split(os.pathsep) if "venv" not in p.lower()]
+        clean_paths = []
+        for p in path_env.split(os.pathsep):
+            p_lower = p.lower()
+            if "venv" not in p_lower and ".venv" not in p_lower:
+                clean_paths.append(p)
         
-        # Ensure ~/go/bin is in the path as many Go security tools are installed there
+        # Ensure ~/go/bin is at the very front of the path as many Go security tools are installed there
         go_bin = os.path.expanduser("~/go/bin")
-        if go_bin not in clean_paths:
-            clean_paths.append(go_bin)
+        if go_bin in clean_paths:
+            clean_paths.remove(go_bin)
+        clean_paths.insert(0, go_bin)
             
         clean_path_env = os.pathsep.join(clean_paths)
-        clean_path_env = os.pathsep.join(clean_paths)
+        
+        # On Linux/macOS, if the binary is specifically in ~/go/bin, shutil.which with custom path will find it
         return shutil.which(bin_name, path=clean_path_env)
 
     def _detect_version(self, path: str, tool_name: str) -> Optional[str]:

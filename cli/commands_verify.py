@@ -1,12 +1,15 @@
 import typer
 import time
 import json
+import sys
+from datetime import datetime, timezone
 from cli.output_formatter import OutputFormatter
 from cli.decorators import timed_cli_command
 from execution.plugins.registry import REGISTRY
 from services.tool_manager import ToolManager
 from execution.utils.process_runner import ProcessRunner
-from schemas.state import ExecutionState, TargetState
+from schemas.state import ExecutionState
+from schemas.target import TargetState
 
 app = typer.Typer(help="Live Validation Engine (Phase 4)")
 
@@ -39,38 +42,57 @@ def verify_plugins_cmd(
             continue
             
         tool_name = meta.supported_tools[0] if meta.supported_tools else name
-        if not tm.available(tool_name):
+        tool_info = tm.get_tool(tool_name)
+        if not tool_info:
             results[name] = {"status": "UNVERIFIED", "reason": "Missing Binary"}
             OutputFormatter.render_warning(f"[{name}] UNVERIFIED: Missing Binary")
             continue
             
         OutputFormatter.render_info(f"[{name}] Running live validation...")
         
-        # Build mock state
+        # Build mock state with proper datetime for start_time
         state = ExecutionState(
-            target=TargetState(domain=target, session_id="verify", start_time=str(time.time()), scope=(), out_of_scope=())
+            target=TargetState(
+                domain=target,
+                session_id="verify",
+                start_time=datetime.now(timezone.utc),
+                scope=(),
+                out_of_scope=()
+            )
         )
         
         start_time = time.time()
         try:
-            cmd = plugin.build_command(state, {}, target=target)
-            if not cmd:
+            cmd_args = plugin.build_command(state, {}, target=target)
+            if not cmd_args:
                 raise ValueError("Plugin returned empty command")
+            
+            # Prepend the resolved binary path, just like PluginExecutor does
+            binary_path = tool_info.binary_path
+            if binary_path.endswith('.py'):
+                full_cmd = [sys.executable, binary_path] + list(cmd_args)
+            else:
+                full_cmd = [binary_path] + list(cmd_args)
                 
-            res = ProcessRunner.run(list(cmd), name, timeout=30)
+            res = ProcessRunner.run(full_cmd, name, timeout=30)
             runtime = time.time() - start_time
             
             # Count findings
             parsed = plugin.parse(res.stdout, res.stderr)
-            parsed_count = len(parsed) if hasattr(parsed, "__len__") else 0
+            parsed_count = 0
+            if isinstance(parsed, tuple) and len(parsed) == 2:
+                parsed_data, _errors = parsed
+                parsed_count = len(parsed_data) if hasattr(parsed_data, "__len__") else 0
+            elif hasattr(parsed, "__len__"):
+                parsed_count = len(parsed)
             
-            # Since some plugins might not find anything on example.com, we can't fail them just for 0 findings.
+            # Since some plugins might not find anything on the test target, we can't fail them just for 0 findings.
             # But we can verify it didn't crash.
             results[name] = {
                 "status": "VERIFIED",
-                "command": " ".join(cmd),
+                "command": " ".join(str(c) for c in full_cmd),
                 "exit_code": res.exit_code,
-                "runtime": runtime,
+                "runtime": round(runtime, 2),
                 "stdout_size": res.stdout_size,
                 "parsed_objects": parsed_count,
             }
