@@ -58,7 +58,11 @@ class ExecutionState(BaseModel):
     metadata: Mapping[str, Any] = Field(default_factory=lambda: MappingProxyType({}))
     intelligence: Optional[IntelligenceState] = Field(default=None)
     operational: Optional[OperationalState] = Field(default=None)
-    runtime_context: Optional[RuntimeContext] = Field(default=None)
+    # Holds live managers used only while a scan is running.  Checkpoint
+    # serialization uses ``model_dump()``, so this must be excluded there as
+    # well as from JSON snapshots; those managers are not msgpack serializable
+    # and are rebuilt when a scan is resumed.
+    runtime_context: Optional[RuntimeContext] = Field(default=None, exclude=True)
 
     @field_serializer('metadata')
     def serialize_metadata(self, v: Mapping[str, Any], _info):

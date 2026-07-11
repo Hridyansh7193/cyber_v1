@@ -1,6 +1,7 @@
 from datetime import datetime, UTC
 from schemas.state import ReconState, JSState, APIState, VulnerabilityState, ExecutionState
 from schemas.target import TargetState
+from schemas.runtime_context import RuntimeContext
 
 def test_recon_state():
     state = ReconState(subdomains=("a.com",))
@@ -71,3 +72,16 @@ def test_execution_state_deserialization():
     exec_state = ExecutionState.model_validate(data)
     assert exec_state.target.domain == "example.com"
     assert isinstance(exec_state.recon_state, ReconState)
+
+
+def test_execution_state_checkpoint_dump_excludes_runtime_context():
+    target = TargetState(domain="example.com", session_id="123", start_time=datetime.now(UTC))
+    runtime_context = RuntimeContext(
+        tool_manager=object(),
+        wordlist_manager=object(),
+        target_resolver=object(),
+    )
+    exec_state = ExecutionState(target=target, runtime_context=runtime_context)
+
+    assert exec_state.runtime_context is runtime_context
+    assert "runtime_context" not in exec_state.model_dump()
