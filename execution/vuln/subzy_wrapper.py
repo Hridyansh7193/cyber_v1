@@ -31,7 +31,9 @@ class SubzyPlugin(BaseExecutionPlugin):
         
         flags = CompatibilityManager().get_flags("subzy", version)
         
-        cmd = []
+        # Subzy v1 uses Cobra subcommands: flags such as ``--targets`` are
+        # accepted by ``subzy run``, not by the top-level executable.
+        cmd = ["run"]
         if flags.get("silent_flag"):
             cmd.append(flags["silent_flag"])
         if flags.get("json_flag"):

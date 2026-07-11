@@ -5,8 +5,13 @@ from datetime import datetime, timezone
 
 def test_subzy_command():
     plugin = REGISTRY.get_plugin("subzy")
-    cmd = plugin.build_command(ExecutionState(target=TargetState(session_id="test", domain="example.com", start_time=datetime.now(timezone.utc))), {})
-    assert len(cmd) > 0
+    cmd = plugin.build_command(
+        ExecutionState(target=TargetState(session_id="test", domain="example.com", start_time=datetime.now(timezone.utc))),
+        {},
+        target="sub.example.com",
+    )
+    assert cmd[:3] == ("run", "--json", "--target")
+    assert cmd[3] == "sub.example.com"
 
 def test_ffuf_command():
     plugin = REGISTRY.get_plugin("ffuf")

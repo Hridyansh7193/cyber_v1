@@ -6,15 +6,19 @@ from services.report_service import ReportService
 from services.persistence_service import PersistenceService
 from runtime.workspace import WorkspaceManager
 from services.workspace_service import WorkspaceService
+from config.loader import load_config
+from pathlib import Path
 
 def _create_default_config() -> BugHunterConfig:
-    return BugHunterConfig(
-        settings={"scan_depth": 1, "max_concurrency": 10, "log_level": "INFO"},
-        llm={"provider": "dummy", "default_model": "dummy", "timeout": 30},
-        tools={"tool_paths": {}, "docker_container_names": {}, "wordlists": {}, "enable_flags": {}},
-        timeouts={"subfinder_timeout": 60, "nuclei_timeout": 60, "dalfox_timeout": 60, "ffuf_timeout": 60, "global_timeout": 3600},
-        reporting={"report_formats": ["json"], "output_directories": {}}
-    )
+    """Load the packaged defaults rather than a stale, duplicated config.
+
+    The previous hard-coded values capped Dalfox at 60 seconds even though
+    ``config/defaults/timeouts.yaml`` configures its 600-second scan timeout.
+    Resolve the path from this module so the installed CLI works outside the
+    repository root too.
+    """
+    config_dir = Path(__file__).resolve().parents[1] / "config"
+    return load_config(config_dir)
 
 registry = JobRegistry()
 default_config = _create_default_config()
