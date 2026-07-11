@@ -35,7 +35,9 @@ plugins:
   dalfox:
     versions:
       "2.x":
-        json_flag: "format json"
+        # `format` is not a Dalfox subcommand.  Dalfox accepts JSON output
+        # through `--format json`, added by DalfoxPlugin after `url` / `file`.
+        json_flag: ""
         silent_flag: ""
         timeout_flag: "--timeout"
         concurrency_flag: "-w"
