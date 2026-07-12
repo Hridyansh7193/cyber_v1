@@ -68,6 +68,16 @@ def test_golden_dataset_dalfox_json_array():
         "https://example.com/?q=two",
     ]
 
+
+def test_golden_dataset_dalfox_reports_unreachable_targets():
+    plugin = REGISTRY.get_plugin("dalfox")
+    stdout = "[E] Request to https://example.com/?q=test failed: context deadline exceeded\n"
+
+    parsed, errors = plugin.parse(stdout, "")
+
+    assert parsed == []
+    assert errors == ["Dalfox could not reach 1 target(s); no vulnerability result can be trusted."]
+
 def test_golden_dataset_trufflehog():
     plugin = REGISTRY.get_plugin("trufflehog")
     mock_json = json.dumps({

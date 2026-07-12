@@ -56,18 +56,28 @@ class DalfoxPlugin(BaseExecutionPlugin):
         if bughunter_config and hasattr(bughunter_config, "profile"):
             profile_name = bughunter_config.profile.value
             if profile_name == "light":
-                cmd.extend(["--worker", "50", "--timeout", "5"])
+                cmd.extend(["--worker", "10", "--timeout", "10"])
             elif profile_name == "aggressive":
                 cmd.extend(["--worker", "200", "--timeout", "20"])
             else: # balanced
-                cmd.extend(["--worker", "100", "--timeout", "10"])
+                cmd.extend(["--worker", "20", "--timeout", "20"])
         else:
-            cmd.extend(["--worker", "100", "--timeout", "10"])
+            cmd.extend(["--worker", "20", "--timeout", "20"])
         
         return tuple(cmd)
 
     def parse(self, stdout: str, stderr: str) -> tuple:
         """Parse both JSON-lines and the JSON array emitted by Dalfox file mode."""
+        failed_requests = [
+            line for line in stdout.splitlines()
+            if line.lstrip().startswith("[E] Request to ") and " failed:" in line
+        ]
+        if failed_requests:
+            return [], [
+                f"Dalfox could not reach {len(failed_requests)} target(s); "
+                "no vulnerability result can be trusted."
+            ]
+
         stripped_output = stdout.strip()
         if not stripped_output:
             return [], []

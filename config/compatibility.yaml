@@ -79,7 +79,9 @@ plugins:
   subzy:
     versions:
       "1.x":
-        json_flag: "--json"
+        # Subzy v1 writes JSON only when `--output` is supplied; it has no
+        # `--json` flag.
+        json_flag: ""
         silent_flag: ""
         timeout_flag: ""
         concurrency_flag: "--concurrency"
