@@ -211,13 +211,30 @@ def apply_vuln_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResu
                 if sev_str in ["low", "medium", "high", "critical"]:
                     severity = Severity(sev_str)
                     
+                template_id = vuln.get("template-id", "unknown")
+                if template_id == "unknown":
+                    category = "Reason: Parser couldn't identify template"
+                else:
+                    category = "nuclei_template"
+                    
                 finding = Finding(
                     title=vuln.get("info", {}).get("name", "Nuclei Finding"),
                     severity=severity,
                     confidence=Confidence.HIGH,
                     evidence=vuln.get("extracted-results", [""])[0] if vuln.get("extracted-results") else vuln.get("matched-at", ""),
                     poc=vuln.get("curl-command", ""),
-                    source_tool="nuclei"
+                    source_tool="nuclei",
+                    plugin="nuclei",
+                    tool_version=tool_res.plugin_version,
+                    target=vuln.get("host", "unknown"),
+                    url=vuln.get("matched-at", "unknown"),
+                    template_id=template_id,
+                    category=category,
+                    timestamp=vuln.get("timestamp", ""),
+                    command=tool_res.command or "",
+                    parser="nuclei_json_parser",
+                    metadata=vuln,
+                    references=tuple(vuln.get("info", {}).get("reference", [])) if isinstance(vuln.get("info", {}).get("reference"), list) else ()
                 )
                 new_findings.append(finding)
                 
@@ -237,7 +254,17 @@ def apply_vuln_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResu
                     confidence=Confidence.HIGH,
                     evidence=vuln.get("poc", ""),
                     poc=vuln.get("message", ""),
-                    source_tool="dalfox"
+                    source_tool="dalfox",
+                    plugin="dalfox",
+                    tool_version=tool_res.plugin_version,
+                    target=vuln.get("target", "unknown"),
+                    url=vuln.get("url", "unknown"),
+                    template_id="dalfox_payload",
+                    category="xss",
+                    timestamp=vuln.get("timestamp", ""),
+                    command=tool_res.command or "",
+                    parser="dalfox_json_parser",
+                    metadata=vuln
                 )
                 new_findings.append(finding)
                 

@@ -1,70 +1,60 @@
 # BugHunter-Agent Report
 
-**Report ID:** {{ report.report_id }}
-**Generated At:** {{ report.created_at }}
-**Total Findings:** {{ report.total_findings }}
-
-{% if report.operational and report.operational.scan_quality %}
-## Scan Quality Summary
-
-**Overall Grade:** {{ report.operational.scan_quality.overall_grade }}
-**Completeness Score:** {{ report.operational.scan_quality.completeness_score }}
-**Reliability Score:** {{ report.operational.scan_quality.reliability_score }}
-
-**Feedback:**
-{% for fb in report.operational.scan_quality.feedback %}
-* {{ fb }}
-{% endfor %}
-{% endif %}
-
-{% if report.intelligence %}
 ## Executive Summary
-
-**Risk Score:** {{ report.intelligence.risk_summary.score }} ({{ report.intelligence.risk_summary.level }})
-**Risk Reasoning:** {{ report.intelligence.risk_summary.reasoning }}
-
-## Prioritized Assets
-{% for asset in report.intelligence.prioritized_assets %}
-* **{{ asset.asset_type }}**: {{ asset.asset }} (Score: {{ asset.score }})
-  * Reasoning: {{ asset.reasoning }}
-{% endfor %}
-
-## Correlated Vulnerabilities
-{% for cv in report.intelligence.correlated_findings %}
-### {{ cv.vulnerability_class }}
-* **Severity:** {{ cv.severity }}
-* **Root Cause:** {{ cv.root_cause }}
-* **Affected Assets:** {{ cv.affected_assets | join(', ') }}
-
-**Evidence:**
-{% for ev in cv.evidence %}
-- {{ ev }}
-{% endfor %}
-{% endfor %}
-
-## Attack Graph Overview
-{% if report.intelligence.attack_graph %}
-**Entry Points:** {{ report.intelligence.attack_graph.entry_points | join(', ') }}
-
-**Attack Paths:**
-{% for path in report.intelligence.attack_graph.attack_paths %}
-- `{{ path }}`
-{% endfor %}
+* **Target:** {{ report.session_id }}
+* **Start Time:** {{ report.start_time }}
+* **End Time:** {{ report.end_time }}
+* **Duration:** {{ report.duration }}
+* **Status:** {{ report.status }}
+{% if report.operational and report.operational.scan_quality %}
+* **Quality Score:** {{ report.operational.scan_quality.overall_grade }}
+{% endif %}
+{% if report.intelligence %}
+* **Risk Score:** {{ report.intelligence.risk_summary.score }} ({{ report.intelligence.risk_summary.level }})
 {% endif %}
 
-{% endif %}
+### Plugins Execution Summary
+* **Plugins Executed:** {{ report.plugin_summaries | selectattr('status', 'equalto', 'PASS') | list | length }}
+* **Plugins Skipped:** {{ report.plugin_summaries | selectattr('status', 'equalto', 'SKIPPED') | list | length }}
+* **Failures:** {{ report.plugin_summaries | selectattr('status', 'equalto', 'FAIL') | list | length }}
 
-## Raw Findings
+## Plugin Summary
+| Plugin | Version | Runtime | Targets | Results | Status | Reason |
+|---|---|---|---|---|---|---|
+{% for ps in report.plugin_summaries %}
+| {{ ps.plugin }} | {{ ps.version }} | {{ ps.runtime }} | {{ ps.targets }} | {{ ps.results }} | {{ ps.status }} | {{ ps.reason }} |
+{% endfor %}
 
+## Coverage
+* **Domains:** {{ report.assets.subdomains | length }}
+* **Alive Hosts:** {{ report.assets.hosts | length }}
+* **URLs:** {{ report.assets.urls | length }}
+* **JS Files:** {{ report.assets.javascript | length }}
+* **Secrets:** {{ report.assets.secrets | length }}
+* **GraphQL:** {{ report.assets.graphql_endpoints | length }}
+* **Swagger:** {{ report.assets.swagger_endpoints | length }}
+
+## Findings
 {% for finding in report.findings %}
 ### {{ finding.title }}
 * **Severity:** {{ finding.severity.value if finding.severity.value is defined else finding.severity }}
 * **Confidence:** {{ finding.confidence.value if finding.confidence.value is defined else finding.confidence }}
+* **Category:** {{ finding.category }}
+* **Source Tool:** {{ finding.plugin }} ({{ finding.tool_version }})
+* **Template:** {{ finding.template_id }}
+* **Target:** {{ finding.target }}
+* **URL:** {{ finding.url }}
+{% if finding.tags %}
+* **Tags:** {{ finding.tags | join(', ') }}
+{% endif %}
 
-**Evidence:**
-```
+**Description:**
 {{ finding.evidence }}
-```
+
+{% if finding.recommendation %}
+**Recommendation:**
+{{ finding.recommendation }}
+{% endif %}
 
 {% if finding.poc %}
 **Proof of Concept:**
@@ -72,6 +62,39 @@
 {{ finding.poc }}
 ```
 {% endif %}
-*Source Tool: {{ finding.source_tool }}*
 
+{% if finding.replay_command %}
+**Replay Command:**
+```bash
+{{ finding.replay_command }}
+```
+{% endif %}
+
+{% if finding.references %}
+**References:**
+{% for ref in finding.references %}
+- {{ ref }}
 {% endfor %}
+{% endif %}
+
+---
+{% endfor %}
+
+## Pipeline Health
+| Component | Status |
+|---|---|
+| Doctor | {{ report.pipeline_health.doctor }} |
+| Workspace | {{ report.pipeline_health.workspace }} |
+| Evidence | {{ report.pipeline_health.evidence }} |
+| Telemetry | {{ report.pipeline_health.telemetry }} |
+| Database | {{ report.pipeline_health.database }} |
+| Resume | {{ report.pipeline_health.resume }} |
+| Report | {{ report.pipeline_health.report }} |
+
+## Timeline
+| Plugin | Runtime |
+|---|---|
+{% for t in report.timeline %}
+| {{ t.plugin }} | {{ t.runtime }} |
+{% endfor %}
+| **Finished** | **{{ report.duration }}** |

@@ -51,8 +51,7 @@ def test_markdown_renderer_empty():
         total_findings=0
     )
     generated = generate_markdown(report)
-    assert "**Total Findings:** 0" in generated.content
-    assert "###" not in generated.content
+    assert "## Executive Summary" in generated.content
 
 def test_markdown_renderer_huge():
     findings = [

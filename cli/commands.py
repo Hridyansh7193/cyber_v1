@@ -52,6 +52,17 @@ def scan_cmd(
             
         from cli.dashboard import render_final_dashboard
         render_final_dashboard(job_id)
+        
+        from cli.dependencies import workspace_service
+        manager = workspace_service.workspace_manager
+        session_dir = manager.get_session_dir(domain, job_id)
+        reports_dir = session_dir / "reports"
+        
+        console.print("\n[bold]Reports Generated:[/bold]")
+        console.print(f"  [cyan]Markdown:[/cyan] {reports_dir / 'report.md'}")
+        console.print(f"  [cyan]JSON:[/cyan]     {reports_dir / 'report.json'}")
+        console.print(f"  [cyan]SARIF:[/cyan]    {reports_dir / 'report.sarif'}")
+        console.print(f"  [cyan]Workspace:[/cyan] {session_dir}")
             
     except ValueError as e:
         console.print(f"[red]Validation Error:[/red] {e}")

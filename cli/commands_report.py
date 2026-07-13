@@ -3,17 +3,56 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from cli.dependencies import persistence_service, workspace_service
+import webbrowser
 
 app = typer.Typer(help="Manage and inspect reports and session data.")
 console = Console()
 
 @app.command("report")
-def report_cmd(job_id: str = typer.Argument(..., help="The Job ID to report on")):
+def report_cmd(
+    job_id: str = typer.Argument(..., help="The Job ID to report on"),
+    json_format: bool = typer.Option(False, "--json", help="Pretty-print the JSON report"),
+    open_report: bool = typer.Option(False, "--open", help="Open the Markdown report"),
+    html_report: bool = typer.Option(False, "--html", help="Open the HTML report")
+):
     """Summarize persisted report metadata."""
     session = persistence_service.get_session(job_id)
     if not session:
         console.print(f"[red]Job {job_id} not found in database.[/red]")
         raise typer.Exit(code=1)
+        
+    manager = workspace_service.workspace_manager
+    session_dir = manager.get_session_dir(session.target_domain, job_id)
+    reports_dir = session_dir / "reports"
+    
+    if json_format:
+        json_path = reports_dir / "report.json"
+        if json_path.exists():
+            console.print(json_path.read_text())
+        else:
+            console.print(f"[red]JSON report not found at {json_path}[/red]")
+        return
+        
+    if open_report:
+        md_path = reports_dir / "report.md"
+        if md_path.exists():
+            import os
+            if os.name == 'nt':
+                os.startfile(md_path)
+            else:
+                import subprocess
+                subprocess.call(['open', str(md_path)])
+        else:
+            console.print(f"[red]Markdown report not found at {md_path}[/red]")
+        return
+        
+    if html_report:
+        html_path = reports_dir / "report.html"
+        if html_path.exists():
+            webbrowser.open(f"file://{html_path.absolute()}")
+        else:
+            console.print(f"[red]HTML report not found at {html_path}[/red]")
+        return
         
     reports = persistence_service.get_reports_for_session(job_id)
     if not reports:
@@ -26,7 +65,7 @@ def report_cmd(job_id: str = typer.Argument(..., help="The Job ID to report on")
     table.add_column("Created At", style="green")
     
     for r in reports:
-        table.add_row(str(r.id), r.report_format, str(r.created_at))
+        table.add_row(str(r.id), getattr(r, 'report_format', 'unknown'), str(getattr(r, 'created_at', '')))
         
     console.print(table)
 

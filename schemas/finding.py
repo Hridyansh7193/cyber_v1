@@ -24,6 +24,19 @@ class Finding(BaseModel):
     confidence: Confidence
     evidence: str
     poc: str = Field(default="")
+    plugin: str = Field(default="unknown")
+    tool_version: str = Field(default="unknown")
+    target: str = Field(default="unknown")
+    url: str = Field(default="unknown")
+    template_id: str = Field(default="unknown")
+    category: str = Field(default="unknown")
+    tags: Tuple[str, ...] = Field(default=())
+    recommendation: str = Field(default="")
+    timestamp: str = Field(default="")
+    command: str = Field(default="")
+    replay_command: str = Field(default="")
+    parser: str = Field(default="unknown")
+    metadata: dict[str, str] = Field(default_factory=dict)
     source_tool: str = Field(default="unknown")
     references: Tuple[str, ...] = Field(default=())
     

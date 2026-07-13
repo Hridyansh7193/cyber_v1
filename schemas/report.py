@@ -9,6 +9,31 @@ from .operational import OperationalState
 
 from .telemetry import ExecutionTelemetry
 
+class PipelineHealth(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    doctor: str = "PASS"
+    workspace: str = "PASS"
+    evidence: str = "PASS"
+    telemetry: str = "PASS"
+    database: str = "PASS"
+    resume: str = "PASS"
+    report: str = "PASS"
+
+class PluginSummary(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    plugin: str
+    version: str = "unknown"
+    runtime: str = "0s"
+    targets: int = 0
+    results: int = 0
+    status: str = "PASS"
+    reason: str = ""
+
+class TimelineEntry(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    plugin: str
+    runtime: str
+
 class ReportFormat(str, Enum):
     JSON = "json"
     MARKDOWN = "markdown"
@@ -70,3 +95,12 @@ class Report(BaseModel):
     retry_counts: dict[str, int] = Field(default_factory=dict)
     execution_timeline: Tuple[dict, ...] = Field(default=())
     plugin_statistics: dict[str, dict] = Field(default_factory=dict)
+    
+    # Phase 3 Fields
+    pipeline_health: PipelineHealth = Field(default_factory=PipelineHealth)
+    plugin_summaries: Tuple[PluginSummary, ...] = Field(default=())
+    timeline: Tuple[TimelineEntry, ...] = Field(default=())
+    duration: str = "0s"
+    start_time: str = ""
+    end_time: str = ""
+    status: str = "PASS"

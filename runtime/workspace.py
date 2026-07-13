@@ -33,7 +33,12 @@ class WorkspaceManager:
         # Create reports, logs, and evidence directories for this session
         (session_dir / "reports").mkdir(exist_ok=True)
         (session_dir / "logs").mkdir(exist_ok=True)
-        (session_dir / "evidence").mkdir(exist_ok=True)
+        evidence_dir = session_dir / "evidence"
+        evidence_dir.mkdir(exist_ok=True)
+        (evidence_dir / "raw").mkdir(exist_ok=True)
+        (evidence_dir / "parsed").mkdir(exist_ok=True)
+        (evidence_dir / "telemetry").mkdir(exist_ok=True)
+        (evidence_dir / "plugin").mkdir(exist_ok=True)
         
         metadata = WorkspaceMetadata(
             session_id=session_id,
