@@ -65,21 +65,22 @@ class SubzyPlugin(BaseExecutionPlugin):
             if not results: # If we have logical errors and no results, it's a failure
                 return [], errors
 
-        try:
-            start_idx = stdout.find('[')
-            end_idx = stdout.rfind(']')
-            if start_idx != -1 and end_idx != -1 and end_idx >= start_idx:
-                json_str = stdout[start_idx:end_idx+1]
-                parsed = json.loads(json_str)
-                if isinstance(parsed, list):
-                    results.extend(parsed)
-                else:
-                    results.append(parsed)
+        # ``subzy run`` prints human-readable progress (for example
+        # ``[ * ] Fingerprints found``) when no takeover is detected.  Only
+        # attempt JSON decoding for actual JSON lines; bracketed status text
+        # must remain a successful empty result.
+        for line in stdout.splitlines():
+            line = line.strip()
+            if not line or line[0] not in "[{":
+                continue
+            try:
+                parsed = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(parsed, list):
+                results.extend(parsed)
             else:
-                errors.append(f"No JSON array found in stdout: {stdout[:50]}")
-        except json.JSONDecodeError as e:
-            if stdout.strip():
-                errors.append(f"JSONDecodeError: {str(e)} on stdout: {stdout[:50]}")
+                results.append(parsed)
         return results, errors
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:

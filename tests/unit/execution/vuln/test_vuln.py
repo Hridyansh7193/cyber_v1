@@ -13,6 +13,15 @@ def test_subzy_command():
     assert cmd[:2] == ("run", "--target")
     assert cmd[2] == "sub.example.com"
 
+
+def test_subzy_progress_output_is_an_empty_success():
+    plugin = REGISTRY.get_plugin("subzy")
+
+    parsed, errors = plugin.parse("[ * ] Fingerprints found; checking integrity\n", "")
+
+    assert parsed == []
+    assert errors == []
+
 def test_ffuf_command():
     plugin = REGISTRY.get_plugin("ffuf")
     cmd = plugin.build_command(ExecutionState(target=TargetState(session_id="test", domain="example.com", start_time=datetime.now(timezone.utc))), {"wordlist": "wordlist.txt"})

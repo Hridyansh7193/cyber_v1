@@ -438,7 +438,13 @@ class PluginExecutor:
             parsed_findings = len(parsed_tuple)
             
             if result.stdout_size > 0 and parsed_findings == 0 and not errors:
-                errors.append("Stdout was not empty but 0 objects were parsed.")
+                # Several scanners emit progress, banner, or no-result status
+                # lines on stdout.  A clean exit with no parseable findings is
+                # a valid empty result, not an execution failure.
+                logger.info(
+                    f"{plugin.metadata().name} produced no parseable findings; "
+                    "treating the successful command as an empty result."
+                )
 
             success = result.success and len(errors) == 0
                 
