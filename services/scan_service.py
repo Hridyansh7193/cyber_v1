@@ -102,11 +102,18 @@ class ScanService:
             self._registry.update_status(job_id, JobStatus.FAILED, error=error_msg)
             return job_id
         
+        # Use the canonical domain everywhere that identifies a workspace
+        # session.  Passing the raw user input here turns a URL such as
+        # ``http://localhost:3000`` into nested ``http:/localhost:3000``
+        # directories on POSIX, while plugin telemetry uses target.domain.
+        # That split made reports and trace files appear to be missing.
+        workspace_target = target.domain
+
         if self._persistence_service and not is_resume:
-            self._persistence_service.create_session(job_id, domain)
+            self._persistence_service.create_session(job_id, workspace_target)
             
         if self._workspace_service and not is_resume:
-            self._workspace_service.workspace_manager.create_session(job_id, domain, "default")
+            self._workspace_service.workspace_manager.create_session(job_id, workspace_target, "default")
             
         # If resuming, load state from checkpoint
         resume_state = None
@@ -115,7 +122,7 @@ class ScanService:
                 import os
                 import json
                 from schemas.state import ExecutionState
-                session_dir = os.path.join("workspaces", domain, "sessions", job_id)
+                session_dir = os.path.join("workspaces", workspace_target, "sessions", job_id)
                 checkpoint_path = os.path.join(session_dir, "checkpoint.json")
                 if os.path.exists(checkpoint_path):
                     with open(checkpoint_path, "r", encoding="utf-8") as f:
@@ -152,14 +159,14 @@ class ScanService:
                 
             # 3. Write to Workspace
             if self._workspace_service and rendered_reports:
-                self._workspace_service.save_reports(domain, job_id, rendered_reports)
+                self._workspace_service.save_reports(workspace_target, job_id, rendered_reports)
                 logger.debug("Workspace output written.")
                 
             # 4. Save trace report
             if final_state.runtime_context and hasattr(final_state.runtime_context, "trace"):
                 import datetime
                 final_state.runtime_context.trace.finished_at = datetime.datetime.now(datetime.timezone.utc)
-                trace_path = __import__('os').path.join("workspaces", domain, "sessions", job_id, "trace.json")
+                trace_path = __import__('os').path.join("workspaces", workspace_target, "sessions", job_id, "trace.json")
                 try:
                     with open(trace_path, "w", encoding="utf-8") as f:
                         f.write(final_state.runtime_context.trace.model_dump_json(indent=2))
@@ -202,7 +209,7 @@ class ScanService:
                     quality_score=0.0
                 )
                 
-                manifest_path = __import__('os').path.join("workspaces", domain, "sessions", job_id, "manifest.json")
+                manifest_path = __import__('os').path.join("workspaces", workspace_target, "sessions", job_id, "manifest.json")
                 with open(manifest_path, "w", encoding="utf-8") as f:
                     f.write(manifest.model_dump_json(indent=2))
                 logger.info(f"Scan manifest saved to {manifest_path}")
