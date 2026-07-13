@@ -55,7 +55,9 @@ def scan_cmd(
         
         from cli.dependencies import workspace_service
         manager = workspace_service.workspace_manager
-        session_dir = manager.get_session_dir(domain, job_id)
+        from services.target_service import TargetService
+        normalized_target = TargetService.normalize_target(domain, job_id).domain
+        session_dir = manager.get_session_dir(normalized_target, job_id)
         reports_dir = session_dir / "reports"
         
         console.print("\n[bold]Reports Generated:[/bold]")
