@@ -45,12 +45,11 @@ class NucleiPlugin(BaseExecutionPlugin):
             for tech in tech_list:
                 tech_tags.add(tech.lower().replace(" ", "-"))
         
-        # Run generic vulnerabilities by default if no tech stack is detected, to ensure we catch basic vulns like SQLi and XSS on custom apps
-        tags = ["cve", "high", "critical", "auth-bypass", "takeover", "xss", "sqli", "lfi", "rce", "misconfig", "generic"]
+        # Run default templates if no tech stack is detected, to ensure we catch basic vulns
         if tech_tags:
+            tags = ["cve", "high", "critical", "auth-bypass", "takeover", "xss", "sqli", "lfi", "rce", "misconfig", "generic"]
             tags.extend(list(tech_tags))
-            
-        cmd.extend(["-tags", ",".join(tags)])
+            cmd.extend(["-tags", ",".join(tags)])
         
         # Optional: Add severity filter (allow low and info so they show up)
         cmd.extend(["-severity", "critical,high,medium,low,info"])

@@ -41,6 +41,7 @@ class FindingRepository:
         if not findings_list:
             return []
         
+        import json
         models = [
             FindingModel(
                 session_id=session_id,
@@ -49,6 +50,22 @@ class FindingRepository:
                 confidence=f.confidence.value if hasattr(f.confidence, 'value') else f.confidence,
                 description=None,
                 evidence=f.evidence,
+                poc=f.poc,
+                plugin=f.plugin,
+                tool_version=f.tool_version,
+                target=f.target,
+                url=f.url,
+                template_id=f.template_id,
+                category=f.category,
+                tags=json.dumps(f.tags) if f.tags else None,
+                recommendation=f.recommendation,
+                timestamp=f.timestamp,
+                command=f.command,
+                replay_command=f.replay_command,
+                parser=f.parser,
+                metadata_json=json.dumps(f.metadata) if f.metadata else None,
+                source_tool=f.source_tool,
+                references_json=json.dumps(f.references) if f.references else None,
                 status="new"
             )
             for f in findings_list

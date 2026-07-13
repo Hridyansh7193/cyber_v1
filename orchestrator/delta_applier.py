@@ -47,16 +47,21 @@ def apply_api_delta(state: ExecutionState, delta: APIDelta) -> ExecutionState:
 
 def apply_vulnerability_delta(state: ExecutionState, delta: VulnerabilityDelta) -> ExecutionState:
     existing_findings = {f.id: f for f in state.findings}
-    for f_dict in delta.findings:
-        finding = Finding(
-            id=f_dict.get('id', ''),
-            title=f_dict.get('title', 'Vulnerability'),
-            severity=f_dict.get('severity', 'info'),
-            confidence=f_dict.get('confidence', 'certain'),
-            evidence=f_dict.get('evidence', ''),
-            references=tuple(f_dict.get('references', []))
-        )
-        existing_findings[finding.id] = finding
+    for f_item in delta.findings:
+        if hasattr(f_item, 'id') and hasattr(f_item, 'title'):
+            # It's already a Finding object (or similar pydantic model)
+            existing_findings[f_item.id] = f_item
+        elif isinstance(f_item, dict) and 'title' in f_item and 'severity' in f_item:
+            # It's a dictionary that actually looks like a Finding
+            finding = Finding(
+                id=f_item.get('id', ''),
+                title=f_item.get('title', 'Vulnerability'),
+                severity=f_item.get('severity', 'info'),
+                confidence=f_item.get('confidence', 'certain'),
+                evidence=f_item.get('evidence', ''),
+                references=tuple(f_item.get('references', []))
+            )
+            existing_findings[finding.id] = finding
     return state.model_copy(deep=True, update={"findings": tuple(existing_findings.values())})
 
 def apply_finding_delta(state: ExecutionState, delta: FindingDelta) -> ExecutionState:
