@@ -44,12 +44,13 @@ def render_final_dashboard(job_id: str):
     # For now, we list findings by category
     if findings:
         findings_table = Table(title="Findings Summary")
-        findings_table.add_column("Type", style="cyan")
+        findings_table.add_column("Severity", style="cyan")
         findings_table.add_column("Count", style="magenta")
         
         counts = {}
         for f in findings:
-            counts[f.finding_type] = counts.get(f.finding_type, 0) + 1
+            severity = getattr(f, "severity", "unknown")
+            counts[severity] = counts.get(severity, 0) + 1
             
         for t, c in counts.items():
             findings_table.add_row(t, str(c))

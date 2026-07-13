@@ -1,5 +1,6 @@
 from urllib.parse import urlparse
 from typing import Dict, Any, Optional
+import ipaddress
 from schemas.target import TargetState
 from datetime import datetime, timezone
 
@@ -14,6 +15,11 @@ class TargetService:
         host = parsed.hostname
         if not host:
             raise ValueError(f"Invalid domain format: {domain}")
+        if host != "localhost" and "." not in host:
+            try:
+                ipaddress.ip_address(host)
+            except ValueError:
+                raise ValueError(f"Invalid domain format: {domain}")
         if parsed.port:
             return f"{host}:{parsed.port}".lower()
         return host.lower()

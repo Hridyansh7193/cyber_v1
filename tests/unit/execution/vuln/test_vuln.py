@@ -10,8 +10,8 @@ def test_subzy_command():
         {},
         target="sub.example.com",
     )
-    assert cmd[:3] == ("run", "--json", "--target")
-    assert cmd[3] == "sub.example.com"
+    assert cmd[:2] == ("run", "--target")
+    assert cmd[2] == "sub.example.com"
 
 def test_ffuf_command():
     plugin = REGISTRY.get_plugin("ffuf")
