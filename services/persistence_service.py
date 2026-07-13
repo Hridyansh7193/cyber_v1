@@ -81,9 +81,10 @@ class PersistenceService:
         with self._get_session() as db:
             return self.log_repo.get_by_session(db, session_id)
             
-    def save_telemetry(self, logs: Iterable[Any]) -> None:
+    def save_telemetry(self, session_id: str, logs: Iterable[Any]) -> None:
         """Save tool telemetry from execution state logs."""
         from schemas.telemetry import ExecutionTelemetry
+        dashboard_logs = []
         for log in logs:
             if isinstance(log, ExecutionTelemetry):
                 metric = ToolMetrics(
@@ -101,6 +102,19 @@ class PersistenceService:
                     success=log.success
                 )
                 self.analytics_repo.insert_metric(metric)
+                if not log.success:
+                    details = list(log.wrapper_errors) + list(log.parser_errors)
+                    message = "; ".join(details) or f"{log.tool} exited with code {log.exit_code}"
+                    dashboard_logs.append({
+                        "session_id": session_id,
+                        "component": log.tool,
+                        "level": "ERROR",
+                        "message": message,
+                    })
+
+        if dashboard_logs:
+            with self._get_session() as db:
+                self.log_repo.create_bulk(db, dashboard_logs)
 
     def get_task_queue(self, session_id: str) -> Optional[List[dict]]:
         """Extracts the Task Queue from the persisted state_blob of a session."""

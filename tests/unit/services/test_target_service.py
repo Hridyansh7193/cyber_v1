@@ -1,5 +1,7 @@
 import pytest
+import urllib.error
 from services.target_service import TargetService
+from services.target_resolver import TargetResolver
 
 def test_validate_domain():
     assert TargetService.validate_domain("example.com") == "example.com"
@@ -27,3 +29,21 @@ def test_normalize_local_url_preserves_connection_details():
     assert target.hostname == "localhost"
     assert target.scheme == "http"
     assert target.port == 3000
+
+
+def test_explicit_url_is_preserved_when_head_probe_fails(monkeypatch):
+    target = TargetService.normalize_target("http://localhost:3000", "session_123")
+
+    def reject_head(*_args, **_kwargs):
+        raise urllib.error.HTTPError(
+            "http://localhost:3000", 405, "Method Not Allowed", {}, None
+        )
+
+    monkeypatch.setattr("urllib.request.urlopen", reject_head)
+
+    resolved = TargetResolver().resolve_target(target)
+
+    assert resolved.alive is True
+    assert resolved.resolved_url == "http://localhost:3000"
+    assert resolved.scheme == "http"
+    assert resolved.port == 3000

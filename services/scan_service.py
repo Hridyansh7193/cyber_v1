@@ -141,7 +141,7 @@ class ScanService:
                 self._persistence_service.save_findings(job_id, final_state.findings)
                 self._persistence_service.save_reports(final_state.reports)
                 if hasattr(final_state, 'logs') and final_state.logs:
-                    self._persistence_service.save_telemetry(final_state.logs)
+                    self._persistence_service.save_telemetry(job_id, final_state.logs)
                 logger.debug("Database persistence complete.")
                 
             # 2. Render Reports

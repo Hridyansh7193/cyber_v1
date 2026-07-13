@@ -88,8 +88,14 @@ class PluginExecutor:
                         # resolved by TargetResolver so a local target such as
                         # ``http://localhost:3000`` retains its scheme and
                         # port instead of being reduced to ``localhost:3000``.
-                        if plugin.metadata().name == "httpx" and state.target.resolved_url:
-                            candidates = [state.target.resolved_url]
+                        if plugin.metadata().name == "httpx":
+                            # Preserve an explicitly supplied scheme and port
+                            # even if TargetResolver could not complete its
+                            # preliminary HEAD request.
+                            target_url = state.target.resolved_url
+                            if not target_url and state.target.scheme:
+                                target_url = f"{state.target.scheme}://{state.target.domain}"
+                            candidates = [target_url] if target_url else [state.target.domain]
                         else:
                             candidates = [state.target.domain]
                     elif elig_type == "subdomains" and hasattr(state, "recon_state") and state.recon_state.subdomains:

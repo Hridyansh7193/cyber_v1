@@ -22,6 +22,13 @@ class TargetResolver:
         elif domain.startswith("https://"):
             domain = domain[8:]
             
+        # An explicitly supplied URL is an instruction from the user, not a
+        # best-effort discovery result.  Keep it as a fallback even when the
+        # lightweight HEAD probe fails (many development servers reject HEAD).
+        requested_url = state.resolved_url
+        if not requested_url and state.scheme:
+            requested_url = f"{state.scheme}://{domain}"
+
         protocols_to_try = [state.scheme] if state.scheme else ["https", "http"]
         
         resolved_url = None
@@ -43,6 +50,14 @@ class TargetResolver:
                 alive = True
                 port = urlparse(test_url).port or (443 if proto == "https" else 80)
                 break
+            except urllib.error.HTTPError:
+                # A 4xx/5xx response proves that the endpoint is reachable.
+                # Treat it as alive so downstream tools still receive the URL.
+                resolved_url = test_url
+                scheme = proto
+                alive = True
+                port = urlparse(test_url).port or (443 if proto == "https" else 80)
+                break
             except urllib.error.URLError:
                 continue
             except socket.timeout:
@@ -52,8 +67,8 @@ class TargetResolver:
                 
         return state.model_copy(update={
             "hostname": state.hostname or domain.split(":", 1)[0],
-            "resolved_url": resolved_url,
-            "scheme": scheme,
-            "port": port,
+            "resolved_url": resolved_url or requested_url,
+            "scheme": scheme or state.scheme,
+            "port": port or state.port,
             "alive": alive
         })
