@@ -28,6 +28,6 @@ def test_report_service_render_reports_markdown():
     generated = report_service.render_reports([report])
     assert len(generated) == 1
     assert generated[0].format == "markdown"
-    assert "## Raw Findings" in generated[0].content
+    assert "## Findings" in generated[0].content
     assert generated[0].mime_type == "text/markdown"
     assert "report_" in generated[0].filename

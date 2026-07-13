@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, ConfigDict, model_validator
 from enum import Enum
-from typing import Tuple
+from typing import Tuple, Any
 import hashlib
 
 class Severity(str, Enum):
@@ -36,7 +36,7 @@ class Finding(BaseModel):
     command: str = Field(default="")
     replay_command: str = Field(default="")
     parser: str = Field(default="unknown")
-    metadata: dict[str, str] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
     source_tool: str = Field(default="unknown")
     references: Tuple[str, ...] = Field(default=())
     

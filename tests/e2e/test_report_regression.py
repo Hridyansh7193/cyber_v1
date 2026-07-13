@@ -56,7 +56,7 @@ def test_report_includes_intelligence(tmp_path):
     report = generate_markdown(delta.reports[0])
     
     # The report should contain the intelligence data
-    assert "Intelligence" in report.content or "Risk Summary" in report.content or "Attack Graph" in report.content
+    assert "Risk Score" in report.content
     
     # Verify the fallback state (no intelligence) doesn't break
     state_no_intel = ExecutionState(

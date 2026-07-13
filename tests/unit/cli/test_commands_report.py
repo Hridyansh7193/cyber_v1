@@ -15,7 +15,7 @@ def test_report_cmd_not_found(mock_persistence):
 @patch("cli.commands_report.persistence_service")
 def test_report_cmd_success(mock_persistence):
     class DummySession:
-        pass
+        target_domain = "example.com"
     mock_persistence.get_session.return_value = DummySession()
     
     class DummyReport:

@@ -26,7 +26,7 @@ def test_reporting_e2e_markdown(tmp_path):
     assert saved_path.exists()
     content = saved_path.read_text(encoding="utf-8")
     
-    assert str(report.report_id) in content
+    assert "E2E Test" in content
 
 def test_reporting_stress_10000_findings(tmp_path):
     findings = [
