@@ -84,7 +84,14 @@ class PluginExecutor:
                 for elig_type in eligibility:
                     candidates = []
                     if elig_type == "domain":
-                        candidates = [state.target.domain]
+                        # HTTPX is the first active probe.  Prefer the URL
+                        # resolved by TargetResolver so a local target such as
+                        # ``http://localhost:3000`` retains its scheme and
+                        # port instead of being reduced to ``localhost:3000``.
+                        if plugin.metadata().name == "httpx" and state.target.resolved_url:
+                            candidates = [state.target.resolved_url]
+                        else:
+                            candidates = [state.target.domain]
                     elif elig_type == "subdomains" and hasattr(state, "recon_state") and state.recon_state.subdomains:
                         candidates = list(state.recon_state.subdomains)
                     elif elig_type == "alive_hosts" and hasattr(state, "recon_state") and state.recon_state.alive_hosts:

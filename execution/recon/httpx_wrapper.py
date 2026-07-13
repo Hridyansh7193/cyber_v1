@@ -19,7 +19,11 @@ class HttpxPlugin(BaseExecutionPlugin):
 
     def is_candidate(self, target: Any) -> bool:
         t = str(target).lower()
-        return not t.startswith("http://") and not t.startswith("https://") and "/" not in t
+        return (
+            t.startswith("http://")
+            or t.startswith("https://")
+            or ("/" not in t and bool(t))
+        )
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
         from services.tool_manager import ToolManager
