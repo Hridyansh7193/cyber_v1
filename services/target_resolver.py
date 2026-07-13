@@ -1,6 +1,7 @@
 import urllib.request
 import urllib.error
 import socket
+from urllib.parse import urlparse
 from schemas.target import TargetState
 
 class TargetResolver:
@@ -21,7 +22,7 @@ class TargetResolver:
         elif domain.startswith("https://"):
             domain = domain[8:]
             
-        protocols_to_try = ["https", "http"]
+        protocols_to_try = [state.scheme] if state.scheme else ["https", "http"]
         
         resolved_url = None
         scheme = None
@@ -40,7 +41,7 @@ class TargetResolver:
                 resolved_url = test_url
                 scheme = proto
                 alive = True
-                port = 443 if proto == "https" else 80
+                port = urlparse(test_url).port or (443 if proto == "https" else 80)
                 break
             except urllib.error.URLError:
                 continue
@@ -50,7 +51,7 @@ class TargetResolver:
                 continue
                 
         return state.model_copy(update={
-            "hostname": domain,
+            "hostname": state.hostname or domain.split(":", 1)[0],
             "resolved_url": resolved_url,
             "scheme": scheme,
             "port": port,

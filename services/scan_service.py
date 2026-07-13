@@ -64,7 +64,13 @@ class ScanService:
         if not job_id:
             job_id = self._registry.create_job(domain, metadata)
             
-        target = TargetService.normalize_target(domain, job_id, metadata)
+        try:
+            target = TargetService.normalize_target(domain, job_id, metadata)
+        except ValueError as exc:
+            error_msg = f"Invalid scan target: {exc}"
+            logger.error(error_msg)
+            self._registry.update_status(job_id, JobStatus.FAILED, error=error_msg)
+            return job_id
         logger.info(f"Scan started for target: {domain} (Job: {job_id}){' (Resuming)' if is_resume else ''}")
         
         # Initialize Runtime Context

@@ -10,18 +10,24 @@ class TargetService:
     def validate_domain(domain: str) -> str:
         if not domain:
             raise ValueError("Domain cannot be empty.")
-        if "://" in domain:
-            parsed = urlparse(domain)
-            domain = parsed.netloc or parsed.path
-        if not domain or "." not in domain:
+        parsed = urlparse(domain if "://" in domain else f"//{domain}")
+        host = parsed.hostname
+        if not host:
             raise ValueError(f"Invalid domain format: {domain}")
-        return domain.lower()
+        if parsed.port:
+            return f"{host}:{parsed.port}".lower()
+        return host.lower()
 
     @staticmethod
     def normalize_target(domain: str, session_id: str, metadata: Optional[Dict[str, Any]] = None) -> TargetState:
         valid_domain = TargetService.validate_domain(domain)
+        parsed = urlparse(domain if "://" in domain else f"//{domain}")
         return TargetState(
             session_id=session_id,
             domain=valid_domain,
-            start_time=datetime.now(timezone.utc)
+            start_time=datetime.now(timezone.utc),
+            hostname=parsed.hostname,
+            scheme=parsed.scheme or None,
+            port=parsed.port,
+            resolved_url=domain if parsed.scheme else None,
         )
