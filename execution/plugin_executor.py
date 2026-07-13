@@ -385,7 +385,12 @@ class PluginExecutor:
                             "command": result.command,
                             "arguments": final_command,
                             "exit_code": result.exit_code,
-                            "runtime": result.execution_time
+                            "runtime": result.execution_time,
+                            # Keep the concise runner exception alongside the
+                            # raw streams.  Raw API responses can be hundreds
+                            # of kilobytes and otherwise obscure the reason a
+                            # process returned a negative exit code.
+                            "error_message": result.error_message,
                         }, f, indent=2)
                 except Exception as e:
                     logger.error(f"Failed to write telemetry for {plugin_name}: {e}")
