@@ -13,7 +13,7 @@ from schemas.target import TargetState
 
 app = typer.Typer(help="Live Validation Engine (Phase 4)")
 
-@app.command("verify")
+@app.command("verify-plugins")
 @timed_cli_command
 def verify_plugins_cmd(
     target: str = typer.Argument(..., help="Target URL or domain to test against (e.g. scanme.nmap.org)"),
