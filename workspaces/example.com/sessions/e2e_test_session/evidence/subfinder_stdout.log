@@ -256,3 +256,8 @@ sub3.example.com
 sub3.example.com
 
 
+{"host":"sub1.example.com"}
+{"host":"sub2.example.com"}
+sub3.example.com
+
+

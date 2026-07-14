@@ -1,8 +1,9 @@
 {
-  "command": "httpx -silent -json -title -tech-detect -rt -u example.com",
+  "command": "",
   "arguments": [
     "httpx"
   ],
   "exit_code": 0,
-  "runtime": 1.0
+  "runtime": 0.0,
+  "error_message": ""
 }

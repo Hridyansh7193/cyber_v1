@@ -1,0 +1,180 @@
+{
+  "job_id": "86720779-a80a-4e32-9841-0e83a99ed03c",
+  "target": "example.local",
+  "started_at": "2026-07-14T22:00:46.517729",
+  "finished_at": "2026-07-14T22:00:51.752539Z",
+  "planner_profile": "default",
+  "bughunter_version": "1.0.0",
+  "trace": [
+    {
+      "stage": "recon",
+      "plugin": "subfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool subfinder is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\86720779-a80a-4e32-9841-0e83a99ed03c\\telemetry\\subfinder\\execution.json",
+      "timestamp": "2026-07-14T22:00:46.570567Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "assetfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool assetfinder is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\86720779-a80a-4e32-9841-0e83a99ed03c\\telemetry\\assetfinder\\execution.json",
+      "timestamp": "2026-07-14T22:00:46.570567Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "gau",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool gau is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\86720779-a80a-4e32-9841-0e83a99ed03c\\telemetry\\gau\\execution.json",
+      "timestamp": "2026-07-14T22:00:46.570567Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "httpx",
+      "received": 1,
+      "stdout_lines": 1,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.1,
+      "success": false,
+      "exit_code": 0,
+      "errors": [
+        "JSONDecodeError: Expecting value: line 1 column 1 (char 0) on line: mock output"
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\86720779-a80a-4e32-9841-0e83a99ed03c\\telemetry\\httpx\\execution.json",
+      "timestamp": "2026-07-14T22:00:46.663010Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "katana",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool katana is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\86720779-a80a-4e32-9841-0e83a99ed03c\\telemetry\\katana\\execution.json",
+      "timestamp": "2026-07-14T22:00:46.663010Z"
+    },
+    {
+      "stage": "js",
+      "plugin": "linkfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool linkfinder is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\86720779-a80a-4e32-9841-0e83a99ed03c\\telemetry\\linkfinder\\execution.json",
+      "timestamp": "2026-07-14T22:00:46.687486Z"
+    },
+    {
+      "stage": "js",
+      "plugin": "secretfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool secretfinder is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\86720779-a80a-4e32-9841-0e83a99ed03c\\telemetry\\secretfinder\\execution.json",
+      "timestamp": "2026-07-14T22:00:46.688011Z"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "nuclei",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool nuclei is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\86720779-a80a-4e32-9841-0e83a99ed03c\\telemetry\\nuclei\\execution.json",
+      "timestamp": "2026-07-14T22:00:46.721119Z"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "dalfox",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool dalfox is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\86720779-a80a-4e32-9841-0e83a99ed03c\\telemetry\\dalfox\\execution.json",
+      "timestamp": "2026-07-14T22:00:46.721119Z"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "subzy",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool subzy is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\86720779-a80a-4e32-9841-0e83a99ed03c\\telemetry\\subzy\\execution.json",
+      "timestamp": "2026-07-14T22:00:46.721119Z"
+    }
+  ]
+}

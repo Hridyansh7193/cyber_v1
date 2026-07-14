@@ -6,7 +6,7 @@ from schemas.state import ExecutionState
 from orchestrator.orchestration_state import OrchestrationState
 from orchestrator.checkpoint_manager import CheckpointManager
 
-@pytest.mark.skip(reason="Needs update for Milestone 3 TaskQueue orchestration logic")
+
 def test_checkpoint_with_intelligence(e2e_db, mock_subprocess_run, base_config, deterministic_target, tmp_path):
     cm = CheckpointManager(db_path=str(tmp_path / "checkpoints_intel.db"))
     app = build_graph(base_config, checkpointer=cm)
@@ -30,8 +30,17 @@ def test_checkpoint_with_intelligence(e2e_db, mock_subprocess_run, base_config, 
     
     def crash_report(state, config):
         raise ValueError("Simulated Report Crash")
-    
-    with patch("orchestrator.nodes.report_node.generate_reports", side_effect=crash_report):
+
+    from agents.deltas.intelligence_delta import IntelligenceDelta
+    from schemas.intelligence import IntelligenceState
+    from orchestrator.delta_applier import apply_intelligence_delta
+
+    def fake_analyze(state, config):
+        return IntelligenceDelta(intelligence=IntelligenceState(version=99))
+
+    with patch("orchestrator.nodes.report_node.generate_reports", side_effect=crash_report), \
+         patch("orchestrator.nodes.analysis_node.analyze_intelligence", side_effect=fake_analyze), \
+         patch("orchestrator.nodes.analysis_node.apply_finding_delta", new=apply_intelligence_delta):
         with pytest.raises(Exception, match="Simulated Report Crash"):
             app.invoke(graph_state_input, config=config_run)
             
@@ -40,7 +49,7 @@ def test_checkpoint_with_intelligence(e2e_db, mock_subprocess_run, base_config, 
     
     # Ensure intelligence was generated before the crash
     assert state_before_crash.intelligence is not None
-    assert state_before_crash.intelligence.planner is not None
+    assert state_before_crash.intelligence.version == 99
     
     # Second run: Graph resumes, Report succeeds
     # We don't patch report_node this time so it succeeds normally
@@ -55,7 +64,7 @@ def test_checkpoint_with_intelligence(e2e_db, mock_subprocess_run, base_config, 
     assert intel_before is not None
     assert intel_after is not None
     
-    assert intel_before.planner == intel_after.planner
+    assert intel_before.version == intel_after.version
     assert intel_before.correlated_findings == intel_after.correlated_findings
     assert intel_before.prioritized_assets == intel_after.prioritized_assets
     assert intel_before.attack_graph == intel_after.attack_graph

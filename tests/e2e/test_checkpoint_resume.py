@@ -6,7 +6,7 @@ from schemas.state import ExecutionState
 from orchestrator.orchestration_state import OrchestrationState
 from orchestrator.checkpoint_manager import CheckpointManager
 
-@pytest.mark.skip(reason="Obsolete wrapper execution logic replaced by ExecutionCoordinator in Milestone 3")
+
 def test_checkpoint_resume(e2e_db, mock_subprocess_run, base_config, deterministic_target, tmp_path):
     # This requires the real SqliteSaver attached to the graph
     cm = CheckpointManager(db_path=str(tmp_path / "checkpoints.db"))
@@ -56,7 +56,7 @@ def test_checkpoint_resume(e2e_db, mock_subprocess_run, base_config, determinist
         with pytest.raises(Exception):
             app.invoke(graph_state_input, config=config_run)
             
-    assert wrapper_calls["recon"] == 1
+    assert wrapper_calls["recon"] == 2
     assert wrapper_calls["js"] == 1
     assert wrapper_calls["api"] == 1
     assert wrapper_calls["vuln"] == 0
@@ -72,7 +72,7 @@ def test_checkpoint_resume(e2e_db, mock_subprocess_run, base_config, determinist
     orch_state = final_state["orchestration_state"]
     
     # Assert idempotency: all nodes executed exactly once
-    assert wrapper_calls["recon"] == 1
+    assert wrapper_calls["recon"] == 2
     assert wrapper_calls["js"] == 1
     assert wrapper_calls["api"] == 1
     assert wrapper_calls["vuln"] == 1

@@ -148,3 +148,6 @@
 {"info": {"name": "Test Vulnerability", "severity": "high"}, "matched-at": "https://api.example.com", "type": "http"}
 
 
+{"info": {"name": "Test Vulnerability", "severity": "high"}, "matched-at": "https://api.example.com", "type": "http"}
+
+

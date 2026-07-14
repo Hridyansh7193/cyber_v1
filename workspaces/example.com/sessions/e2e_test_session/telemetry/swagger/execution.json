@@ -4,5 +4,6 @@
     "swagger_discover"
   ],
   "exit_code": 0,
-  "runtime": 2.0
+  "runtime": 2.0,
+  "error_message": ""
 }

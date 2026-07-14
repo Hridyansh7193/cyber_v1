@@ -202,6 +202,7 @@ storage/file_storage.py
 storage/alembic/env.py
 storage/alembic/versions/37018f834149_create_tables.py
 storage/alembic/versions/4e8a4c5e2809_initial_schema.py
+storage/alembic/versions/8a5c97b93ea2_add_missing_finding_fields.py
 storage/migrations/__init__.py
 storage/models/__init__.py
 storage/repositories/__init__.py
@@ -220,3 +221,4 @@ storage/repositories/task_repository.py
 storage/repositories/url_repository.py
 utils/__init__.py
 utils/logger.py
+utils/recommendations.py

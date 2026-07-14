@@ -1,8 +1,9 @@
 {
-  "command": "katana -silent -json -u example.com",
+  "command": "katana -silent -j -depth 1 -crawl-duration 120s -list /tmp/target_list",
   "arguments": [
     "katana"
   ],
   "exit_code": 0,
-  "runtime": 1.0
+  "runtime": 1.0,
+  "error_message": ""
 }

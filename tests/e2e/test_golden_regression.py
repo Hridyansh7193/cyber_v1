@@ -12,7 +12,6 @@ from running BugHunter against these targets.  The tests verify:
 4. Determinism — re-parsing the same input yields identical output.
 """
 
-import json
 import os
 import pytest
 

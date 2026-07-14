@@ -8,7 +8,6 @@ Verifies that:
 """
 
 import time
-import threading
 from orchestrator.lifecycle_monitor import get_monitor, LifecycleMonitor
 
 

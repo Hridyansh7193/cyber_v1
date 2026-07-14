@@ -17,7 +17,7 @@ def test_config():
         reporting={"report_formats": ["json", "markdown"], "output_directories": {}}
     )
 
-@pytest.mark.skip(reason="Needs update for Milestone 3 TaskQueue orchestration logic")
+
 def test_resume_and_evidence(test_config, monkeypatch, tmp_path):
     import storage.models as models
     from storage.database import get_engine, override_db
@@ -31,12 +31,35 @@ def test_resume_and_evidence(test_config, monkeypatch, tmp_path):
     models.Base.metadata.create_all(engine)
 
     registry = JobRegistry()
-    adapter = OrchestratorAdapter(registry, test_config)
+    from orchestrator.checkpoint_manager import CheckpointManager
+    checkpointer = CheckpointManager(db_path=str(tmp_path / "checkpoints.db"))
+    adapter = OrchestratorAdapter(registry, test_config, checkpointer=checkpointer)
     persistence = PersistenceService()
-    scan_service = ScanService(adapter, registry, persistence)
     
+    from services.workspace_service import WorkspaceService
+    from services.report_service import ReportService
+    from runtime.workspace import WorkspaceManager
+    
+    workspace_dir = tmp_path / "workspaces"
+    workspace = WorkspaceManager(root_dir=str(workspace_dir))
+    workspace_svc = WorkspaceService(workspace)
+    report_svc = ReportService()
+    
+    scan_service = ScanService(adapter, registry, persistence, report_svc, workspace_svc)
+
     domain = "test-resume.com"
     job_id = registry.create_job(domain, {})
+
+    class MockDoctorReport:
+        summary_fail = 0
+        summary_pass = 10
+        summary_warn = 0
+
+    def mock_diagnose(self):
+        return MockDoctorReport()
+
+    from runtime.doctor import Doctor
+    monkeypatch.setattr(Doctor, "diagnose", mock_diagnose)
     
     # Mock ProcessRunner.run to succeed and return some stdout
     from execution.utils.process_runner import ProcessResult
@@ -62,15 +85,14 @@ def test_resume_and_evidence(test_config, monkeypatch, tmp_path):
     # Since we are creating ScanService manually, let's just run it synchronously.
     
     # Ensure evidence directory is created
-    from runtime.workspace import WorkspaceManager
-    workspace = WorkspaceManager()
+    # Use the workspace initialized earlier
     session_dir = workspace.create_session(job_id, domain, "default")
     
     # Run scan synchronously
     scan_service.run_scan_sync(domain, test_config, metadata={}, job_id=job_id)
     
     # Check if checkpoint exists
-    checkpoint_path = os.path.join(session_dir, "checkpoint.json")
+    checkpoint_path = tmp_path / "checkpoints.db"
     assert os.path.exists(checkpoint_path)
     
     # Verify evidence directory contains outputs

@@ -1,0 +1,17 @@
+name: bug_bounty
+description: Standard comprehensive scan for bug bounties.
+plugins:
+  subfinder: true
+  assetfinder: true
+  httpx: true
+  gau: true
+  nuclei: true
+  dalfox: true
+  ffuf: true
+  katana: true
+  linkfinder: true
+  secretfinder: true
+  trufflehog: true
+  subzy: true
+  swagger: true
+  graphql: true

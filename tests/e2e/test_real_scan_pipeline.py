@@ -32,7 +32,7 @@ def temp_workspace(tmp_path):
     ws.initialize()
     return ws
 
-@pytest.mark.skip(reason="Needs update for Milestone 3 TaskQueue orchestration logic")
+
 def test_real_scan_pipeline(mock_config, temp_workspace, monkeypatch):
     # Initialize DB (in-memory for tests)
     setup_test_db()
@@ -54,6 +54,16 @@ def test_real_scan_pipeline(mock_config, temp_workspace, monkeypatch):
     def mock_resolve(self, state):
         return state.model_copy(update={"hostname": state.domain, "resolved_url": f"http://{state.domain}", "scheme": "http", "alive": True})
         
+    class MockDoctorReport:
+        summary_fail = 0
+        summary_pass = 10
+        summary_warn = 0
+        
+    def mock_diagnose(self):
+        return MockDoctorReport()
+
+    from runtime.doctor import Doctor
+    monkeypatch.setattr(Doctor, "diagnose", mock_diagnose)
     monkeypatch.setattr(ProcessRunner, "run", mock_run)
     monkeypatch.setattr(TargetResolver, "resolve_target", mock_resolve)
     

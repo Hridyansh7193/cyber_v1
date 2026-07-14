@@ -1,0 +1,5 @@
+subfinder_timeout: 300
+nuclei_timeout: 600
+dalfox_timeout: 600
+ffuf_timeout: 600
+global_timeout: 3600

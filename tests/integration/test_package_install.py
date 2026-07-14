@@ -1,8 +1,7 @@
 import subprocess
 import sys
-import pytest
 
-@pytest.mark.skipif(sys.version_info < (3, 12), reason="Requires Python >= 3.12 for pyproject.toml requirements")
+
 def test_pip_install_and_import():
     # Install the package locally
     # It assumes that pyproject.toml exists in the current directory

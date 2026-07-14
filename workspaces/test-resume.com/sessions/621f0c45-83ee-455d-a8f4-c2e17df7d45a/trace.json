@@ -1,0 +1,9 @@
+{
+  "job_id": "621f0c45-83ee-455d-a8f4-c2e17df7d45a",
+  "target": "test-resume.com",
+  "started_at": "2026-07-14T21:48:41.884245",
+  "finished_at": "2026-07-14T21:48:47.027602Z",
+  "planner_profile": "default",
+  "bughunter_version": "1.0.0",
+  "trace": []
+}

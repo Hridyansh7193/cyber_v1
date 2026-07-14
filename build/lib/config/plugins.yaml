@@ -1,0 +1,15 @@
+nuclei:
+  severity:
+    - critical
+    - high
+  concurrency: 50
+ffuf:
+  threads: 40
+  timeout: 10
+katana:
+  depth: 3
+  concurrency: 10
+dalfox:
+  workers: 100
+subfinder:
+  threads: 10

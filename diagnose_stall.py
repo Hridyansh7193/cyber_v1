@@ -13,7 +13,6 @@ This script:
 """
 
 import json
-import os
 import sys
 import time
 from pathlib import Path
@@ -38,13 +37,13 @@ def diagnose_job(job_id: str, domain: str = "testphp.vulnweb.com", verbose: bool
     with open(checkpoint_path) as f:
         state = json.load(f)
     
-    print(f"✅ Checkpoint loaded")
+    print("✅ Checkpoint loaded")
     
     # Check execution state
     exec_state = state.get("execution_state", {})
     recon = exec_state.get("recon_state", {})
     
-    print(f"\n📊 Recon Discovery Results:")
+    print("\n📊 Recon Discovery Results:")
     print(f"   Subdomains: {len(recon.get('subdomains', []))} discovered")
     print(f"   Alive hosts: {len(recon.get('alive_hosts', []))} discovered")
     print(f"   URLs: {len(recon.get('urls', []))} discovered")
@@ -77,7 +76,7 @@ def diagnose_job(job_id: str, domain: str = "testphp.vulnweb.com", verbose: bool
     print(f"   Top 10 netlocs: {sorted(netlocs.items(), key=lambda x: -x[1])[:10]}")
     
     # Profile scope filtering (sample)
-    print(f"\n⏱️  Scope Filtering Profile (sample of first 1000 URLs):")
+    print("\n⏱️  Scope Filtering Profile (sample of first 1000 URLs):")
     
     target_scope = exec_state.get("target", {}).get("scope", [domain, f"*.{domain}"])
     print(f"   In-scope rules: {target_scope}")
@@ -113,7 +112,7 @@ def diagnose_job(job_id: str, domain: str = "testphp.vulnweb.com", verbose: bool
         
         if total_estimated > 300:
             print(f"   ⚠️  RISK: Filtering will take >{5} minutes!")
-            print(f"      Consider reducing URL discovery or optimizing filtering")
+            print("      Consider reducing URL discovery or optimizing filtering")
     
     print("\n" + "=" * 80)
 

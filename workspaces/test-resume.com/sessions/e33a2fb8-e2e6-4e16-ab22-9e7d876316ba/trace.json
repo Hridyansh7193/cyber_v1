@@ -1,0 +1,178 @@
+{
+  "job_id": "e33a2fb8-e2e6-4e16-ab22-9e7d876316ba",
+  "target": "test-resume.com",
+  "started_at": "2026-07-14T21:32:42.757797",
+  "finished_at": "2026-07-14T21:32:47.974904Z",
+  "planner_profile": "default",
+  "bughunter_version": "1.0.0",
+  "trace": [
+    {
+      "stage": "recon",
+      "plugin": "subfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool subfinder is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\e33a2fb8-e2e6-4e16-ab22-9e7d876316ba\\telemetry\\subfinder\\execution.json",
+      "timestamp": "2026-07-14T21:32:42.841263Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "assetfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool assetfinder is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\e33a2fb8-e2e6-4e16-ab22-9e7d876316ba\\telemetry\\assetfinder\\execution.json",
+      "timestamp": "2026-07-14T21:32:42.841263Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "gau",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool gau is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\e33a2fb8-e2e6-4e16-ab22-9e7d876316ba\\telemetry\\gau\\execution.json",
+      "timestamp": "2026-07-14T21:32:42.841263Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "httpx",
+      "received": 1,
+      "stdout_lines": 3,
+      "parsed": 2,
+      "stored": 2,
+      "runtime": 1.0,
+      "success": true,
+      "exit_code": 0,
+      "errors": [],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\e33a2fb8-e2e6-4e16-ab22-9e7d876316ba\\telemetry\\httpx\\execution.json",
+      "timestamp": "2026-07-14T21:32:43.004727Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "katana",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool katana is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\e33a2fb8-e2e6-4e16-ab22-9e7d876316ba\\telemetry\\katana\\execution.json",
+      "timestamp": "2026-07-14T21:32:43.004727Z"
+    },
+    {
+      "stage": "js",
+      "plugin": "linkfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool linkfinder is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\e33a2fb8-e2e6-4e16-ab22-9e7d876316ba\\telemetry\\linkfinder\\execution.json",
+      "timestamp": "2026-07-14T21:32:43.009556Z"
+    },
+    {
+      "stage": "js",
+      "plugin": "secretfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool secretfinder is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\e33a2fb8-e2e6-4e16-ab22-9e7d876316ba\\telemetry\\secretfinder\\execution.json",
+      "timestamp": "2026-07-14T21:32:43.009556Z"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "nuclei",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool nuclei is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\e33a2fb8-e2e6-4e16-ab22-9e7d876316ba\\telemetry\\nuclei\\execution.json",
+      "timestamp": "2026-07-14T21:32:43.029200Z"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "dalfox",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool dalfox is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\e33a2fb8-e2e6-4e16-ab22-9e7d876316ba\\telemetry\\dalfox\\execution.json",
+      "timestamp": "2026-07-14T21:32:43.029200Z"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "subzy",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool subzy is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\test-resume.com\\sessions\\e33a2fb8-e2e6-4e16-ab22-9e7d876316ba\\telemetry\\subzy\\execution.json",
+      "timestamp": "2026-07-14T21:32:43.029200Z"
+    }
+  ]
+}
