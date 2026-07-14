@@ -173,7 +173,8 @@ class PluginExecutor:
             offset_path = ""
             start_chunk_idx = 0
             if state.target.session_id:
-                offset_path = os.path.join("workspaces", state.target.domain, "sessions", state.target.session_id, "plugin_offsets.json")
+                from utils.target_utils import sanitize_workspace_target
+                offset_path = os.path.join("workspaces", sanitize_workspace_target(state.target.domain), "sessions", state.target.session_id, "plugin_offsets.json")
                 if os.path.exists(offset_path):
                     try:
                         with open(offset_path, "r", encoding="utf-8") as f:
@@ -356,7 +357,8 @@ class PluginExecutor:
             logger.info("=" * 80)
             # Evidence & Telemetry writing logic
             if state.target.session_id:
-                target_str = state.target.domain
+                from utils.target_utils import sanitize_workspace_target
+                target_str = sanitize_workspace_target(state.target.domain)
                 
                 # Standard evidence log appending
                 evidence_dir = os.path.join("workspaces", target_str, "sessions", state.target.session_id, "evidence")
@@ -380,10 +382,12 @@ class PluginExecutor:
                         f.write(result.stdout)
                     with open(os.path.join(telemetry_dir, "stderr.txt"), "w", encoding="utf-8") as f:
                         f.write(result.stderr)
+                    from execution.utils.redaction import redact_command_string, redact_command_list
                     with open(os.path.join(telemetry_dir, "execution.json"), "w", encoding="utf-8") as f:
                         json.dump({
-                            "command": result.command,
-                            "arguments": final_command,
+                            "command": redact_command_string(result.command),
+                            "arguments": redact_command_list(final_command),
+                            "execution_args": final_command,
                             "exit_code": result.exit_code,
                             "runtime": result.execution_time,
                             # Keep the concise runner exception alongside the
@@ -414,7 +418,8 @@ class PluginExecutor:
                 errors.append(result.error_message)
                 
             if state.target.session_id:
-                target_str = state.target.domain
+                from utils.target_utils import sanitize_workspace_target
+                target_str = sanitize_workspace_target(state.target.domain)
                 telemetry_dir = os.path.join("workspaces", target_str, "sessions", state.target.session_id, "telemetry", plugin_name)
                 try:
                     with open(os.path.join(telemetry_dir, "parsed.json"), "w", encoding="utf-8") as f:
@@ -470,11 +475,12 @@ class PluginExecutor:
                 else:
                     failure_category = "UNKNOWN"
 
+            from execution.utils.redaction import redact_command_string
             tool_res = ToolResult(
                 tool_name=plugin.metadata().name,
                 plugin_version=plugin.metadata().version,
                 binary_path=result.binary_path,
-                command=result.command,
+                command=redact_command_string(result.command),
                 working_directory=result.cwd,
                 success=success,
                 exit_code=result.exit_code,

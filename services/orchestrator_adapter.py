@@ -143,7 +143,8 @@ class OrchestratorAdapter:
                     
                     # Create checkpoint after each node
                     try:
-                        session_dir = os.path.join("workspaces", final_state.target.domain, "sessions", job_id)
+                        from utils.target_utils import sanitize_workspace_target
+                        session_dir = os.path.join("workspaces", sanitize_workspace_target(final_state.target.domain), "sessions", job_id)
                         if os.path.exists(session_dir):
                             checkpoint_path = os.path.join(session_dir, "checkpoint.json")
                             with open(checkpoint_path, "w", encoding="utf-8") as f:

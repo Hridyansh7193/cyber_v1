@@ -26,7 +26,8 @@ def diagnose_job(job_id: str, domain: str = "testphp.vulnweb.com", verbose: bool
     print("=" * 80)
     
     # Try to load checkpoint
-    session_dir = Path("workspaces") / domain / "sessions" / job_id
+    from utils.target_utils import sanitize_workspace_target
+    session_dir = Path("workspaces") / sanitize_workspace_target(domain) / "sessions" / job_id
     checkpoint_path = session_dir / "checkpoint.json"
     
     if not checkpoint_path.exists():

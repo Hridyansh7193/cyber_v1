@@ -107,7 +107,8 @@ class ScanService:
         # ``http://localhost:3000`` into nested ``http:/localhost:3000``
         # directories on POSIX, while plugin telemetry uses target.domain.
         # That split made reports and trace files appear to be missing.
-        workspace_target = target.domain
+        from utils.target_utils import sanitize_workspace_target
+        workspace_target = sanitize_workspace_target(target.domain)
 
         if self._persistence_service and not is_resume:
             self._persistence_service.create_session(job_id, workspace_target)
@@ -296,10 +297,11 @@ class ScanService:
                 try:
                     with open(r.report_path, 'r', encoding='utf-8') as f:
                         content = f.read()
+                    from pathlib import Path
                     return GeneratedReport(
                         report_id=r.id,
                         format=format.lower(),
-                        filename=r.report_path.split("/")[-1] if "/" in r.report_path else r.report_path.split("\\")[-1],
+                        filename=Path(r.report_path).name,
                         mime_type="application/json" if format.lower() == "json" else "text/markdown",
                         content=content
                     )

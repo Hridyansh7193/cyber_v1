@@ -25,8 +25,8 @@ def generate_csv(report: Report) -> GeneratedReport:
     
     filename = "report.csv"
     if report.report_path:
-        parts = report.report_path.replace("\\", "/").split("/")
-        filename = parts[-1].replace(".json", ".csv").replace(".md", ".csv")
+        from pathlib import Path
+        filename = Path(report.report_path).name.replace(".json", ".csv").replace(".md", ".csv")
         
     return GeneratedReport(
         report_id=report.report_id,

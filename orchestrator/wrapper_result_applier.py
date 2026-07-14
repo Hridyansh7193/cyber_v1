@@ -12,7 +12,8 @@ def _append_trace(state: ExecutionState, stage: str, tool_res: ToolResult, store
         
         workspace_file = ""
         if state.target.session_id:
-            workspace_file = os.path.join("workspaces", state.target.domain, "sessions", state.target.session_id, "telemetry", tool_res.tool_name, "execution.json")
+            from utils.target_utils import sanitize_workspace_target
+            workspace_file = os.path.join("workspaces", sanitize_workspace_target(state.target.domain), "sessions", state.target.session_id, "telemetry", tool_res.tool_name, "execution.json")
             
         trace = TraceEvent(
             stage=stage,

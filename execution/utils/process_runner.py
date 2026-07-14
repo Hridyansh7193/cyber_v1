@@ -1,15 +1,29 @@
 import subprocess
 import time
-import shutil
 import os
-from typing import List
+import signal
+import platform
 import logging
 import shlex
+from typing import List, Tuple, Optional
 from .timeout_manager import TimeoutManager
+from .executable_resolver import resolve_executable, IdentityState
 
 logger = logging.getLogger("process_runner")
 
 class ProcessResult:
+    """
+    ProcessRunner Return Contract:
+    - exit_code: int (0=Success, -1=Timeout, -2=Execution Error, -3=Missing Binary, >0=Process Failed)
+    - stdout: str (Decoded UTF-8, preserved even on timeout if partial output is available)
+    - stderr: str (Decoded UTF-8, preserved even on timeout if partial output is available)
+    - execution_time: float (Seconds the process ran)
+    - binary_path: str (Resolved path used for execution)
+    - command: str (Executed command)
+    - cwd: str (Working directory)
+    - error_message: str (Context for failures)
+    - success: bool (True if exit_code == 0)
+    """
     def __init__(self, exit_code: int, stdout: str, stderr: str, execution_time: float, 
                  binary_path: str = "", command: str = "", cwd: str = "", error_message: str = ""):
         self.exit_code = exit_code
@@ -32,58 +46,139 @@ class ProcessResult:
 
 class ProcessRunner:
     @staticmethod
+    def _start_process(command: List[str], cwd: str) -> subprocess.Popen:
+        """Starts a process in an isolated process group where supported."""
+        plat = platform.system()
+        
+        # We use PIPE to capture stdout and stderr, but read via communicate()
+        # to avoid deadlocks. This does hold output in memory. For current limits,
+        # we rely on the OS pipe buffer and Python's communicate string limits.
+        # Future enhancement: stream to disk if output limits are exceeded.
+        kwargs = {
+            "cwd": cwd,
+            "stdout": subprocess.PIPE,
+            "stderr": subprocess.PIPE,
+            "text": False, # Capture as bytes initially to prevent decoding crash on timeout
+            "shell": False,
+        }
+
+        if plat != "Windows":
+            kwargs["start_new_session"] = True
+        else:
+            # CREATE_NEW_PROCESS_GROUP
+            kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+
+        return subprocess.Popen(command, **kwargs)
+
+    @staticmethod
+    def _terminate_posix_process_tree(process: subprocess.Popen) -> None:
+        """Terminates a POSIX process tree gracefully using SIGTERM then SIGKILL."""
+        try:
+            pgid = os.getpgid(process.pid)
+            os.killpg(pgid, signal.SIGTERM)
+            
+            # Wait grace period
+            for _ in range(10):
+                if process.poll() is not None:
+                    return
+                time.sleep(0.1)
+                
+            if process.poll() is None:
+                os.killpg(pgid, signal.SIGKILL)
+        except OSError:
+            pass # Process might have already died
+            
+    @staticmethod
+    def _terminate_windows_process_tree(process: subprocess.Popen) -> None:
+        """Terminates a Windows process tree."""
+        try:
+            # We use process.terminate() for Windows as CTRL_BREAK_EVENT 
+            # behaves differently with console vs non-console.
+            # A full process tree kill on Windows might require `taskkill /T /F`
+            # but for standard subprocess isolation, terminate() is the safest fallback.
+            process.terminate()
+            for _ in range(10):
+                if process.poll() is not None:
+                    return
+                time.sleep(0.1)
+            if process.poll() is None:
+                process.kill()
+        except OSError:
+            pass
+
+    @staticmethod
+    def _collect_output(stdout_bytes: Optional[bytes], stderr_bytes: Optional[bytes]) -> Tuple[str, str]:
+        """Safely decode bytes to UTF-8 strings."""
+        stdout_str = stdout_bytes.decode('utf-8', errors='replace') if stdout_bytes else ""
+        stderr_str = stderr_bytes.decode('utf-8', errors='replace') if stderr_bytes else ""
+        return stdout_str, stderr_str
+
+    @staticmethod
     def run(command: List[str], tool_name: str, cwd: str = None, timeout: int = None) -> ProcessResult:
         """
-        Executes a subprocess with retries, timeout, and explicit path resolution.
+        Executes a subprocess with retries, timeout, explicit path resolution, 
+        and proper process group termination.
         """
         if timeout is None:
             timeout = TimeoutManager.get_timeout(tool_name)
         
         binary = command[0]
-        # On Windows, shutil.which handles .exe, .cmd, .bat implicitly.
-        binary_path = shutil.which(binary)
+        
+        # 1. Resolve Executable
+        resolution = resolve_executable(binary)
+        if not resolution.exists or not resolution.executable:
+            return ProcessResult(
+                exit_code=-3, stdout="", stderr="", execution_time=0.0,
+                binary_path="", command=shlex.join(command), cwd=cwd or os.getcwd(),
+                error_message=f"Executable '{binary}' not found or not executable."
+            )
+
+        binary_path = resolution.resolved_path
+        command[0] = binary_path
         
         command_str = shlex.join(command)
         cwd_str = cwd or os.getcwd()
 
-        if not binary_path:
-            return ProcessResult(
-                exit_code=-3, stdout="", stderr="", execution_time=0.0,
-                binary_path="", command=command_str, cwd=cwd_str,
-                error_message=f"Executable '{binary}' not found in PATH."
-            )
-
-        # Replace command[0] with absolute path to prevent ambiguity
-        command[0] = binary_path
-
         max_retries = 1
         for attempt in range(max_retries + 1):
             start_time = time.time()
+            process = None
             try:
-                process = subprocess.run(
-                    command,
-                    cwd=cwd,
-                    capture_output=True,
-                    text=True,
-                    timeout=timeout,
-                    shell=False
-                )
+                process = ProcessRunner._start_process(command, cwd_str)
+                stdout_bytes, stderr_bytes = process.communicate(timeout=timeout)
                 exit_code = process.returncode
-                stdout = process.stdout
-                stderr = process.stderr
+                stdout, stderr = ProcessRunner._collect_output(stdout_bytes, stderr_bytes)
                 error_message = ""
+                
             except subprocess.TimeoutExpired as e:
                 exit_code = -1
-                stdout = e.stdout.decode('utf-8', errors='replace') if isinstance(e.stdout, bytes) else (e.stdout or "")
-                stderr = f"Process timed out after {timeout} seconds"
-                error_message = stderr
-            except subprocess.CalledProcessError as e:
-                exit_code = e.returncode
-                stdout = e.stdout.decode('utf-8', errors='replace') if isinstance(e.stdout, bytes) else (e.stdout or "")
-                stderr = e.stderr.decode('utf-8', errors='replace') if isinstance(e.stderr, bytes) else (e.stderr or "")
-                error_message = f"Process failed with exit code {exit_code}"
+                
+                # Terminate process tree
+                if platform.system() != "Windows":
+                    ProcessRunner._terminate_posix_process_tree(process)
+                else:
+                    ProcessRunner._terminate_windows_process_tree(process)
+                    
+                # Collect partial output if possible. 
+                # communicate() after timeout/termination flushes remaining pipes.
+                try:
+                    partial_stdout, partial_stderr = process.communicate(timeout=2)
+                    # If communicate() returned partial output, e.stdout/e.stderr is sometimes None
+                    stdout_bytes = (e.stdout or b"") + (partial_stdout or b"")
+                    stderr_bytes = (e.stderr or b"") + (partial_stderr or b"")
+                except Exception:
+                    stdout_bytes = e.stdout or b""
+                    stderr_bytes = e.stderr or b""
+
+                stdout, stderr = ProcessRunner._collect_output(stdout_bytes, stderr_bytes)
+                error_message = f"Process timed out after {timeout} seconds"
+                
             except Exception as e:
-                # Catch-all to never crash the pipeline (OSError, ValueError, etc)
+                if process and process.poll() is None:
+                    try:
+                        process.kill()
+                    except Exception:
+                        pass
                 exit_code = -2
                 stdout = ""
                 stderr = str(e)
@@ -91,10 +186,6 @@ class ProcessRunner:
                 
             execution_time = time.time() - start_time
             
-            # If successful or it's a timeout/error we shouldn't retry, break. 
-            # We retry on unexpected internal failures or sometimes exit_code != 0 if desired, 
-            # but usually we only retry if it was a system failure.
-            # The spec says "retry policy (1 retry)". Let's retry if exit_code < -1 or if there's a crash.
             if exit_code in (-1, 0, 1, 2) or attempt == max_retries:
                 break
                 

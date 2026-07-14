@@ -59,8 +59,9 @@ def benchmark_cmd(
             import os
             import json
             from schemas.state import ExecutionState
+            from utils.target_utils import sanitize_workspace_target
             
-            checkpoint_path = os.path.join("workspaces", target, "sessions", job_id, "checkpoint.json")
+            checkpoint_path = os.path.join("workspaces", sanitize_workspace_target(target), "sessions", job_id, "checkpoint.json")
             final_state = None
             if os.path.exists(checkpoint_path):
                 with open(checkpoint_path, "r", encoding="utf-8") as f:

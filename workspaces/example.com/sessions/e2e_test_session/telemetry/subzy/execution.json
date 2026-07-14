@@ -3,6 +3,9 @@
   "arguments": [
     "subzy"
   ],
+  "execution_args": [
+    "subzy"
+  ],
   "exit_code": 0,
   "runtime": 0.0,
   "error_message": ""

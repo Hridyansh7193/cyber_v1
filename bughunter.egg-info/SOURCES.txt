@@ -100,8 +100,10 @@ execution/recon/httpx_wrapper.py
 execution/recon/katana_wrapper.py
 execution/recon/subfinder_wrapper.py
 execution/utils/__init__.py
+execution/utils/executable_resolver.py
 execution/utils/output_parser.py
 execution/utils/process_runner.py
+execution/utils/redaction.py
 execution/utils/timeout_manager.py
 execution/vuln/__init__.py
 execution/vuln/dalfox_wrapper.py
@@ -222,3 +224,4 @@ storage/repositories/url_repository.py
 utils/__init__.py
 utils/logger.py
 utils/recommendations.py
+utils/target_utils.py

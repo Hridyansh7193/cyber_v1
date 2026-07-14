@@ -43,8 +43,8 @@ def generate_sarif(report: Report) -> GeneratedReport:
     
     filename = "report.sarif"
     if report.report_path:
-        parts = report.report_path.replace("\\", "/").split("/")
-        filename = parts[-1].replace(".json", ".sarif").replace(".md", ".sarif")
+        from pathlib import Path
+        filename = Path(report.report_path).name.replace(".json", ".sarif").replace(".md", ".sarif")
 
     return GeneratedReport(
         report_id=report.report_id,

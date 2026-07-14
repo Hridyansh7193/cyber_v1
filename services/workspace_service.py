@@ -20,7 +20,13 @@ class WorkspaceService:
             reports_dir = session_dir / "reports"
             reports_dir.mkdir(parents=True, exist_ok=True)
             
-            file_path = reports_dir / report.filename
+            # Prevent path traversal in filename
+            safe_filename = Path(report.filename).name
+            file_path = (reports_dir / safe_filename).resolve()
+            
+            if not file_path.is_relative_to(reports_dir.resolve()):
+                raise ValueError(f"Path traversal detected in report filename: {report.filename}")
+                
             with open(file_path, "w", encoding=report.encoding) as f:
                 f.write(report.content)
             saved_paths.append(str(file_path))

@@ -19,10 +19,21 @@ class WorkspaceManager:
         return self.root_dir.exists() and self.root_dir.is_dir()
 
     def get_target_dir(self, target: str) -> Path:
-        return self.root_dir / target
+        from utils.target_utils import sanitize_workspace_target
+        target = sanitize_workspace_target(target)
+        target_path = (self.root_dir / target).resolve()
+        if not target_path.is_relative_to(self.root_dir.resolve()):
+            raise ValueError(f"Path traversal detected in target: {target}")
+        return target_path
 
     def get_session_dir(self, target: str, session_id: str) -> Path:
-        return self.get_target_dir(target) / "sessions" / session_id
+        target_dir = self.get_target_dir(target)
+        # Ensure session_id doesn't cause path traversal
+        session_id_safe = Path(session_id).name
+        session_path = (target_dir / "sessions" / session_id_safe).resolve()
+        if not session_path.is_relative_to(target_dir.resolve()):
+            raise ValueError(f"Path traversal detected in session_id: {session_id}")
+        return session_path
 
     def create_session(self, session_id: str, target: str, profile: str) -> Path:
         """Create a new session directory and session.json."""

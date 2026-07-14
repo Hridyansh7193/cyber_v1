@@ -66,7 +66,8 @@ def test_job_registry_imports_no_langgraph():
 def test_only_adapter_imports_orchestrator():
     # Only orchestrator_adapter.py inside services can import orchestrator
     for f in glob.glob("services/**/*.py", recursive=True):
-        if not f.replace("\\", "/").endswith("orchestrator_adapter.py"):
+        from pathlib import Path
+        if Path(f).name != "orchestrator_adapter.py":
             imports = get_imports(f)
             for imp in imports:
                 assert not imp.startswith("orchestrator")

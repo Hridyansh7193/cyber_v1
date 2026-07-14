@@ -1,0 +1,9 @@
+{
+  "command": "C:\\Python314\\Scripts\\httpx.EXE -silent -json -title -tech-detect -rt -l /tmp/target_list",
+  "arguments": [
+    "C:\\Python314\\Scripts\\httpx.EXE"
+  ],
+  "exit_code": 0,
+  "runtime": 0.1,
+  "error_message": ""
+}

@@ -45,8 +45,8 @@ def generate_burpxml(report: Report) -> GeneratedReport:
     
     filename = "report.xml"
     if report.report_path:
-        parts = report.report_path.replace("\\", "/").split("/")
-        filename = parts[-1].replace(".json", ".xml").replace(".md", ".xml")
+        from pathlib import Path
+        filename = Path(report.report_path).name.replace(".json", ".xml").replace(".md", ".xml")
 
     return GeneratedReport(
         report_id=report.report_id,
