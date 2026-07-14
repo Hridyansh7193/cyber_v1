@@ -5,11 +5,28 @@ import signal
 import platform
 import logging
 import shlex
+import threading
 from typing import List, Tuple, Optional
 from .timeout_manager import TimeoutManager
 from .executable_resolver import resolve_executable, IdentityState
 
 logger = logging.getLogger("process_runner")
+
+_active_processes = set()
+_active_processes_lock = threading.Lock()
+
+def terminate_all_active_processes():
+    """Forcefully terminates all active subprocesses. Used for emergency shutdown."""
+    with _active_processes_lock:
+        for process in list(_active_processes):
+            try:
+                if platform.system() != "Windows":
+                    ProcessRunner._terminate_posix_process_tree(process)
+                else:
+                    ProcessRunner._terminate_windows_process_tree(process)
+            except Exception:
+                pass
+        _active_processes.clear()
 
 class ProcessResult:
     """
@@ -145,6 +162,9 @@ class ProcessRunner:
             process = None
             try:
                 process = ProcessRunner._start_process(command, cwd_str)
+                with _active_processes_lock:
+                    _active_processes.add(process)
+                    
                 stdout_bytes, stderr_bytes = process.communicate(timeout=timeout)
                 exit_code = process.returncode
                 stdout, stderr = ProcessRunner._collect_output(stdout_bytes, stderr_bytes)
@@ -173,6 +193,14 @@ class ProcessRunner:
                 stdout, stderr = ProcessRunner._collect_output(stdout_bytes, stderr_bytes)
                 error_message = f"Process timed out after {timeout} seconds"
                 
+            except KeyboardInterrupt as e:
+                # Catch KeyboardInterrupt explicitly to terminate the process before re-raising
+                if platform.system() != "Windows":
+                    ProcessRunner._terminate_posix_process_tree(process)
+                else:
+                    ProcessRunner._terminate_windows_process_tree(process)
+                raise e
+                
             except Exception as e:
                 if process and process.poll() is None:
                     try:
@@ -183,6 +211,10 @@ class ProcessRunner:
                 stdout = ""
                 stderr = str(e)
                 error_message = f"Execution error: {str(e)}"
+            finally:
+                if process:
+                    with _active_processes_lock:
+                        _active_processes.discard(process)
                 
             execution_time = time.time() - start_time
             

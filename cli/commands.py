@@ -98,9 +98,15 @@ def report_cmd(
         console.print(f"[red]Error:[/red] Job target not found for job: {job_id}")
         raise typer.Exit(code=1)
         
+    from services.target_service import TargetService
+    try:
+        normalized_domain = TargetService.normalize_target(domain, job_id).domain
+    except Exception:
+        normalized_domain = domain
+        
     from cli.dependencies import workspace_service
     manager = workspace_service.workspace_manager
-    session_dir = manager.get_session_dir(domain, job_id)
+    session_dir = manager.get_session_dir(normalized_domain, job_id)
     reports_dir = session_dir / "reports"
     
     # Map 'md' to 'markdown' if needed by some internals, but file is report.md
