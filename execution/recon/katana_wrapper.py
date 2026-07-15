@@ -63,7 +63,12 @@ class KatanaPlugin(BaseExecutionPlugin):
         return parsed_json, errors
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
-        urls = [x.get("url", x.get("host", str(x))) if isinstance(x, dict) else str(x) for x in parsed]
+        from execution.utils.url_utils import normalize_url
+        urls = []
+        for x in parsed:
+            clean_url = normalize_url(x)
+            if clean_url:
+                urls.append(clean_url)
         return {NEW_URLS: urls}
 
 class KatanaWrapper:

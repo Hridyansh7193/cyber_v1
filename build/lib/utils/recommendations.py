@@ -28,6 +28,8 @@ def get_recommendation(template_id: Optional[str], category: Optional[str], meta
             return "Implement context-aware output encoding and a strong Content-Security-Policy."
         if "sqli" in tid or "sql-injection" in tid:
             return "Use parameterized queries or prepared statements for all database operations."
+        if "swagger" in tid or "api" in tid:
+            return "Restrict production documentation exposure when not intended. Require appropriate authentication/access control, and review the documented endpoints for unintended sensitive API disclosure."
         if "takeover" in tid:
             return "Remove the dangling DNS record or claim the external resource."
             

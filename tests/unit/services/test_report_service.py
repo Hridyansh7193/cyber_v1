@@ -15,7 +15,7 @@ def test_report_service_render_reports_json():
     assert generated[0].format == "json"
     assert "job-123" in generated[0].content
     assert generated[0].mime_type == "application/json"
-    assert "report_" in generated[0].filename
+    assert generated[0].filename == "report.json"
 
 def test_report_service_render_reports_markdown():
     report_service = ReportService()
@@ -30,4 +30,4 @@ def test_report_service_render_reports_markdown():
     assert generated[0].format == "markdown"
     assert "## Findings" in generated[0].content
     assert generated[0].mime_type == "text/markdown"
-    assert "report_" in generated[0].filename
+    assert generated[0].filename == "report.md"

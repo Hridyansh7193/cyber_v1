@@ -8,7 +8,7 @@ def generate_json(report: Report) -> GeneratedReport:
     return GeneratedReport(
         report_id=report.report_id,
         format="json",
-        filename=f"report_{report.report_id}.json",
+        filename="report.json",
         mime_type="application/json",
         encoding="utf-8",
         content=content,

@@ -58,22 +58,24 @@ class HttpxPlugin(BaseExecutionPlugin):
         return parsed_json, errors
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
+        from execution.utils.url_utils import normalize_url
         hosts = []
         tech_stack = {}
         waf_detected = {}
         for x in parsed:
+            clean_url = normalize_url(x)
+            if not clean_url:
+                continue
+            hosts.append(clean_url)
+            
             if isinstance(x, dict):
-                url = x.get("url", x.get("host", str(x)))
-                hosts.append(url)
                 techs = x.get("technologies", [])
                 if techs:
-                    tech_stack[url] = tuple(techs)
+                    tech_stack[clean_url] = tuple(techs)
                     waf_keywords = ["waf", "cloudflare", "akamai", "imperva", "sucuri", "incapsula", "aws web application firewall"]
                     is_waf = any(any(wk in t.lower() for wk in waf_keywords) for t in techs)
                     if is_waf:
-                        waf_detected[url] = True
-            else:
-                hosts.append(str(x))
+                        waf_detected[clean_url] = True
         return {
             NEW_HOSTS: hosts,
             "tech_stack": tech_stack,

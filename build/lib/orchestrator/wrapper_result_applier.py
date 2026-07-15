@@ -242,9 +242,19 @@ def apply_vuln_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResu
                     
                 from utils.recommendations import get_recommendation
                 recommendation = get_recommendation(template_id, category, vuln) or ""
+                
+                info_dict = vuln.get("info", {})
+                description = info_dict.get("description", "")
+                
+                classification = info_dict.get("classification", {})
+                cwe_ids = tuple(classification.get("cwe-id", [])) if isinstance(classification.get("cwe-id"), list) else ()
+                cve_ids = tuple(classification.get("cve-id", [])) if isinstance(classification.get("cve-id"), list) else ()
+                cvss_metrics = classification.get("cvss-metrics", "")
+                cvss_score = classification.get("cvss-score", 0.0)
                     
                 finding = Finding(
-                    title=vuln.get("info", {}).get("name", "Nuclei Finding"),
+                    title=info_dict.get("name", "Nuclei Finding"),
+                    description=description,
                     severity=severity,
                     confidence=Confidence.HIGH,
                     evidence=evidence_text,
@@ -261,7 +271,11 @@ def apply_vuln_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResu
                     command=tool_res.command or "",
                     parser="nuclei_json_parser",
                     metadata=vuln,
-                    references=tuple(vuln.get("info", {}).get("reference", [])) if isinstance(vuln.get("info", {}).get("reference"), list) else ()
+                    references=tuple(info_dict.get("reference", [])) if isinstance(info_dict.get("reference"), list) else (),
+                    cwe_ids=cwe_ids,
+                    cve_ids=cve_ids,
+                    cvss_score=float(cvss_score),
+                    cvss_vector=cvss_metrics
                 )
                 new_findings.append(finding)
                 

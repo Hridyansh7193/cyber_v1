@@ -21,7 +21,7 @@ def generate_markdown(report: Report) -> GeneratedReport:
     return GeneratedReport(
         report_id=report.report_id,
         format="markdown",
-        filename=f"report_{report.report_id}.md",
+        filename="report.md",
         mime_type="text/markdown",
         encoding="utf-8",
         content=content,

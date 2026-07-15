@@ -24,7 +24,7 @@ def test_json_renderer_basic():
     assert before == after
     
     assert generated.format == "json"
-    assert f"report_{report_id}.json" == generated.filename
+    assert "report.json" == generated.filename
     assert generated.mime_type == "application/json"
     assert generated.encoding == "utf-8"
     assert not generated.is_binary

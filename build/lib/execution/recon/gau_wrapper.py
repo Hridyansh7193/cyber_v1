@@ -56,4 +56,10 @@ class GauWrapper(BaseExecutionPlugin):
         return list(dict.fromkeys(results)), errors
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
-        return {NEW_URLS: parsed}
+        from execution.utils.url_utils import normalize_url
+        urls = []
+        for x in parsed:
+            clean_url = normalize_url(x)
+            if clean_url:
+                urls.append(clean_url)
+        return {NEW_URLS: urls}

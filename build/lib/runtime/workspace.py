@@ -55,7 +55,7 @@ class WorkspaceManager:
             session_id=session_id,
             target=target,
             profile=profile,
-            started_at=datetime.datetime.utcnow().isoformat(),
+            started_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
             status="running"
         )
         

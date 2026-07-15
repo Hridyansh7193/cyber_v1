@@ -105,6 +105,7 @@ execution/utils/output_parser.py
 execution/utils/process_runner.py
 execution/utils/redaction.py
 execution/utils/timeout_manager.py
+execution/utils/url_utils.py
 execution/vuln/__init__.py
 execution/vuln/dalfox_wrapper.py
 execution/vuln/ffuf_wrapper.py

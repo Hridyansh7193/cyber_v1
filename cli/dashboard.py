@@ -12,15 +12,27 @@ def render_final_dashboard(job_id: str):
     findings = persistence_service.get_findings_for_session(job_id)
     logs = persistence_service.get_logs_for_session(job_id)
 
+    # Get canonical error count from the generated report
+    error_count = 0
+    status = "PASS"
+    reports = persistence_service.get_reports_for_session(job_id)
+    if reports:
+        for r in reports:
+            if r.report_format == "json":
+                import json
+                try:
+                    with open(r.report_path, "r", encoding="utf-8") as f:
+                        report_data = json.load(f)
+                        error_count = report_data.get("error_count", 0)
+                        status = report_data.get("status", "PASS")
+                        break
+                except Exception:
+                    pass
+
     # Calculate Quality Score
-    # 100 base points.
-    # -5 for every ERROR log.
-    # -2 for every WARNING log.
-    # +1 for every finding.
     score = 100
-    errors = sum(1 for log in logs if log.level == "ERROR")
-    warnings = sum(1 for log in logs if log.level == "WARNING")
-    score -= (errors * 5)
+    warnings = 0
+    score -= (error_count * 5)
     score -= (warnings * 2)
     score += len(findings)
     score = max(0, min(100, score)) # Cap between 0 and 100
@@ -28,13 +40,13 @@ def render_final_dashboard(job_id: str):
     score_color = "green" if score >= 80 else "yellow" if score >= 50 else "red"
 
     console.print("\n")
-    console.print(Panel(f"[bold]Scan Completed:[/bold] {session.target_domain}\n[bold]Job ID:[/bold] {job_id}", border_style="blue"))
+    console.print(Panel(f"[bold]Scan Completed:[/bold] {session.target_domain}\n[bold]Job ID:[/bold] {job_id}\n[bold]Status:[/bold] {status}", border_style="blue"))
     
     # Execution Summary
     summary_table = Table(show_header=False, box=None)
     summary_table.add_row("[bold]Quality Score:[/bold]", f"[{score_color}]{score}/100[/{score_color}]")
     summary_table.add_row("[bold]Findings:[/bold]", str(len(findings)))
-    summary_table.add_row("[bold]Errors:[/bold]", str(errors))
+    summary_table.add_row("[bold]Errors:[/bold]", str(error_count))
     summary_table.add_row("[bold]Warnings:[/bold]", str(warnings))
     
     console.print(summary_table)

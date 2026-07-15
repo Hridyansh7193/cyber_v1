@@ -96,7 +96,31 @@ app.add_typer(verify_app, name="")
 app.add_typer(legacy_app, name="")
 
 def main():
-    app()
+    import signal
+    import os
+    import sys
+    
+    def sigint_handler(sig, frame):
+        print("\n[!] Scan interrupted by user. Cleaning up processes...")
+        try:
+            from execution.utils.process_runner import terminate_all_active_processes
+            terminate_all_active_processes()
+        except Exception:
+            pass
+        os._exit(1)
+        
+    signal.signal(signal.SIGINT, sigint_handler)
+    try:
+        app()
+    except KeyboardInterrupt:
+        # Fallback if the signal handler didn't catch it
+        print("\n[!] Scan interrupted by user. Cleaning up processes...")
+        try:
+            from execution.utils.process_runner import terminate_all_active_processes
+            terminate_all_active_processes()
+        except Exception:
+            pass
+        os._exit(1)
 
 if __name__ == "__main__":
     main()

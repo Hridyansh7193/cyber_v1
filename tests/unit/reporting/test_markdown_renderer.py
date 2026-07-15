@@ -22,7 +22,7 @@ def test_markdown_renderer_basic():
     assert before == after
     
     assert generated.format == "markdown"
-    assert "report_" in generated.filename
+    assert generated.filename == "report.md"
     assert generated.mime_type == "text/markdown"
     assert generated.encoding == "utf-8"
     assert not generated.is_binary

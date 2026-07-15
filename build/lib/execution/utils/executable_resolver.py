@@ -86,8 +86,20 @@ def resolve_executable(
                 error_message=f"Configured path '{configured_path}' is {'not executable' if exists else 'not found or not a file'}."
             )
 
-    # 2. Check system PATH using shutil.which
-    which_path = shutil.which(tool_name)
+    # 2. Check system PATH using shutil.which, filtering out virtual environments
+    path_env = os.environ.get("PATH", "")
+    clean_paths = []
+    for p in path_env.split(os.pathsep):
+        p_lower = p.lower()
+        if "venv" not in p_lower and ".venv" not in p_lower:
+            clean_paths.append(p)
+    go_bin = os.path.expanduser("~/go/bin")
+    if go_bin in clean_paths:
+        clean_paths.remove(go_bin)
+    clean_paths.insert(0, go_bin)
+    clean_path_env = os.pathsep.join(clean_paths)
+    
+    which_path = shutil.which(tool_name, path=clean_path_env)
     if which_path:
         return ExecutableResolution(
             tool_name=tool_name,
