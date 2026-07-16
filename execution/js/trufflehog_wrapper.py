@@ -10,7 +10,7 @@ class TrufflehogWrapper(BaseExecutionPlugin):
             name="trufflehog",
             version="3.0.0",
             description="Secret leakage detection",
-            capabilities=(Capability.SECRETS,),
+            capabilities=(Capability.SECRETS, Capability.JS),
             minimum_version="0.0.1",
             supported_tools=("trufflehog",),
             target_eligibility=("js_files", "urls"),

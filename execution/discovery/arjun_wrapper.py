@@ -76,8 +76,12 @@ class ArjunPlugin(BaseExecutionPlugin):
         # Arjun stdout parsing
         # Example output:
         # [i] Target: http://example.com/
-        # [+] Parameters found: id, page
-        for line in stdout.splitlines():
+        import re
+        
+        # Remove ANSI color codes
+        clean_stdout = re.sub(r'\x1b\[[0-9;]*[a-zA-Z]', '', stdout)
+        
+        for line in clean_stdout.splitlines():
             line = line.strip()
             if "Target:" in line or "Scanning:" in line:
                 m = re.search(r'(?:Target|Scanning):\s+(\S+)', line)

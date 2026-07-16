@@ -10,7 +10,7 @@ class FfufPlugin(BaseExecutionPlugin):
             name="ffuf",
             version="2.0.0",
             description="Content discovery via ffuf",
-            capabilities=(Capability.FUZZING, Capability.HTTP),
+            capabilities=(Capability.FUZZING, Capability.HTTP, Capability.VULN),
             minimum_version="0.0.1",
             supported_tools=("ffuf",),
             target_eligibility=("alive_hosts", "domain"),

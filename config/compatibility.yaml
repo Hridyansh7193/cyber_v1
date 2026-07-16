@@ -44,7 +44,7 @@ plugins:
   ffuf:
     versions:
       "2.x":
-        json_flag: "-o output.json -of json"
+        json_flag: "-o /dev/stdout -of json"
         silent_flag: "-s"
         timeout_flag: "-t"
         concurrency_flag: "-t"
