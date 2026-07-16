@@ -70,6 +70,8 @@ class HttpxPlugin(BaseExecutionPlugin):
             
             if isinstance(x, dict):
                 techs = x.get("technologies", [])
+                if not techs:
+                    techs = x.get("tech", [])
                 if techs:
                     tech_stack[clean_url] = tuple(techs)
                     waf_keywords = ["waf", "cloudflare", "akamai", "imperva", "sucuri", "incapsula", "aws web application firewall"]

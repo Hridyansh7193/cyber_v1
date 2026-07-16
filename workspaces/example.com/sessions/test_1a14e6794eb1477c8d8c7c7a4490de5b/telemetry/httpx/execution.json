@@ -1,0 +1,12 @@
+{
+  "command": "/mock/httpx -silent -json -title -tech-detect -rt -l /tmp/target_list",
+  "arguments": [
+    "/mock/httpx"
+  ],
+  "execution_args": [
+    "/mock/httpx"
+  ],
+  "exit_code": 0,
+  "runtime": 1.0,
+  "error_message": ""
+}

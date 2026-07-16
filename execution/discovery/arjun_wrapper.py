@@ -34,9 +34,9 @@ class ArjunPlugin(BaseExecutionPlugin):
         cmd = []
         if flags.get("silent_flag"):
             cmd.append(flags["silent_flag"])
-        if flags.get("json_flag"):
-            for f in flags["json_flag"].split():
-                cmd.append(f)
+        # if flags.get("json_flag"):
+        #     for f in flags["json_flag"].split():
+        #         cmd.append(f)
                 
         cmd.extend(["-t", "10"]) # 10 threads
         if target:

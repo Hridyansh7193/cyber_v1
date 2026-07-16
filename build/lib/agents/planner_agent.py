@@ -46,6 +46,7 @@ def plan(state: ExecutionState, config: BugHunterConfig) -> TaskQueueDelta:
     
     js_plugins    = ["linkfinder", "secretfinder", "trufflehog"]
     api_plugins   = ["swagger", "graphql"]
+    parameter_plugins = ["arjun"]
     vuln_plugins  = ["nuclei", "dalfox", "subzy", "ffuf"]
     
     has_waf = any(state.recon_state.waf_detected.values())
@@ -71,6 +72,7 @@ def plan(state: ExecutionState, config: BugHunterConfig) -> TaskQueueDelta:
     for p in active_recon_plugins:  tasks.append(Task(name=f"{_PREFIX_ACTIVE_RECON}{p}"))
     for p in js_plugins:  tasks.append(Task(name=f"{_PREFIX_JS}{p}"))
     for p in api_plugins: tasks.append(Task(name=f"{_PREFIX_API}{p}"))
+    for p in parameter_plugins: tasks.append(Task(name=f"{_PREFIX_PARAMETER}{p}"))
     for p in vuln_plugins: tasks.append(Task(name=f"{_PREFIX_VULN}{p}"))
     
     return TaskQueueDelta(task_queue=tuple(tasks))

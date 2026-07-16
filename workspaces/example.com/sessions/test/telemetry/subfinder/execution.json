@@ -1,5 +1,5 @@
 {
-  "command": "/mock/subfinder -silent -json -d example.com",
+  "command": "",
   "arguments": [
     "/mock/subfinder"
   ],
@@ -7,6 +7,6 @@
     "/mock/subfinder"
   ],
   "exit_code": 0,
-  "runtime": 1.0,
+  "runtime": 0.0,
   "error_message": ""
 }
