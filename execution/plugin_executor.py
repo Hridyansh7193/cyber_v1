@@ -152,7 +152,7 @@ class PluginExecutor:
             # ---------------------------------------------------------
             plugin_name = plugin.metadata().name
             
-            heavy_tools = {"katana", "nuclei", "ffuf", "dalfox"}
+            heavy_tools = {"katana", "nuclei", "ffuf", "dalfox", "arjun"}
             if plugin_name in heavy_tools:
                 heavy_cap = 100
                 if unique_targets > heavy_cap:
@@ -202,7 +202,7 @@ class PluginExecutor:
                     for header in config.auth.headers:
                         final_command.extend(["-H", header])
             
-            native_multi = {"nuclei", "dalfox", "httpx", "subzy", "katana"}
+            native_multi = {"nuclei", "dalfox", "httpx", "subzy", "katana", "arjun"}
             
             timeout_override = None
             if hasattr(config, "timeouts"):

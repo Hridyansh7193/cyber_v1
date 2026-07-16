@@ -20,6 +20,10 @@ class ArjunPlugin(BaseExecutionPlugin):
 
     def is_candidate(self, target: Any) -> bool:
         t = str(target).lower()
+        path = t.split("?")[0]
+        static_exts = (".css", ".js", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".woff", ".woff2", ".ttf", ".eot", ".ico", ".html", ".htm")
+        if any(path.endswith(ext) for ext in static_exts):
+            return False
         return t.startswith("http://") or t.startswith("https://")
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
