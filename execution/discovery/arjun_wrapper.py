@@ -42,7 +42,7 @@ class ArjunPlugin(BaseExecutionPlugin):
         #     for f in flags["json_flag"].split():
         #         cmd.append(f)
                 
-        cmd.extend(["-t", "10"]) # 10 threads
+        cmd.extend(["-t", "50"]) # 50 threads
         if target:
             if isinstance(target, list):
                 # Arjun supports file input with -i

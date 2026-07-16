@@ -154,7 +154,7 @@ class PluginExecutor:
             
             heavy_tools = {"katana", "nuclei", "ffuf", "dalfox", "arjun"}
             if plugin_name in heavy_tools:
-                heavy_cap = 100
+                heavy_cap = 10 if plugin_name == "arjun" else 100
                 if unique_targets > heavy_cap:
                     logger.warning(f"Plugin {plugin_name} is a heavy tool. Capping targets from {unique_targets} to {heavy_cap}.")
                     original_target_list = list(set(original_target_list))[:heavy_cap]
