@@ -11,6 +11,16 @@ class OutputParser:
         if not raw_output or not raw_output.strip():
             return [], []
             
+        # Try to parse as a single JSON object first
+        try:
+            parsed = json.loads(raw_output)
+            if isinstance(parsed, list):
+                return parsed, []
+            elif isinstance(parsed, dict):
+                return [parsed], []
+        except json.JSONDecodeError:
+            pass
+
         results = []
         errors = []
         for line in raw_output.strip().split('\n'):

@@ -45,6 +45,9 @@ class KatanaPlugin(BaseExecutionPlugin):
         
         # Add crawl duration limit to prevent long hangs (default to 120 seconds)
         cmd.extend(["-crawl-duration", "120s"])
+        
+        # Add headless mode for SPA crawling
+        cmd.extend(["-hl"])
             
         if isinstance(target, list):
             import tempfile
