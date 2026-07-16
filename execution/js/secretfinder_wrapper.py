@@ -57,19 +57,22 @@ class SecretFinderWrapper(BaseExecutionPlugin):
         results = []
         errors = []
         
-        # Check for logical errors first
-        combined_output = (stdout + "\n" + stderr).lower()
-        if "max retries exceeded" in combined_output or "connectiontimeout" in combined_output or "error" in combined_output:
-            for line in combined_output.splitlines():
-                if "error" in line or "max retries" in line or "timeout" in line:
-                    errors.append(f"Logical error detected: {line.strip()}")
-            if not results: # If we have logical errors and no results, it's a failure
-                return [], errors
-
         for line in stdout.splitlines():
             line = line.strip()
             if line and " -> " in line:
                 results.append(line)
+
+        # Check for logical errors
+        combined_output = (stdout + "\n" + stderr).lower()
+        fatal_keywords = ["max retries exceeded", "connectiontimeout", "traceback (most"]
+        
+        if any(k in combined_output for k in fatal_keywords):
+            for line in combined_output.splitlines():
+                if any(k in line for k in ["max retries", "timeout", "traceback"]):
+                    errors.append(f"Logical error detected: {line.strip()}")
+            if not results: # If we have logical errors and no results, it's a failure
+                return [], errors
+
         return list(dict.fromkeys(results)), errors
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:

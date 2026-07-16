@@ -61,15 +61,6 @@ class LinkFinderWrapper(BaseExecutionPlugin):
         results = []
         errors = []
         
-        # Check for logical errors first
-        combined_output = (stdout + "\n" + stderr).lower()
-        if "invalid input" in combined_output or "error" in combined_output or "timed out" in combined_output:
-            for line in combined_output.splitlines():
-                if "error" in line or "timed out" in line or "invalid input" in line:
-                    errors.append(f"Logical error detected: {line.strip()}")
-            if not results: # If we have logical errors and no results, it's a failure
-                return [], errors
-
         for line in lines:
             if line.startswith("[+]") or line.startswith("Running") or line.startswith("Invalid input") or line.startswith("URL:") or line.startswith("BANNER"):
                 continue
@@ -77,6 +68,18 @@ class LinkFinderWrapper(BaseExecutionPlugin):
                 results.append(line)
             else:
                 errors.append(f"Skipping potentially contaminated line: {line}")
+
+        # Check for logical errors
+        combined_output = (stdout + "\n" + stderr).lower()
+        fatal_keywords = ["connectiontimeout", "traceback (most"]
+        
+        if any(k in combined_output for k in fatal_keywords):
+            for line in combined_output.splitlines():
+                if any(k in line for k in ["timeout", "traceback"]):
+                    errors.append(f"Logical error detected: {line.strip()}")
+            if not results: # If we have logical errors and no results, it's a failure
+                return [], errors
+
         return list(dict.fromkeys(results)), errors
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
