@@ -1,0 +1,12 @@
+{
+  "command": "graphql_discover -u https://example.com/api/v1/users",
+  "arguments": [
+    "graphql_discover"
+  ],
+  "execution_args": [
+    "graphql_discover"
+  ],
+  "exit_code": 0,
+  "runtime": 2.0,
+  "error_message": ""
+}

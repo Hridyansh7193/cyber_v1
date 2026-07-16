@@ -15,19 +15,22 @@ def render_final_dashboard(job_id: str):
     # Get canonical error count from the generated report
     error_count = 0
     status = "PASS"
-    reports = persistence_service.get_reports_for_session(job_id)
-    if reports:
-        for r in reports:
-            if r.report_format == "json":
-                import json
-                try:
-                    with open(r.report_path, "r", encoding="utf-8") as f:
-                        report_data = json.load(f)
-                        error_count = report_data.get("error_count", 0)
-                        status = report_data.get("status", "PASS")
-                        break
-                except Exception:
-                    pass
+    try:
+        from cli.dependencies import workspace_service
+        from services.target_service import TargetService
+        import json
+        
+        normalized_target = TargetService.normalize_target(session.target_domain, job_id).domain
+        session_dir = workspace_service.workspace_manager.get_session_dir(normalized_target, job_id)
+        report_json_path = session_dir / "reports" / "report.json"
+        
+        if report_json_path.exists():
+            with open(report_json_path, "r", encoding="utf-8") as f:
+                report_data = json.load(f)
+                error_count = report_data.get("error_count", 0)
+                status = report_data.get("status", "PASS")
+    except Exception:
+        pass
 
     # Calculate Quality Score
     score = 100

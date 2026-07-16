@@ -1,0 +1,12 @@
+{
+  "command": "swagger_discover -u https://example.com/api/v1/users",
+  "arguments": [
+    "swagger_discover"
+  ],
+  "execution_args": [
+    "swagger_discover"
+  ],
+  "exit_code": 0,
+  "runtime": 2.0,
+  "error_message": ""
+}
