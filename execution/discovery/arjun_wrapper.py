@@ -42,6 +42,14 @@ class ArjunPlugin(BaseExecutionPlugin):
         #     for f in flags["json_flag"].split():
         #         cmd.append(f)
                 
+        # Use a minimal, highly-targeted wordlist to prevent Arjun from hanging/DOSing local apps
+        import tempfile
+        import os
+        wl_fd, wl_path = tempfile.mkstemp(prefix="arjun_wordlist_", text=True)
+        with os.fdopen(wl_fd, 'w') as f:
+            f.write("\n".join(["id", "page", "dir", "search", "category", "file", "class", "url", "query", "api", "q"]))
+        cmd.extend(["-w", wl_path])
+                
         cmd.extend(["-t", "50"]) # 50 threads
         if target:
             if isinstance(target, list):
