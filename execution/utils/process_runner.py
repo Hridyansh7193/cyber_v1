@@ -75,6 +75,7 @@ class ProcessRunner:
             "cwd": cwd,
             "stdout": subprocess.PIPE,
             "stderr": subprocess.PIPE,
+            "stdin": subprocess.DEVNULL,
             "text": False, # Capture as bytes initially to prevent decoding crash on timeout
             "shell": False,
         }

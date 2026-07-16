@@ -45,6 +45,9 @@ class KatanaPlugin(BaseExecutionPlugin):
         
         # Add crawl duration limit to prevent long hangs (default to 120 seconds)
         cmd.extend(["-crawl-duration", "120s"])
+        
+        # Add headless mode for SPA crawling
+        cmd.extend(["-hl"])
             
         if isinstance(target, list):
             import tempfile
@@ -59,8 +62,12 @@ class KatanaPlugin(BaseExecutionPlugin):
 
     def parse(self, stdout: str, stderr: str) -> tuple:
         from execution.utils.output_parser import OutputParser
-        parsed_json, errors = OutputParser.parse_json(stdout)
-        return parsed_json, errors
+        # Katana with -hl outputs Chromium logs to stdout which breaks JSON parsing
+        clean_stdout = "\n".join(line for line in stdout.split('\n') if not line.startswith("[launcher.Browser]"))
+        parsed_json, errors = OutputParser.parse_json(clean_stdout)
+        # Also filter out any remaining JSONDecodeErrors that might be Katana progress logs
+        filtered_errors = [e for e in errors if not (e.startswith("JSONDecodeError") and ("Progress:" in e or "Download:" in e or "Unzip:" in e))]
+        return parsed_json, filtered_errors
 
     def build_metadata(self, parsed: Any) -> Mapping[str, Any]:
         from execution.utils.url_utils import normalize_url

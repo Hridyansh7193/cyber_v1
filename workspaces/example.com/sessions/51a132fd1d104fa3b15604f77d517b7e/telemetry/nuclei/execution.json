@@ -1,0 +1,12 @@
+{
+  "command": "nuclei -silent -json -tags cve,high,critical,auth-bypass,takeover,xss,sqli,lfi,rce,misconfig,generic -severity critical,high,medium,low,info -c 50 -rl 150 -l /tmp/target_list",
+  "arguments": [
+    "nuclei"
+  ],
+  "execution_args": [
+    "nuclei"
+  ],
+  "exit_code": 0,
+  "runtime": 1.0,
+  "error_message": ""
+}

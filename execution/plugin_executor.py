@@ -243,7 +243,7 @@ class PluginExecutor:
                 logger.info(f"Resuming From    : Chunk {start_chunk_idx}")
             logger.info("=" * 80)
             
-            def process_command(cmd, idx, total, t_path=None):
+            def process_command(cmd, idx, total, t_paths=None):
                 cmd_start_time = time.time()
                 elapsed_total = int(cmd_start_time - plugin_start_time)
                 logger.info(f"[{plugin_name.upper()}] Command {idx} / {total} | Elapsed: {elapsed_total}s")
@@ -252,11 +252,12 @@ class PluginExecutor:
                 sanitized_cmd = [arg if not (isinstance(arg, str) and (arg.startswith(tempfile.gettempdir()) or "/tmp" in arg)) else "/tmp/target_list" for arg in cmd]
                 cmd_str = " ".join(map(str, sanitized_cmd))
                 
-                if t_path:
-                    try:
-                        os.remove(t_path)
-                    except OSError:
-                        pass
+                if t_paths:
+                    for tp in t_paths:
+                        try:
+                            os.remove(tp)
+                        except OSError:
+                            pass
                         
                 return result, cmd_str
 
@@ -290,7 +291,7 @@ class PluginExecutor:
                         )
                         if cmd_args:
                             final_commands.append(list(final_command) + list(cmd_args))
-                            temp_paths.append(None)
+                            temp_paths.append([])
                 else:
                     cmd_args = plugin.build_command(state,
                         {
@@ -302,13 +303,12 @@ class PluginExecutor:
                     )
                     if cmd_args:
                         final_commands.append(list(final_command) + list(cmd_args))
-                        t_path = None
+                        t_paths = []
                         for arg in cmd_args:
                             if isinstance(arg, str) and (arg.startswith(tempfile.gettempdir()) or "/tmp" in arg):
                                 if os.path.exists(arg):
-                                    t_path = arg
-                                    break
-                        temp_paths.append(t_path)
+                                    t_paths.append(arg)
+                        temp_paths.append(t_paths)
                         
                 if not final_commands:
                     continue

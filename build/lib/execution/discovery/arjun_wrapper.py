@@ -20,6 +20,10 @@ class ArjunPlugin(BaseExecutionPlugin):
 
     def is_candidate(self, target: Any) -> bool:
         t = str(target).lower()
+        path = t.split("?")[0]
+        static_exts = (".css", ".js", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".woff", ".woff2", ".ttf", ".eot", ".ico", ".html", ".htm")
+        if any(path.endswith(ext) for ext in static_exts):
+            return False
         return t.startswith("http://") or t.startswith("https://")
 
     def build_command(self, state: ExecutionState, config: Mapping[str, Any], target: Any = None) -> Tuple[str, ...]:
@@ -38,7 +42,15 @@ class ArjunPlugin(BaseExecutionPlugin):
         #     for f in flags["json_flag"].split():
         #         cmd.append(f)
                 
-        cmd.extend(["-t", "10"]) # 10 threads
+        # Use a minimal, highly-targeted wordlist to prevent Arjun from hanging/DOSing local apps
+        import tempfile
+        import os
+        wl_fd, wl_path = tempfile.mkstemp(prefix="arjun_wordlist_", text=True)
+        with os.fdopen(wl_fd, 'w') as f:
+            f.write("\n".join(["id", "page", "dir", "search", "category", "file", "class", "url", "query", "api", "q"]))
+        cmd.extend(["-w", wl_path])
+                
+        cmd.extend(["-t", "50"]) # 50 threads
         if target:
             if isinstance(target, list):
                 # Arjun supports file input with -i
@@ -64,11 +76,15 @@ class ArjunPlugin(BaseExecutionPlugin):
         # Arjun stdout parsing
         # Example output:
         # [i] Target: http://example.com/
-        # [+] Parameters found: id, page
-        for line in stdout.splitlines():
+        import re
+        
+        # Remove ANSI color codes
+        clean_stdout = re.sub(r'\x1b\[[0-9;]*[a-zA-Z]', '', stdout)
+        
+        for line in clean_stdout.splitlines():
             line = line.strip()
-            if "Target:" in line:
-                m = re.search(r'Target:\s+(\S+)', line)
+            if "Target:" in line or "Scanning:" in line:
+                m = re.search(r'(?:Target|Scanning):\s+(\S+)', line)
                 if m:
                     current_target = m.group(1)
             elif "Parameters found:" in line and current_target:

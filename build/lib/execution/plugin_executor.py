@@ -105,11 +105,26 @@ class PluginExecutor:
                     elif elig_type == "urls" and hasattr(state, "recon_state") and state.recon_state.urls:
                         candidates = list(state.recon_state.urls)
                     elif elig_type == "parameters" and hasattr(state, "recon_state") and state.recon_state.parameters:
-                        candidates = list(state.recon_state.parameters)
+                        candidates = []
+                        for p in state.recon_state.parameters:
+                            if isinstance(p, dict) and "url" in p and "parameters" in p:
+                                url = p["url"]
+                                sep = "&" if "?" in url else "?"
+                                for param in p["parameters"]:
+                                    candidates.append(f"{url}{sep}{param}=")
+                            else:
+                                candidates.append(str(p))
                     elif elig_type == "js_files" and hasattr(state, "js_state") and state.js_state.js_files:
                         candidates = list(state.js_state.js_files)
                     elif elig_type == "endpoints" and hasattr(state, "js_state") and state.js_state.endpoints:
-                        candidates = list(state.js_state.endpoints)
+                        base_url = state.target.resolved_url or (f"http://{state.target.domain}" if not state.target.domain.startswith("http") else state.target.domain)
+                        base_url = base_url.rstrip("/")
+                        candidates = []
+                        for ep in state.js_state.endpoints:
+                            if str(ep).startswith("/"):
+                                candidates.append(f"{base_url}{ep}")
+                            else:
+                                candidates.append(str(ep))
                         
                     # Filter candidates using plugin.is_candidate
                     filtered = [c for c in candidates if plugin.is_candidate(c)]
@@ -152,9 +167,9 @@ class PluginExecutor:
             # ---------------------------------------------------------
             plugin_name = plugin.metadata().name
             
-            heavy_tools = {"katana", "nuclei", "ffuf", "dalfox"}
+            heavy_tools = {"katana", "nuclei", "ffuf", "dalfox", "arjun"}
             if plugin_name in heavy_tools:
-                heavy_cap = 100
+                heavy_cap = 10 if plugin_name == "arjun" else 100
                 if unique_targets > heavy_cap:
                     logger.warning(f"Plugin {plugin_name} is a heavy tool. Capping targets from {unique_targets} to {heavy_cap}.")
                     original_target_list = list(set(original_target_list))[:heavy_cap]
@@ -202,7 +217,7 @@ class PluginExecutor:
                     for header in config.auth.headers:
                         final_command.extend(["-H", header])
             
-            native_multi = {"nuclei", "dalfox", "httpx", "subzy", "katana"}
+            native_multi = {"nuclei", "dalfox", "httpx", "subzy", "katana", "arjun"}
             
             timeout_override = None
             if hasattr(config, "timeouts"):
