@@ -1,8 +1,0 @@
-{
-  "command": "/home/akshat/go/bin/subfinder -silent -json -d testphp.vulnweb.com",
-  "arguments": [
-    "/home/akshat/go/bin/subfinder"
-  ],
-  "exit_code": 0,
-  "runtime": 31.88700556755066
-}

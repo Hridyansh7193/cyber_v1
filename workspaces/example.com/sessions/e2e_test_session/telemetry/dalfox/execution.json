@@ -1,8 +1,0 @@
-{
-  "command": "dalfox file /tmp/target_list --format json",
-  "arguments": [
-    "dalfox"
-  ],
-  "exit_code": 0,
-  "runtime": 1.0
-}

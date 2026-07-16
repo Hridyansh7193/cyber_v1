@@ -1,9 +1,0 @@
-{
-  "command": "/home/akshat/Desktop/project/cyber_v1/.venv/bin/python /home/akshat/Desktop/project/cyber_v1/execution/api/graphql_discovery.py -u http://testphp.vulnweb.com/http3A2F2Fwww.cq51edu.com2Flink.php3Furl3Dhttp3A2F2Fwww5f.biglobe.ne.jp2F7Ehokuto_hinata_itou_obi2FLapin2Fyybbs2Fyybbs.cgi",
-  "arguments": [
-    "/home/akshat/Desktop/project/cyber_v1/.venv/bin/python",
-    "/home/akshat/Desktop/project/cyber_v1/execution/api/graphql_discovery.py"
-  ],
-  "exit_code": 0,
-  "runtime": 151.88668131828308
-}

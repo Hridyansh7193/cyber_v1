@@ -1,8 +1,0 @@
-{
-  "command": "secretfinder -i http://testphp.vulnweb.com/assets/app50.js -o cli",
-  "arguments": [
-    "secretfinder"
-  ],
-  "exit_code": 0,
-  "runtime": 0.09999999999999999
-}

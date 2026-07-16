@@ -1,8 +1,0 @@
-{
-  "command": "C:\\Python314\\Scripts\\httpx.EXE -silent -json -title -tech-detect -rt -u test-resume.com",
-  "arguments": [
-    "C:\\Python314\\Scripts\\httpx.EXE"
-  ],
-  "exit_code": 0,
-  "runtime": 1.0
-}

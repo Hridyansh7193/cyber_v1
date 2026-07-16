@@ -1,8 +1,0 @@
-{
-  "command": "assetfinder --subs-only testphp.vulnweb.com",
-  "arguments": [
-    "assetfinder"
-  ],
-  "exit_code": 0,
-  "runtime": 0.01
-}

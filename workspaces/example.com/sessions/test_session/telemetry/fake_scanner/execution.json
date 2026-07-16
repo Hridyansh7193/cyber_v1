@@ -1,8 +1,0 @@
-{
-  "command": ".\\fake_scanner.PY example.com_49",
-  "arguments": [
-    "fake_scanner"
-  ],
-  "exit_code": -2,
-  "runtime": 0.03614497184753418
-}

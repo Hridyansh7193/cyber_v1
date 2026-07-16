@@ -1,8 +1,0 @@
-{
-  "command": "swagger_discover -u http://testphp.vulnweb.com/swagger.json",
-  "arguments": [
-    "swagger_discover"
-  ],
-  "exit_code": -3,
-  "runtime": 0.0
-}

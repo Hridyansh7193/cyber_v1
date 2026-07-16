@@ -1,8 +1,0 @@
-{
-  "command": "swagger_discover -u /api/v1/user/80",
-  "arguments": [
-    "swagger_discover"
-  ],
-  "exit_code": 0,
-  "runtime": 0.25000000000000006
-}

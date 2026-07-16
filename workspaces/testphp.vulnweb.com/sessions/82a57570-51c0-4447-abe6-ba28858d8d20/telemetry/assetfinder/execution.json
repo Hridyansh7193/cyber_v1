@@ -1,8 +1,0 @@
-{
-  "command": "/home/akshat/go/bin/assetfinder testphp.vulnweb.com",
-  "arguments": [
-    "/home/akshat/go/bin/assetfinder"
-  ],
-  "exit_code": 0,
-  "runtime": 3.8994760513305664
-}

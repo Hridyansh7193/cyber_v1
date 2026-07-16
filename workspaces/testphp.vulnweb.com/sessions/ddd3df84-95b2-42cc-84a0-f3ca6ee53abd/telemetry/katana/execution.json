@@ -1,8 +1,0 @@
-{
-  "command": "/home/akshat/go/bin/katana -silent -j -depth 1 -crawl-duration 120s -list /tmp/target_list",
-  "arguments": [
-    "/home/akshat/go/bin/katana"
-  ],
-  "exit_code": 1,
-  "runtime": 2.3236303329467773
-}

@@ -1,3 +1,0 @@
-Usage: httpx.EXE [OPTIONS] URL
-
-Error: No such option: -s

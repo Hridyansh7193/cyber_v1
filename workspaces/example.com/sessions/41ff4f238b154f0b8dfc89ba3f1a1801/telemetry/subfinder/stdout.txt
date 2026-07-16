@@ -1,1 +1,0 @@
-{"host": "sub1.example.com"}
