@@ -72,7 +72,7 @@ class SwaggerPlugin(BaseExecutionPlugin):
         
         return {
             NEW_SWAGGER: list(dict.fromkeys(swagger_urls)),
-            "new_endpoints": endpoints,
+            "new_api_endpoints": endpoints,
             "new_schemas": schemas
         }
 

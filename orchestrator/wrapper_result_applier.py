@@ -152,7 +152,7 @@ def apply_api_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResul
         output = tool_res.metadata or {}
         new_swagger.extend(output.get(NEW_SWAGGER, []))
         new_graphql.extend(output.get(NEW_GRAPHQL, []))
-        new_endpoints.extend(output.get("new_endpoints", []))
+        new_endpoints.extend(output.get("new_api_endpoints", []))
         new_schemas.extend(output.get("new_schemas", []))
         
         stored_count = sum(len(v) for k, v in output.items() if isinstance(v, (list, tuple)))

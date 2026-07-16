@@ -72,7 +72,7 @@ class GraphQLPlugin(BaseExecutionPlugin):
         
         return {
             NEW_GRAPHQL: list(dict.fromkeys(graphql_urls)),
-            "new_endpoints": endpoints,
+            "new_api_endpoints": endpoints,
             "new_schemas": schemas
         }
 
