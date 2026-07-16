@@ -31,8 +31,8 @@ def plan(state: ExecutionState, config: BugHunterConfig) -> TaskQueueDelta:
         tasks.append(Task(name="node:api_node", priority=TaskPriority.MEDIUM))
         
     # Vuln, Parameter, Analysis, Report nodes
-    tasks.append(Task(name="node:vulnerability_node", priority=TaskPriority.MEDIUM))
     tasks.append(Task(name="node:parameter_node", priority=TaskPriority.MEDIUM))
+    tasks.append(Task(name="node:vulnerability_node", priority=TaskPriority.MEDIUM))
     tasks.append(Task(name="node:analysis_node", priority=TaskPriority.HIGH))
     tasks.append(Task(name="node:report_node", priority=TaskPriority.HIGH))
     

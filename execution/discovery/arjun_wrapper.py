@@ -79,8 +79,8 @@ class ArjunPlugin(BaseExecutionPlugin):
         # [+] Parameters found: id, page
         for line in stdout.splitlines():
             line = line.strip()
-            if "Target:" in line:
-                m = re.search(r'Target:\s+(\S+)', line)
+            if "Target:" in line or "Scanning:" in line:
+                m = re.search(r'(?:Target|Scanning):\s+(\S+)', line)
                 if m:
                     current_target = m.group(1)
             elif "Parameters found:" in line and current_target:
