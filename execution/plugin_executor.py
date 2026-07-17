@@ -451,7 +451,7 @@ class PluginExecutor:
             if result.exit_code == 0 and not errors:
                 try:
                     metadata = plugin.build_metadata(parsed)
-                    valid_keys = {"new_subdomains", "new_hosts", "new_urls", "new_js_files", "new_endpoints", "new_secrets", "new_swagger", "new_graphql", "new_nuclei", "new_dalfox", "new_takeovers", "new_fuzz_results", "new_findings", "tech_stack", "waf_detected", "new_schemas", "new_parameters"}
+                    valid_keys = {"new_subdomains", "new_hosts", "new_urls", "new_js_files", "new_endpoints", "new_secrets", "new_swagger", "new_graphql", "new_nuclei", "new_dalfox", "new_takeovers", "new_fuzz_results", "new_findings", "tech_stack", "waf_detected", "new_schemas", "new_parameters", "new_api_endpoints"}
                     invalid_keys = [k for k in metadata.keys() if k not in valid_keys]
                     if invalid_keys:
                         errors.append(f"Invalid metadata keys returned by plugin: {invalid_keys}")
