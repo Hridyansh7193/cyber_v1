@@ -46,7 +46,7 @@ class NucleiPlugin(BaseExecutionPlugin):
                 tech_tags.add(tech.lower().replace(" ", "-"))
         
         # Run default templates to ensure we catch basic vulns
-        tags = ["cve", "high", "critical", "auth-bypass", "takeover", "xss", "sqli", "lfi", "rce", "misconfig", "generic"]
+        tags = ["cve", "high", "critical", "auth-bypass", "takeover", "xss", "sqli", "lfi", "rce", "misconfig"]
         if tech_tags:
             tags.extend(list(tech_tags))
         cmd.extend(["-tags", ",".join(tags)])

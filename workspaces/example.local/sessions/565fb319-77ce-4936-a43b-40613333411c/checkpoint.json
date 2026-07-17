@@ -1,0 +1,1446 @@
+{
+  "target": {
+    "domain": "example.local",
+    "scope": [],
+    "out_of_scope": [],
+    "session_id": "565fb319-77ce-4936-a43b-40613333411c",
+    "start_time": "2026-07-17T20:04:57.843732Z",
+    "hostname": "example.local",
+    "resolved_url": "http://example.local",
+    "scheme": "http",
+    "port": null,
+    "alive": true,
+    "redirect_chain": []
+  },
+  "task_queue": [
+    {
+      "name": "node:passive_recon_node",
+      "priority": "high",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    },
+    {
+      "name": "node:scope_enforcement_node",
+      "priority": "high",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    },
+    {
+      "name": "node:active_recon_node",
+      "priority": "high",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    },
+    {
+      "name": "node:js_node",
+      "priority": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    },
+    {
+      "name": "node:api_node",
+      "priority": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    },
+    {
+      "name": "node:parameter_node",
+      "priority": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    },
+    {
+      "name": "node:vulnerability_node",
+      "priority": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    },
+    {
+      "name": "node:analysis_node",
+      "priority": "high",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    },
+    {
+      "name": "node:report_node",
+      "priority": "high",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    },
+    {
+      "name": "plugin:passive_recon:subfinder",
+      "priority": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    },
+    {
+      "name": "plugin:passive_recon:assetfinder",
+      "priority": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    },
+    {
+      "name": "plugin:passive_recon:gau",
+      "priority": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    },
+    {
+      "name": "plugin:active_recon:httpx",
+      "priority": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    },
+    {
+      "name": "plugin:active_recon:katana",
+      "priority": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    },
+    {
+      "name": "plugin:js:linkfinder",
+      "priority": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    },
+    {
+      "name": "plugin:js:secretfinder",
+      "priority": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    },
+    {
+      "name": "plugin:js:trufflehog",
+      "priority": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    },
+    {
+      "name": "plugin:api:swagger",
+      "priority": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    },
+    {
+      "name": "plugin:api:graphql",
+      "priority": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    },
+    {
+      "name": "plugin:parameter:arjun",
+      "priority": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    },
+    {
+      "name": "plugin:vuln:nuclei",
+      "priority": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    },
+    {
+      "name": "plugin:vuln:dalfox",
+      "priority": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    },
+    {
+      "name": "plugin:vuln:subzy",
+      "priority": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    },
+    {
+      "name": "plugin:vuln:ffuf",
+      "priority": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "dependencies": []
+    }
+  ],
+  "recon_state": {
+    "subdomains": [],
+    "alive_hosts": [],
+    "urls": [],
+    "parameters": [],
+    "tech_stack": {},
+    "waf_detected": {}
+  },
+  "js_state": {
+    "js_files": [],
+    "endpoints": [],
+    "secrets": []
+  },
+  "api_state": {
+    "swagger_urls": [],
+    "graphql_urls": [],
+    "endpoints": [],
+    "schemas": []
+  },
+  "vuln_state": {
+    "nuclei_results": [],
+    "dalfox_results": [],
+    "takeovers": [],
+    "fuzz_results": []
+  },
+  "findings": [],
+  "reports": [
+    {
+      "report_id": "e49bd303-140b-544a-a83d-25c4039170b5",
+      "session_id": "565fb319-77ce-4936-a43b-40613333411c",
+      "report_path": "reports/report.json",
+      "report_format": "json",
+      "created_at": "2026-07-17T20:04:57.843732Z",
+      "timestamp": "2026-07-17T20:04:57.843732Z",
+      "findings": [],
+      "total_findings": 0,
+      "assets": {
+        "subdomains": [],
+        "hosts": [],
+        "urls": [],
+        "javascript": [],
+        "apis": [],
+        "secrets": [],
+        "swagger_endpoints": [],
+        "graphql_endpoints": [],
+        "technologies": [],
+        "response_titles": [],
+        "status_codes": [],
+        "takeovers": [],
+        "fuzz_results": [],
+        "measured_metrics": []
+      },
+      "telemetry": [
+        {
+          "tool": "assetfinder",
+          "version": "0.1.1",
+          "command": "",
+          "arguments": [],
+          "execution_time": 0.0,
+          "exit_code": -2,
+          "stdout_size": 0,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "Tool assetfinder is missing or not installed."
+          ],
+          "parser_errors": [],
+          "binary_path": "assetfinder",
+          "working_directory": null,
+          "exception_type": null,
+          "retry_count": 0
+        },
+        {
+          "tool": "dalfox",
+          "version": "2.8.0",
+          "command": "",
+          "arguments": [],
+          "execution_time": 0.0,
+          "exit_code": -2,
+          "stdout_size": 0,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "Tool dalfox is missing or not installed."
+          ],
+          "parser_errors": [],
+          "binary_path": "dalfox",
+          "working_directory": null,
+          "exception_type": null,
+          "retry_count": 0
+        },
+        {
+          "tool": "ffuf",
+          "version": "2.0.0",
+          "command": "",
+          "arguments": [],
+          "execution_time": 0.0,
+          "exit_code": -2,
+          "stdout_size": 0,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "Tool ffuf is missing or not installed."
+          ],
+          "parser_errors": [],
+          "binary_path": "ffuf",
+          "working_directory": null,
+          "exception_type": null,
+          "retry_count": 0
+        },
+        {
+          "tool": "gau",
+          "version": "2.1.2",
+          "command": "",
+          "arguments": [],
+          "execution_time": 0.0,
+          "exit_code": -2,
+          "stdout_size": 0,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "Tool gau is missing or not installed."
+          ],
+          "parser_errors": [],
+          "binary_path": "gau",
+          "working_directory": null,
+          "exception_type": null,
+          "retry_count": 0
+        },
+        {
+          "tool": "httpx",
+          "version": "1.6.0",
+          "command": "C:\\Python314\\Scripts\\httpx.EXE -silent -json -title -tech-detect -rt -l /tmp/target_list",
+          "arguments": [],
+          "execution_time": 0.1,
+          "exit_code": 0,
+          "stdout_size": 12,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "JSONDecodeError: Expecting value: line 1 column 1 (char 0) on line: mock output"
+          ],
+          "parser_errors": [],
+          "binary_path": "C:\\Python314\\Scripts\\httpx.EXE",
+          "working_directory": "C:\\Users\\hridy\\Desktop\\cyber",
+          "exception_type": null,
+          "retry_count": 0
+        },
+        {
+          "tool": "katana",
+          "version": "1.1.0",
+          "command": "",
+          "arguments": [],
+          "execution_time": 0.0,
+          "exit_code": -2,
+          "stdout_size": 0,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "Tool katana is missing or not installed."
+          ],
+          "parser_errors": [],
+          "binary_path": "katana",
+          "working_directory": null,
+          "exception_type": null,
+          "retry_count": 0
+        },
+        {
+          "tool": "linkfinder",
+          "version": "1.0.0",
+          "command": "",
+          "arguments": [],
+          "execution_time": 0.0,
+          "exit_code": -2,
+          "stdout_size": 0,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "Tool linkfinder is missing or not installed."
+          ],
+          "parser_errors": [],
+          "binary_path": "linkfinder",
+          "working_directory": null,
+          "exception_type": null,
+          "retry_count": 0
+        },
+        {
+          "tool": "nuclei",
+          "version": "2.9.0",
+          "command": "",
+          "arguments": [],
+          "execution_time": 0.0,
+          "exit_code": -2,
+          "stdout_size": 0,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "Tool nuclei is missing or not installed."
+          ],
+          "parser_errors": [],
+          "binary_path": "nuclei",
+          "working_directory": null,
+          "exception_type": null,
+          "retry_count": 0
+        },
+        {
+          "tool": "secretfinder",
+          "version": "1.0.0",
+          "command": "",
+          "arguments": [],
+          "execution_time": 0.0,
+          "exit_code": -2,
+          "stdout_size": 0,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "Tool secretfinder is missing or not installed."
+          ],
+          "parser_errors": [],
+          "binary_path": "secretfinder",
+          "working_directory": null,
+          "exception_type": null,
+          "retry_count": 0
+        },
+        {
+          "tool": "subfinder",
+          "version": "2.6.6",
+          "command": "",
+          "arguments": [],
+          "execution_time": 0.0,
+          "exit_code": -2,
+          "stdout_size": 0,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "Tool subfinder is missing or not installed."
+          ],
+          "parser_errors": [],
+          "binary_path": "subfinder",
+          "working_directory": null,
+          "exception_type": null,
+          "retry_count": 0
+        },
+        {
+          "tool": "subzy",
+          "version": "1.0.0",
+          "command": "",
+          "arguments": [],
+          "execution_time": 0.0,
+          "exit_code": -2,
+          "stdout_size": 0,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "Tool subzy is missing or not installed."
+          ],
+          "parser_errors": [],
+          "binary_path": "subzy",
+          "working_directory": null,
+          "exception_type": null,
+          "retry_count": 0
+        },
+        {
+          "tool": "trufflehog",
+          "version": "3.0.0",
+          "command": "",
+          "arguments": [],
+          "execution_time": 0.0,
+          "exit_code": -2,
+          "stdout_size": 0,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "Tool trufflehog is missing or not installed."
+          ],
+          "parser_errors": [],
+          "binary_path": "trufflehog",
+          "working_directory": null,
+          "exception_type": null,
+          "retry_count": 0
+        }
+      ],
+      "intelligence": null,
+      "operational": null,
+      "runtime_metadata": null,
+      "tool_versions": {
+        "httpx": "unknown",
+        "swagger_discover": "unknown",
+        "graphql_discover": "unknown",
+        "arjun": "unknown"
+      },
+      "tool_paths": {
+        "httpx": "C:\\Python314\\Scripts\\httpx.EXE",
+        "swagger_discover": "C:\\Users\\hridy\\Desktop\\cyber\\execution\\api\\swagger_discovery.py",
+        "graphql_discover": "C:\\Users\\hridy\\Desktop\\cyber\\execution\\api\\graphql_discovery.py",
+        "arjun": "C:\\Users\\hridy\\AppData\\Local\\Programs\\Python\\Python311\\Scripts\\arjun.EXE"
+      },
+      "skipped_plugins": [],
+      "failed_plugins": [
+        "subfinder",
+        "assetfinder",
+        "gau",
+        "httpx",
+        "katana",
+        "linkfinder",
+        "secretfinder",
+        "trufflehog",
+        "nuclei",
+        "dalfox",
+        "subzy",
+        "ffuf"
+      ],
+      "retry_counts": {},
+      "execution_timeline": [],
+      "plugin_statistics": {},
+      "pipeline_health": {
+        "doctor": "PASS",
+        "workspace": "PASS",
+        "evidence": "PASS",
+        "telemetry": "PASS",
+        "database": "PASS",
+        "resume": "PASS",
+        "report": "PASS"
+      },
+      "plugin_summaries": [
+        {
+          "plugin": "subfinder",
+          "version": "2.6.6",
+          "runtime": "0.00s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        },
+        {
+          "plugin": "assetfinder",
+          "version": "0.1.1",
+          "runtime": "0.00s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        },
+        {
+          "plugin": "gau",
+          "version": "2.1.2",
+          "runtime": "0.00s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        },
+        {
+          "plugin": "httpx",
+          "version": "1.6.0",
+          "runtime": "0.10s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        },
+        {
+          "plugin": "katana",
+          "version": "1.1.0",
+          "runtime": "0.00s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        },
+        {
+          "plugin": "linkfinder",
+          "version": "1.0.0",
+          "runtime": "0.00s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        },
+        {
+          "plugin": "secretfinder",
+          "version": "1.0.0",
+          "runtime": "0.00s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        },
+        {
+          "plugin": "trufflehog",
+          "version": "3.0.0",
+          "runtime": "0.00s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        },
+        {
+          "plugin": "nuclei",
+          "version": "2.9.0",
+          "runtime": "0.00s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        },
+        {
+          "plugin": "dalfox",
+          "version": "2.8.0",
+          "runtime": "0.00s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        },
+        {
+          "plugin": "subzy",
+          "version": "1.0.0",
+          "runtime": "0.00s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        },
+        {
+          "plugin": "ffuf",
+          "version": "2.0.0",
+          "runtime": "0.00s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        }
+      ],
+      "timeline": [
+        {
+          "plugin": "subfinder",
+          "runtime": "0.00s"
+        },
+        {
+          "plugin": "assetfinder",
+          "runtime": "0.00s"
+        },
+        {
+          "plugin": "gau",
+          "runtime": "0.00s"
+        },
+        {
+          "plugin": "httpx",
+          "runtime": "0.10s"
+        },
+        {
+          "plugin": "katana",
+          "runtime": "0.00s"
+        },
+        {
+          "plugin": "linkfinder",
+          "runtime": "0.00s"
+        },
+        {
+          "plugin": "secretfinder",
+          "runtime": "0.00s"
+        },
+        {
+          "plugin": "trufflehog",
+          "runtime": "0.00s"
+        },
+        {
+          "plugin": "nuclei",
+          "runtime": "0.00s"
+        },
+        {
+          "plugin": "dalfox",
+          "runtime": "0.00s"
+        },
+        {
+          "plugin": "subzy",
+          "runtime": "0.00s"
+        },
+        {
+          "plugin": "ffuf",
+          "runtime": "0.00s"
+        }
+      ],
+      "duration": "0s",
+      "start_time": "2026-07-17T20:04:57.843732+00:00",
+      "end_time": "2026-07-17T20:04:57.843732+00:00",
+      "status": "FAIL",
+      "error_count": 12,
+      "target": "http://example.local"
+    },
+    {
+      "report_id": "dd19c192-553b-5d9e-af79-27648213154d",
+      "session_id": "565fb319-77ce-4936-a43b-40613333411c",
+      "report_path": "reports/report.markdown",
+      "report_format": "markdown",
+      "created_at": "2026-07-17T20:04:57.843732Z",
+      "timestamp": "2026-07-17T20:04:57.843732Z",
+      "findings": [],
+      "total_findings": 0,
+      "assets": {
+        "subdomains": [],
+        "hosts": [],
+        "urls": [],
+        "javascript": [],
+        "apis": [],
+        "secrets": [],
+        "swagger_endpoints": [],
+        "graphql_endpoints": [],
+        "technologies": [],
+        "response_titles": [],
+        "status_codes": [],
+        "takeovers": [],
+        "fuzz_results": [],
+        "measured_metrics": []
+      },
+      "telemetry": [
+        {
+          "tool": "assetfinder",
+          "version": "0.1.1",
+          "command": "",
+          "arguments": [],
+          "execution_time": 0.0,
+          "exit_code": -2,
+          "stdout_size": 0,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "Tool assetfinder is missing or not installed."
+          ],
+          "parser_errors": [],
+          "binary_path": "assetfinder",
+          "working_directory": null,
+          "exception_type": null,
+          "retry_count": 0
+        },
+        {
+          "tool": "dalfox",
+          "version": "2.8.0",
+          "command": "",
+          "arguments": [],
+          "execution_time": 0.0,
+          "exit_code": -2,
+          "stdout_size": 0,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "Tool dalfox is missing or not installed."
+          ],
+          "parser_errors": [],
+          "binary_path": "dalfox",
+          "working_directory": null,
+          "exception_type": null,
+          "retry_count": 0
+        },
+        {
+          "tool": "ffuf",
+          "version": "2.0.0",
+          "command": "",
+          "arguments": [],
+          "execution_time": 0.0,
+          "exit_code": -2,
+          "stdout_size": 0,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "Tool ffuf is missing or not installed."
+          ],
+          "parser_errors": [],
+          "binary_path": "ffuf",
+          "working_directory": null,
+          "exception_type": null,
+          "retry_count": 0
+        },
+        {
+          "tool": "gau",
+          "version": "2.1.2",
+          "command": "",
+          "arguments": [],
+          "execution_time": 0.0,
+          "exit_code": -2,
+          "stdout_size": 0,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "Tool gau is missing or not installed."
+          ],
+          "parser_errors": [],
+          "binary_path": "gau",
+          "working_directory": null,
+          "exception_type": null,
+          "retry_count": 0
+        },
+        {
+          "tool": "httpx",
+          "version": "1.6.0",
+          "command": "C:\\Python314\\Scripts\\httpx.EXE -silent -json -title -tech-detect -rt -l /tmp/target_list",
+          "arguments": [],
+          "execution_time": 0.1,
+          "exit_code": 0,
+          "stdout_size": 12,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "JSONDecodeError: Expecting value: line 1 column 1 (char 0) on line: mock output"
+          ],
+          "parser_errors": [],
+          "binary_path": "C:\\Python314\\Scripts\\httpx.EXE",
+          "working_directory": "C:\\Users\\hridy\\Desktop\\cyber",
+          "exception_type": null,
+          "retry_count": 0
+        },
+        {
+          "tool": "katana",
+          "version": "1.1.0",
+          "command": "",
+          "arguments": [],
+          "execution_time": 0.0,
+          "exit_code": -2,
+          "stdout_size": 0,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "Tool katana is missing or not installed."
+          ],
+          "parser_errors": [],
+          "binary_path": "katana",
+          "working_directory": null,
+          "exception_type": null,
+          "retry_count": 0
+        },
+        {
+          "tool": "linkfinder",
+          "version": "1.0.0",
+          "command": "",
+          "arguments": [],
+          "execution_time": 0.0,
+          "exit_code": -2,
+          "stdout_size": 0,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "Tool linkfinder is missing or not installed."
+          ],
+          "parser_errors": [],
+          "binary_path": "linkfinder",
+          "working_directory": null,
+          "exception_type": null,
+          "retry_count": 0
+        },
+        {
+          "tool": "nuclei",
+          "version": "2.9.0",
+          "command": "",
+          "arguments": [],
+          "execution_time": 0.0,
+          "exit_code": -2,
+          "stdout_size": 0,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "Tool nuclei is missing or not installed."
+          ],
+          "parser_errors": [],
+          "binary_path": "nuclei",
+          "working_directory": null,
+          "exception_type": null,
+          "retry_count": 0
+        },
+        {
+          "tool": "secretfinder",
+          "version": "1.0.0",
+          "command": "",
+          "arguments": [],
+          "execution_time": 0.0,
+          "exit_code": -2,
+          "stdout_size": 0,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "Tool secretfinder is missing or not installed."
+          ],
+          "parser_errors": [],
+          "binary_path": "secretfinder",
+          "working_directory": null,
+          "exception_type": null,
+          "retry_count": 0
+        },
+        {
+          "tool": "subfinder",
+          "version": "2.6.6",
+          "command": "",
+          "arguments": [],
+          "execution_time": 0.0,
+          "exit_code": -2,
+          "stdout_size": 0,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "Tool subfinder is missing or not installed."
+          ],
+          "parser_errors": [],
+          "binary_path": "subfinder",
+          "working_directory": null,
+          "exception_type": null,
+          "retry_count": 0
+        },
+        {
+          "tool": "subzy",
+          "version": "1.0.0",
+          "command": "",
+          "arguments": [],
+          "execution_time": 0.0,
+          "exit_code": -2,
+          "stdout_size": 0,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "Tool subzy is missing or not installed."
+          ],
+          "parser_errors": [],
+          "binary_path": "subzy",
+          "working_directory": null,
+          "exception_type": null,
+          "retry_count": 0
+        },
+        {
+          "tool": "trufflehog",
+          "version": "3.0.0",
+          "command": "",
+          "arguments": [],
+          "execution_time": 0.0,
+          "exit_code": -2,
+          "stdout_size": 0,
+          "stderr_size": 0,
+          "parsed_objects": 0,
+          "success": false,
+          "timeout": false,
+          "wrapper_errors": [
+            "Tool trufflehog is missing or not installed."
+          ],
+          "parser_errors": [],
+          "binary_path": "trufflehog",
+          "working_directory": null,
+          "exception_type": null,
+          "retry_count": 0
+        }
+      ],
+      "intelligence": null,
+      "operational": null,
+      "runtime_metadata": null,
+      "tool_versions": {
+        "httpx": "unknown",
+        "swagger_discover": "unknown",
+        "graphql_discover": "unknown",
+        "arjun": "unknown"
+      },
+      "tool_paths": {
+        "httpx": "C:\\Python314\\Scripts\\httpx.EXE",
+        "swagger_discover": "C:\\Users\\hridy\\Desktop\\cyber\\execution\\api\\swagger_discovery.py",
+        "graphql_discover": "C:\\Users\\hridy\\Desktop\\cyber\\execution\\api\\graphql_discovery.py",
+        "arjun": "C:\\Users\\hridy\\AppData\\Local\\Programs\\Python\\Python311\\Scripts\\arjun.EXE"
+      },
+      "skipped_plugins": [],
+      "failed_plugins": [
+        "subfinder",
+        "assetfinder",
+        "gau",
+        "httpx",
+        "katana",
+        "linkfinder",
+        "secretfinder",
+        "trufflehog",
+        "nuclei",
+        "dalfox",
+        "subzy",
+        "ffuf"
+      ],
+      "retry_counts": {},
+      "execution_timeline": [],
+      "plugin_statistics": {},
+      "pipeline_health": {
+        "doctor": "PASS",
+        "workspace": "PASS",
+        "evidence": "PASS",
+        "telemetry": "PASS",
+        "database": "PASS",
+        "resume": "PASS",
+        "report": "PASS"
+      },
+      "plugin_summaries": [
+        {
+          "plugin": "subfinder",
+          "version": "2.6.6",
+          "runtime": "0.00s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        },
+        {
+          "plugin": "assetfinder",
+          "version": "0.1.1",
+          "runtime": "0.00s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        },
+        {
+          "plugin": "gau",
+          "version": "2.1.2",
+          "runtime": "0.00s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        },
+        {
+          "plugin": "httpx",
+          "version": "1.6.0",
+          "runtime": "0.10s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        },
+        {
+          "plugin": "katana",
+          "version": "1.1.0",
+          "runtime": "0.00s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        },
+        {
+          "plugin": "linkfinder",
+          "version": "1.0.0",
+          "runtime": "0.00s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        },
+        {
+          "plugin": "secretfinder",
+          "version": "1.0.0",
+          "runtime": "0.00s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        },
+        {
+          "plugin": "trufflehog",
+          "version": "3.0.0",
+          "runtime": "0.00s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        },
+        {
+          "plugin": "nuclei",
+          "version": "2.9.0",
+          "runtime": "0.00s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        },
+        {
+          "plugin": "dalfox",
+          "version": "2.8.0",
+          "runtime": "0.00s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        },
+        {
+          "plugin": "subzy",
+          "version": "1.0.0",
+          "runtime": "0.00s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        },
+        {
+          "plugin": "ffuf",
+          "version": "2.0.0",
+          "runtime": "0.00s",
+          "targets": 0,
+          "results": 0,
+          "status": "FAIL",
+          "reason": "Non-zero exit code or execution failed"
+        }
+      ],
+      "timeline": [
+        {
+          "plugin": "subfinder",
+          "runtime": "0.00s"
+        },
+        {
+          "plugin": "assetfinder",
+          "runtime": "0.00s"
+        },
+        {
+          "plugin": "gau",
+          "runtime": "0.00s"
+        },
+        {
+          "plugin": "httpx",
+          "runtime": "0.10s"
+        },
+        {
+          "plugin": "katana",
+          "runtime": "0.00s"
+        },
+        {
+          "plugin": "linkfinder",
+          "runtime": "0.00s"
+        },
+        {
+          "plugin": "secretfinder",
+          "runtime": "0.00s"
+        },
+        {
+          "plugin": "trufflehog",
+          "runtime": "0.00s"
+        },
+        {
+          "plugin": "nuclei",
+          "runtime": "0.00s"
+        },
+        {
+          "plugin": "dalfox",
+          "runtime": "0.00s"
+        },
+        {
+          "plugin": "subzy",
+          "runtime": "0.00s"
+        },
+        {
+          "plugin": "ffuf",
+          "runtime": "0.00s"
+        }
+      ],
+      "duration": "0s",
+      "start_time": "2026-07-17T20:04:57.843732+00:00",
+      "end_time": "2026-07-17T20:04:57.843732+00:00",
+      "status": "FAIL",
+      "error_count": 12,
+      "target": "http://example.local"
+    }
+  ],
+  "logs": [
+    {
+      "tool": "subfinder",
+      "version": "2.6.6",
+      "command": "",
+      "arguments": [],
+      "execution_time": 0.0,
+      "exit_code": -2,
+      "stdout_size": 0,
+      "stderr_size": 0,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Tool subfinder is missing or not installed."
+      ],
+      "parser_errors": [],
+      "binary_path": "subfinder",
+      "working_directory": null,
+      "exception_type": null,
+      "retry_count": 0
+    },
+    {
+      "tool": "assetfinder",
+      "version": "0.1.1",
+      "command": "",
+      "arguments": [],
+      "execution_time": 0.0,
+      "exit_code": -2,
+      "stdout_size": 0,
+      "stderr_size": 0,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Tool assetfinder is missing or not installed."
+      ],
+      "parser_errors": [],
+      "binary_path": "assetfinder",
+      "working_directory": null,
+      "exception_type": null,
+      "retry_count": 0
+    },
+    {
+      "tool": "gau",
+      "version": "2.1.2",
+      "command": "",
+      "arguments": [],
+      "execution_time": 0.0,
+      "exit_code": -2,
+      "stdout_size": 0,
+      "stderr_size": 0,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Tool gau is missing or not installed."
+      ],
+      "parser_errors": [],
+      "binary_path": "gau",
+      "working_directory": null,
+      "exception_type": null,
+      "retry_count": 0
+    },
+    {
+      "tool": "httpx",
+      "version": "1.6.0",
+      "command": "C:\\Python314\\Scripts\\httpx.EXE -silent -json -title -tech-detect -rt -l /tmp/target_list",
+      "arguments": [],
+      "execution_time": 0.1,
+      "exit_code": 0,
+      "stdout_size": 12,
+      "stderr_size": 0,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "JSONDecodeError: Expecting value: line 1 column 1 (char 0) on line: mock output"
+      ],
+      "parser_errors": [],
+      "binary_path": "C:\\Python314\\Scripts\\httpx.EXE",
+      "working_directory": "C:\\Users\\hridy\\Desktop\\cyber",
+      "exception_type": null,
+      "retry_count": 0
+    },
+    {
+      "tool": "katana",
+      "version": "1.1.0",
+      "command": "",
+      "arguments": [],
+      "execution_time": 0.0,
+      "exit_code": -2,
+      "stdout_size": 0,
+      "stderr_size": 0,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Tool katana is missing or not installed."
+      ],
+      "parser_errors": [],
+      "binary_path": "katana",
+      "working_directory": null,
+      "exception_type": null,
+      "retry_count": 0
+    },
+    {
+      "tool": "linkfinder",
+      "version": "1.0.0",
+      "command": "",
+      "arguments": [],
+      "execution_time": 0.0,
+      "exit_code": -2,
+      "stdout_size": 0,
+      "stderr_size": 0,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Tool linkfinder is missing or not installed."
+      ],
+      "parser_errors": [],
+      "binary_path": "linkfinder",
+      "working_directory": null,
+      "exception_type": null,
+      "retry_count": 0
+    },
+    {
+      "tool": "secretfinder",
+      "version": "1.0.0",
+      "command": "",
+      "arguments": [],
+      "execution_time": 0.0,
+      "exit_code": -2,
+      "stdout_size": 0,
+      "stderr_size": 0,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Tool secretfinder is missing or not installed."
+      ],
+      "parser_errors": [],
+      "binary_path": "secretfinder",
+      "working_directory": null,
+      "exception_type": null,
+      "retry_count": 0
+    },
+    {
+      "tool": "trufflehog",
+      "version": "3.0.0",
+      "command": "",
+      "arguments": [],
+      "execution_time": 0.0,
+      "exit_code": -2,
+      "stdout_size": 0,
+      "stderr_size": 0,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Tool trufflehog is missing or not installed."
+      ],
+      "parser_errors": [],
+      "binary_path": "trufflehog",
+      "working_directory": null,
+      "exception_type": null,
+      "retry_count": 0
+    },
+    {
+      "tool": "nuclei",
+      "version": "2.9.0",
+      "command": "",
+      "arguments": [],
+      "execution_time": 0.0,
+      "exit_code": -2,
+      "stdout_size": 0,
+      "stderr_size": 0,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Tool nuclei is missing or not installed."
+      ],
+      "parser_errors": [],
+      "binary_path": "nuclei",
+      "working_directory": null,
+      "exception_type": null,
+      "retry_count": 0
+    },
+    {
+      "tool": "dalfox",
+      "version": "2.8.0",
+      "command": "",
+      "arguments": [],
+      "execution_time": 0.0,
+      "exit_code": -2,
+      "stdout_size": 0,
+      "stderr_size": 0,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Tool dalfox is missing or not installed."
+      ],
+      "parser_errors": [],
+      "binary_path": "dalfox",
+      "working_directory": null,
+      "exception_type": null,
+      "retry_count": 0
+    },
+    {
+      "tool": "subzy",
+      "version": "1.0.0",
+      "command": "",
+      "arguments": [],
+      "execution_time": 0.0,
+      "exit_code": -2,
+      "stdout_size": 0,
+      "stderr_size": 0,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Tool subzy is missing or not installed."
+      ],
+      "parser_errors": [],
+      "binary_path": "subzy",
+      "working_directory": null,
+      "exception_type": null,
+      "retry_count": 0
+    },
+    {
+      "tool": "ffuf",
+      "version": "2.0.0",
+      "command": "",
+      "arguments": [],
+      "execution_time": 0.0,
+      "exit_code": -2,
+      "stdout_size": 0,
+      "stderr_size": 0,
+      "parsed_objects": 0,
+      "success": false,
+      "timeout": false,
+      "wrapper_errors": [
+        "Tool ffuf is missing or not installed."
+      ],
+      "parser_errors": [],
+      "binary_path": "ffuf",
+      "working_directory": null,
+      "exception_type": null,
+      "retry_count": 0
+    }
+  ],
+  "metadata": {},
+  "intelligence": null,
+  "operational": null
+}

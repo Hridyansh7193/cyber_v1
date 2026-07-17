@@ -66,13 +66,13 @@ class GraphQLPlugin(BaseExecutionPlugin):
                 if "url" in item:
                     graphql_urls.append(item["url"])
                 if "endpoint" in item:
-                    endpoints.append(item["endpoint"])
+                    endpoints.append({"path": item["endpoint"]})
                 if "schema" in item:
-                    schemas.append(item["schema"])
+                    schemas.append({"version": item["schema"]})
         
         return {
             NEW_GRAPHQL: list(dict.fromkeys(graphql_urls)),
-            "new_endpoints": endpoints,
+            "new_api_endpoints": endpoints,
             "new_schemas": schemas
         }
 

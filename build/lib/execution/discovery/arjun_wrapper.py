@@ -42,15 +42,31 @@ class ArjunPlugin(BaseExecutionPlugin):
         #     for f in flags["json_flag"].split():
         #         cmd.append(f)
                 
-        # Use a minimal, highly-targeted wordlist to prevent Arjun from hanging/DOSing local apps
-        import tempfile
-        import os
-        wl_fd, wl_path = tempfile.mkstemp(prefix="arjun_wordlist_", text=True)
-        with os.fdopen(wl_fd, 'w') as f:
-            f.write("\n".join(["id", "page", "dir", "search", "category", "file", "class", "url", "query", "api", "q"]))
-        cmd.extend(["-w", wl_path])
-                
         cmd.extend(["-t", "50"]) # 50 threads
+        
+        # Resolve a smaller wordlist to avoid huge scan times
+        import os
+        import site
+        
+        arjun_small = None
+        search_paths = getattr(site, "getsitepackages", lambda: [])()
+        if hasattr(site, "getusersitepackages"):
+            search_paths.append(site.getusersitepackages())
+        for p in search_paths:
+            candidate = os.path.join(p, "arjun", "db", "small.txt")
+            if os.path.exists(candidate):
+                arjun_small = candidate
+                break
+                
+        if arjun_small:
+            cmd.extend(["-w", arjun_small])
+        else:
+            import tempfile
+            fd, wl_path = tempfile.mkstemp(prefix="arjun_small_", text=True)
+            with os.fdopen(fd, 'w') as f:
+                fallback = ["id", "page", "dir", "search", "category", "file", "class", "url", "query", "api", "q", "name", "type", "user", "password", "email", "token", "action", "limit", "offset", "sort", "order", "filter", "key", "lang", "format", "version", "client", "cb", "callback", "jsonp", "debug", "test", "admin", "redirect", "next", "return", "view", "show", "mode", "profile", "cmd", "exec", "command", "module", "step", "status", "date", "time", "year", "month", "day", "start", "end", "from", "to", "size", "width", "height", "color", "style", "theme", "ref", "source", "campaign", "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "account", "role", "access", "auth", "session", "sid", "hash", "code", "client_id"]
+                f.write("\n".join(fallback))
+            cmd.extend(["-w", wl_path])
         if target:
             if isinstance(target, list):
                 # Arjun supports file input with -i

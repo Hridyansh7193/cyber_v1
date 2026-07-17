@@ -1,7 +1,7 @@
 class TimeoutManager:
-    FAST_TIMEOUT = 45
-    DEFAULT_TIMEOUT = 300
-    HEAVY_TIMEOUT = 600
+    FAST_TIMEOUT = 120
+    DEFAULT_TIMEOUT = 600
+    HEAVY_TIMEOUT = 1200
 
     @classmethod
     def get_timeout(cls, tool_name: str) -> int:

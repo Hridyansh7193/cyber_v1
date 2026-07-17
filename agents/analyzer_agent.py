@@ -19,32 +19,59 @@ def analyze_intelligence(state: ExecutionState, config: BugHunterConfig) -> Find
                 severity="medium",
                 confidence="low",
                 evidence="Sequential IDs detected in parameters alongside JWT usage.",
+                target=state.target.domain,
+                plugin="analyzer_agent",
+                source_tool="analyzer_agent",
                 references=()
             )
         )
         
     # Heuristic 2: GraphQL Introspection
     if state.api_state.graphql_urls:
+        from urllib.parse import urlparse
+        urls_str = ", ".join(state.api_state.graphql_urls)
+        first_url = state.api_state.graphql_urls[0]
+        try:
+            target = urlparse(first_url).netloc
+        except Exception:
+            target = "unknown"
+            
         inferred_findings.append(
             Finding(
                 id=str(uuid.uuid5(uuid.NAMESPACE_URL, "graphql_introspection")),
                 title="GraphQL API Exposed",
                 severity="info",
                 confidence="certain",
-                evidence=f"GraphQL endpoints found: {', '.join(state.api_state.graphql_urls)}",
+                evidence=f"GraphQL endpoints found: {urls_str}",
+                url=first_url,
+                target=target,
+                plugin="analyzer_agent",
+                source_tool="analyzer_agent",
                 references=()
             )
         )
         
     # Heuristic 3: Exposed Swagger / OpenAPI
     if state.api_state.swagger_urls:
+        from urllib.parse import urlparse
+        urls_str = ", ".join(state.api_state.swagger_urls)
+        first_url = state.api_state.swagger_urls[0]
+        try:
+            target = urlparse(first_url).netloc
+        except Exception:
+            target = "unknown"
+            
         inferred_findings.append(
             Finding(
                 id=str(uuid.uuid5(uuid.NAMESPACE_URL, "swagger_exposed")),
                 title="Swagger / OpenAPI Documentation Exposed",
                 severity="info",
                 confidence="certain",
-                evidence=f"Swagger endpoints found: {', '.join(state.api_state.swagger_urls)}",
+                evidence=f"Swagger endpoints found: {urls_str}",
+                url=first_url,
+                target=target,
+                plugin="analyzer_agent",
+                source_tool="analyzer_agent",
                 references=()
             )
         )
@@ -60,6 +87,9 @@ def analyze_intelligence(state: ExecutionState, config: BugHunterConfig) -> Find
                 severity="low",
                 confidence="medium",
                 evidence="WordPress site is exposing direct .php parameters which may bypass routing.",
+                target=state.target.domain,
+                plugin="analyzer_agent",
+                source_tool="analyzer_agent",
                 references=()
             )
         )

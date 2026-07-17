@@ -152,7 +152,7 @@ def apply_api_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResul
         output = tool_res.metadata or {}
         new_swagger.extend(output.get(NEW_SWAGGER, []))
         new_graphql.extend(output.get(NEW_GRAPHQL, []))
-        new_endpoints.extend(output.get("new_endpoints", []))
+        new_endpoints.extend(output.get("new_api_endpoints", []))
         new_schemas.extend(output.get("new_schemas", []))
         
         stored_count = sum(len(v) for k, v in output.items() if isinstance(v, (list, tuple)))
@@ -290,18 +290,30 @@ def apply_vuln_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResu
                     severity = Severity(sev_str)
                     
                 from utils.recommendations import get_recommendation
-                recommendation = get_recommendation("dalfox_payload", "xss", vuln) or ""
+                recommendation = get_recommendation("dalfox_payload", "xss", vuln) or "Implement context-aware output encoding to prevent XSS."
+                
+                poc_url = vuln.get("poc", "") or vuln.get("url", "")
+                payload = vuln.get("payload", "") or vuln.get("param", "")
+                
+                target = vuln.get("target")
+                if not target and poc_url:
+                    from urllib.parse import urlparse
+                    try:
+                        target = urlparse(poc_url).netloc
+                    except Exception:
+                        target = "unknown"
+                
                 finding = Finding(
-                    title=f"Dalfox XSS: {vuln.get('type', 'Unknown')}",
+                    title=f"Dalfox XSS: {vuln.get('type', 'Reflected')}",
                     severity=severity,
                     confidence=Confidence.HIGH,
-                    evidence=vuln.get("poc", ""),
-                    poc=vuln.get("message", ""),
+                    evidence=payload,
+                    poc=poc_url,
                     source_tool="dalfox",
                     plugin="dalfox",
                     tool_version=tool_res.plugin_version,
-                    target=vuln.get("target", "unknown"),
-                    url=vuln.get("url", "unknown"),
+                    target=target or "unknown",
+                    url=poc_url or "unknown",
                     template_id="dalfox_payload",
                     category="xss",
                     recommendation=recommendation,

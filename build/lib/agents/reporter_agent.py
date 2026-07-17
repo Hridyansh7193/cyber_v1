@@ -12,9 +12,17 @@ def generate_reports(state: ExecutionState, config: BugHunterConfig) -> ReportDe
     target_id = state.target.session_id
     report_time = state.target.start_time
     
-    # Calculate end time and duration
-    end_time_dt = datetime.now(timezone.utc)
-    duration_secs = int((end_time_dt - report_time).total_seconds())
+    from datetime import timedelta
+    
+    # Calculate end time and duration deterministically based on logs
+    # Since tools can run in parallel, sum of execution_time is an approximation of total CPU time,
+    # but we'll use it to ensure the report generation is a pure function.
+    if state.logs:
+        duration_secs = int(sum(log.execution_time for log in state.logs))
+    else:
+        duration_secs = 0
+        
+    end_time_dt = report_time + timedelta(seconds=duration_secs)
     duration_str = f"{duration_secs}s"
 
     # Process telemetry
@@ -26,6 +34,7 @@ def generate_reports(state: ExecutionState, config: BugHunterConfig) -> ReportDe
     measured_metrics = []
     has_httpx = False
     has_katana = False
+    has_api = False
     has_js = False
     has_subfinder = False
 
@@ -53,8 +62,9 @@ def generate_reports(state: ExecutionState, config: BugHunterConfig) -> ReportDe
         # Check success for measured metrics
         if ps_status == "PASS":
             if log.tool == "httpx": has_httpx = True
-            elif log.tool in ["katana", "gau"]: has_katana = True
-            elif log.tool == "js_discovery": has_js = True
+            elif log.tool in ["katana", "gau", "hakrawler", "waybackurls"]: has_katana = True
+            elif log.tool in ["linkfinder", "secretfinder"]: has_js = True
+            elif log.tool in ["swagger", "graphql_discovery"]: has_api = True
             elif log.tool in ["subfinder", "assetfinder"]: has_subfinder = True
 
     if has_httpx: measured_metrics.append("alive_hosts")
@@ -62,6 +72,8 @@ def generate_reports(state: ExecutionState, config: BugHunterConfig) -> ReportDe
     if has_js: 
         measured_metrics.append("javascript")
         measured_metrics.append("secrets")
+    if has_api:
+        measured_metrics.append("apis")
     if has_subfinder: measured_metrics.append("subdomains")
 
     if error_count == 0:

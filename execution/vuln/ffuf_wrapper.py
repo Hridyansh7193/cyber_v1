@@ -89,7 +89,7 @@ class FfufPlugin(BaseExecutionPlugin):
         parsed_json, errors = OutputParser.parse_json(stdout)
         results = []
         for data in parsed_json:
-            if "results" in data:
+            if isinstance(data, dict) and "results" in data:
                 results.extend(data["results"])
             else:
                 results.append(data)
