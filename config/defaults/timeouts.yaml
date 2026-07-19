@@ -1,5 +1,5 @@
 subfinder_timeout: 300
-nuclei_timeout: 600
-dalfox_timeout: 600
-ffuf_timeout: 600
-global_timeout: 3600
+nuclei_timeout: 3600
+dalfox_timeout: 1200
+ffuf_timeout: 1200
+global_timeout: 7200

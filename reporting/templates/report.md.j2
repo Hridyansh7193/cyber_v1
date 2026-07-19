@@ -32,7 +32,7 @@
 
 ## Coverage
 * **Domains:** {{ report.assets.subdomains | length if "subdomains" in report.assets.measured_metrics else "NOT_MEASURED" }}
-* **Alive Hosts:** {{ report.assets.hosts | length if "hosts" in report.assets.measured_metrics else "NOT_MEASURED" }}
+* **Alive Hosts:** {{ report.assets.hosts | length if "alive_hosts" in report.assets.measured_metrics else "NOT_MEASURED" }}
 * **URLs:** {{ report.assets.urls | length if "urls" in report.assets.measured_metrics else "NOT_MEASURED" }}
 * **JS Files:** {{ report.assets.javascript | length if "javascript" in report.assets.measured_metrics else "NOT_MEASURED" }}
 * **Secrets:** {{ report.assets.secrets | length if "secrets" in report.assets.measured_metrics else "NOT_MEASURED" }}

@@ -92,11 +92,14 @@ def generate_reports(state: ExecutionState, config: BugHunterConfig) -> ReportDe
             fuzz_res = list(state.recon_state.parameters)
             fuzz_res.extend(str(f.get("url", f)) if isinstance(f, dict) else str(f) for f in state.vuln_state.fuzz_results)
             
+            js_from_urls = [u for u in state.recon_state.urls if ".js" in u.split("?")[0].lower()]
+            all_js = tuple(set(list(state.js_state.js_files) + js_from_urls))
+            
             assets = DiscoveredAssets(
                 subdomains=state.recon_state.subdomains,
                 hosts=state.recon_state.alive_hosts,
                 urls=state.recon_state.urls,
-                javascript=state.js_state.js_files,
+                javascript=all_js,
                 apis=tuple(list(state.api_state.swagger_urls) + list(state.api_state.graphql_urls)),
                 secrets=tuple(s.get("secret", str(s)) if isinstance(s, dict) else str(s) for s in state.js_state.secrets),
                 technologies=tuple(set(tech for techs in state.recon_state.tech_stack.values() for tech in techs)),

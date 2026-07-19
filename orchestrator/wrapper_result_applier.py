@@ -292,10 +292,13 @@ def apply_vuln_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResu
                 from utils.recommendations import get_recommendation
                 recommendation = get_recommendation("dalfox_payload", "xss", vuln) or "Implement context-aware output encoding to prevent XSS."
                 
-                poc_url = vuln.get("poc", "") or vuln.get("url", "")
-                payload = vuln.get("payload", "") or vuln.get("param", "")
+                # Ensure case-insensitivity for dalfox JSON output
+                vuln_lower = {k.lower(): v for k, v in vuln.items()}
                 
-                target = vuln.get("target")
+                poc_url = vuln_lower.get("poc", "") or vuln_lower.get("url", "")
+                payload = vuln_lower.get("payload", "") or vuln_lower.get("param", "")
+                
+                target = vuln_lower.get("target")
                 if not target and poc_url:
                     from urllib.parse import urlparse
                     try:
