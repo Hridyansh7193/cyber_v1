@@ -295,10 +295,20 @@ def apply_vuln_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResu
                 # Ensure case-insensitivity for dalfox JSON output
                 vuln_lower = {k.lower(): v for k, v in vuln.items()}
                 
+                data_dict = vuln_lower.get("data", {})
+                if isinstance(data_dict, dict) and data_dict:
+                    data_lower = {k.lower(): v for k, v in data_dict.items()}
+                    vuln_lower.update(data_lower)
+                    
                 poc_url = vuln_lower.get("poc", "") or vuln_lower.get("url", "")
                 payload = vuln_lower.get("payload", "") or vuln_lower.get("param", "")
                 
                 target = vuln_lower.get("target")
+                
+                # Default type if nested
+                vuln_type = vuln_lower.get("type", "Reflected")
+                if vuln_type == "V" or vuln_type == "Vulnerable":
+                    vuln_type = data_lower.get("type", "Reflected") if isinstance(data_dict, dict) else "Reflected"
                 if not target and poc_url:
                     from urllib.parse import urlparse
                     try:
@@ -307,7 +317,7 @@ def apply_vuln_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResu
                         target = "unknown"
                 
                 finding = Finding(
-                    title=f"Dalfox XSS: {vuln.get('type', 'Reflected')}",
+                    title=f"Dalfox XSS: {vuln_type}",
                     severity=severity,
                     confidence=Confidence.HIGH,
                     evidence=payload,
