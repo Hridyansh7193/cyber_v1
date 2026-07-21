@@ -45,26 +45,30 @@ class NucleiPlugin(BaseExecutionPlugin):
             for tech in tech_list:
                 tech_tags.add(tech.lower().replace(" ", "-"))
         
-        # Run default templates to ensure we catch basic vulns
-        tags = ["cve", "high", "critical", "auth-bypass", "takeover", "xss", "sqli", "lfi", "rce", "misconfig"]
+        # Default templates to catch basic vulns and exposures
+        tags = ["cve", "high", "critical", "auth-bypass", "takeover", "misconfig"]
         if tech_tags:
             tags.extend(list(tech_tags))
+        
+        # Dynamic performance profile
+        bughunter_config = config.get("config")
+        profile_name = "balanced"
+        if bughunter_config and hasattr(bughunter_config, "profile"):
+            profile_name = bughunter_config.profile.value
+            
+        if profile_name == "aggressive":
+            tags.extend(["xss", "sqli", "lfi", "rce"])
+            
         cmd.extend(["-tags", ",".join(tags)])
         
         # Optional: Add severity filter (allow low and info so they show up)
         cmd.extend(["-severity", "critical,high,medium,low,info"])
         
-        # Dynamic performance profile
-        bughunter_config = config.get("config")
-        if bughunter_config and hasattr(bughunter_config, "profile"):
-            profile_name = bughunter_config.profile.value
-            if profile_name == "light":
-                cmd.extend(["-c", "20", "-rl", "50"])
-            elif profile_name == "aggressive":
-                cmd.extend(["-c", "100", "-rl", "300"])
-            else: # balanced
-                cmd.extend(["-c", "50", "-rl", "150"])
-        else:
+        if profile_name == "light":
+            cmd.extend(["-c", "20", "-rl", "50"])
+        elif profile_name == "aggressive":
+            cmd.extend(["-c", "100", "-rl", "300"])
+        else: # balanced
             cmd.extend(["-c", "50", "-rl", "150"])
 
         if isinstance(target, list):
