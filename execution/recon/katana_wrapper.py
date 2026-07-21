@@ -48,6 +48,9 @@ class KatanaPlugin(BaseExecutionPlugin):
         
         # Add headless mode for SPA crawling
         cmd.extend(["-hl"])
+        
+        # Restrict extraction to the target's fully qualified domain name (prevents leaking to external domains like Google/OWASP)
+        cmd.extend(["-fs", "fqdn"])
             
         if isinstance(target, list):
             import tempfile
