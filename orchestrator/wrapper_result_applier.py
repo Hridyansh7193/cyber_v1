@@ -280,7 +280,18 @@ def apply_vuln_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResu
                 new_findings.append(finding)
                 
         # Parse dalfox
-        dalfox_out = [d for d in output.get(NEW_DALFOX, []) if isinstance(d, dict)]
+        raw_dalfox_out = [d for d in output.get(NEW_DALFOX, []) if isinstance(d, dict)]
+        dalfox_out = []
+        for d in raw_dalfox_out:
+            d_lower = {k.lower(): v for k, v in d.items()}
+            if "pocs" in d_lower and isinstance(d_lower["pocs"], list):
+                dalfox_out.extend([p for p in d_lower["pocs"] if isinstance(p, dict)])
+            else:
+                # If there's no pocs array, assume the object itself is a finding,
+                # but only if it looks like a finding.
+                if "type" in d_lower or "poc" in d_lower or "data" in d_lower:
+                    dalfox_out.append(d)
+                
         new_dalfox.extend(dalfox_out)
         for vuln in dalfox_out:
             if isinstance(vuln, dict):
