@@ -1,0 +1,214 @@
+{
+  "job_id": "15fdd1fe-e5b7-4668-9ddd-bd09fb178ba6",
+  "target": "example.local",
+  "started_at": "2026-07-20T00:38:48.465557",
+  "finished_at": "2026-07-20T00:38:53.674152Z",
+  "planner_profile": "default",
+  "bughunter_version": "1.0.0",
+  "trace": [
+    {
+      "stage": "recon",
+      "plugin": "subfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool subfinder is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\15fdd1fe-e5b7-4668-9ddd-bd09fb178ba6\\telemetry\\subfinder\\execution.json",
+      "timestamp": "2026-07-20T00:38:48.518571Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "assetfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool assetfinder is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\15fdd1fe-e5b7-4668-9ddd-bd09fb178ba6\\telemetry\\assetfinder\\execution.json",
+      "timestamp": "2026-07-20T00:38:48.518571Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "gau",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool gau is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\15fdd1fe-e5b7-4668-9ddd-bd09fb178ba6\\telemetry\\gau\\execution.json",
+      "timestamp": "2026-07-20T00:38:48.518571Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "httpx",
+      "received": 1,
+      "stdout_lines": 1,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.1,
+      "success": false,
+      "exit_code": 0,
+      "errors": [
+        "JSONDecodeError: Expecting value: line 1 column 1 (char 0) on line: mock output"
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\15fdd1fe-e5b7-4668-9ddd-bd09fb178ba6\\telemetry\\httpx\\execution.json",
+      "timestamp": "2026-07-20T00:38:48.593219Z"
+    },
+    {
+      "stage": "recon",
+      "plugin": "katana",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool katana is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\15fdd1fe-e5b7-4668-9ddd-bd09fb178ba6\\telemetry\\katana\\execution.json",
+      "timestamp": "2026-07-20T00:38:48.593219Z"
+    },
+    {
+      "stage": "js",
+      "plugin": "linkfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool linkfinder is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\15fdd1fe-e5b7-4668-9ddd-bd09fb178ba6\\telemetry\\linkfinder\\execution.json",
+      "timestamp": "2026-07-20T00:38:48.601445Z"
+    },
+    {
+      "stage": "js",
+      "plugin": "secretfinder",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool secretfinder is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\15fdd1fe-e5b7-4668-9ddd-bd09fb178ba6\\telemetry\\secretfinder\\execution.json",
+      "timestamp": "2026-07-20T00:38:48.601445Z"
+    },
+    {
+      "stage": "js",
+      "plugin": "trufflehog",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool trufflehog is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\15fdd1fe-e5b7-4668-9ddd-bd09fb178ba6\\telemetry\\trufflehog\\execution.json",
+      "timestamp": "2026-07-20T00:38:48.601445Z"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "nuclei",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool nuclei is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\15fdd1fe-e5b7-4668-9ddd-bd09fb178ba6\\telemetry\\nuclei\\execution.json",
+      "timestamp": "2026-07-20T00:38:48.611756Z"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "dalfox",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool dalfox is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\15fdd1fe-e5b7-4668-9ddd-bd09fb178ba6\\telemetry\\dalfox\\execution.json",
+      "timestamp": "2026-07-20T00:38:48.611756Z"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "subzy",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool subzy is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\15fdd1fe-e5b7-4668-9ddd-bd09fb178ba6\\telemetry\\subzy\\execution.json",
+      "timestamp": "2026-07-20T00:38:48.611756Z"
+    },
+    {
+      "stage": "vuln",
+      "plugin": "ffuf",
+      "received": 1,
+      "stdout_lines": 0,
+      "parsed": 0,
+      "stored": 0,
+      "runtime": 0.0,
+      "success": false,
+      "exit_code": -2,
+      "errors": [
+        "Tool ffuf is missing or not installed."
+      ],
+      "warnings": [],
+      "workspace_file": "workspaces\\example.local\\sessions\\15fdd1fe-e5b7-4668-9ddd-bd09fb178ba6\\telemetry\\ffuf\\execution.json",
+      "timestamp": "2026-07-20T00:38:48.611756Z"
+    }
+  ]
+}

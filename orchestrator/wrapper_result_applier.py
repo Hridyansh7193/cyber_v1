@@ -295,20 +295,26 @@ def apply_vuln_wrapper_result(state: ExecutionState, wrapper_out: Tuple[ToolResu
                 # Ensure case-insensitivity for dalfox JSON output
                 vuln_lower = {k.lower(): v for k, v in vuln.items()}
                 
-                data_dict = vuln_lower.get("data", {})
-                if isinstance(data_dict, dict) and data_dict:
-                    data_lower = {k.lower(): v for k, v in data_dict.items()}
+                data_val = vuln_lower.get("data", "")
+                if isinstance(data_val, dict) and data_val:
+                    data_lower = {k.lower(): v for k, v in data_val.items()}
                     vuln_lower.update(data_lower)
                     
                 poc_url = vuln_lower.get("poc", "") or vuln_lower.get("url", "")
+                if not poc_url and isinstance(data_val, str) and (data_val.startswith("http") or "://" in data_val):
+                    poc_url = data_val
+                    
                 payload = vuln_lower.get("payload", "") or vuln_lower.get("param", "")
                 
                 target = vuln_lower.get("target")
                 
                 # Default type if nested
                 vuln_type = vuln_lower.get("type", "Reflected")
-                if vuln_type == "V" or vuln_type == "Vulnerable":
-                    vuln_type = data_lower.get("type", "Reflected") if isinstance(data_dict, dict) else "Reflected"
+                if vuln_type in ["V", "Vulnerable", "R", "G", "I"]:
+                    if isinstance(data_val, dict):
+                        vuln_type = data_val.get("type", "Reflected")
+                    else:
+                        vuln_type = vuln_lower.get("inject_type", "Reflected")
                 if not target and poc_url:
                     from urllib.parse import urlparse
                     try:

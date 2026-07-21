@@ -22,6 +22,9 @@ def analyze_intelligence(state: ExecutionState, config: BugHunterConfig) -> Find
                 target=state.target.domain,
                 plugin="analyzer_agent",
                 source_tool="analyzer_agent",
+                tool_version="1.0.0",
+                template_id="analyzer_heuristic",
+                category="idor",
                 references=()
             )
         )
@@ -47,6 +50,9 @@ def analyze_intelligence(state: ExecutionState, config: BugHunterConfig) -> Find
                 target=target,
                 plugin="analyzer_agent",
                 source_tool="analyzer_agent",
+                tool_version="1.0.0",
+                template_id="analyzer_heuristic",
+                category="exposure",
                 references=()
             )
         )
@@ -72,6 +78,9 @@ def analyze_intelligence(state: ExecutionState, config: BugHunterConfig) -> Find
                 target=target,
                 plugin="analyzer_agent",
                 source_tool="analyzer_agent",
+                tool_version="1.0.0",
+                template_id="analyzer_heuristic",
+                category="exposure",
                 references=()
             )
         )
@@ -90,6 +99,9 @@ def analyze_intelligence(state: ExecutionState, config: BugHunterConfig) -> Find
                 target=state.target.domain,
                 plugin="analyzer_agent",
                 source_tool="analyzer_agent",
+                tool_version="1.0.0",
+                template_id="analyzer_heuristic",
+                category="misconfiguration",
                 references=()
             )
         )
