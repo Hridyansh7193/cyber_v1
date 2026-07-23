@@ -19,8 +19,15 @@ class OutputParser:
             elif isinstance(parsed, dict):
                 return [parsed], []
         except json.JSONDecodeError:
-            pass
-
+            try:
+                start = raw_output.find('{')
+                end = raw_output.rfind('}')
+                if start != -1 and end != -1 and start < end:
+                    parsed = json.loads(raw_output[start:end+1])
+                    if isinstance(parsed, dict):
+                        return [parsed], []
+            except json.JSONDecodeError:
+                pass
         results = []
         errors = []
         for line in raw_output.strip().split('\n'):
